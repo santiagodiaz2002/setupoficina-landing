@@ -148,6 +148,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/configurador-3d.css">
+
+  <!-- Three.js (version fijada) via import map para modulos ES -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 
 </head>
 <body>
@@ -370,136 +381,99 @@
     </div>
     <div class="config-grid">
 
-      <!-- VISUAL -->
+      <!-- VISUAL / ESCENA 3D -->
       <div class="config-visual">
-        <div class="config-scene-wrap">
-          <svg id="deskSvg" viewBox="0 0 520 430" xmlns="http://www.w3.org/2000/svg" style="background:linear-gradient(160deg,#0a1628,#112040)">
-            <defs>
-              <radialGradient id="glow1" cx="80%" cy="20%" r="40%"><stop offset="0%" stop-color="rgba(23,174,230,0.22)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
-              <radialGradient id="glow2" cx="15%" cy="85%" r="35%"><stop offset="0%" stop-color="rgba(23,174,230,0.10)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>
-              <linearGradient id="monBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(23,174,230,0.32)"/><stop offset="100%" stop-color="rgba(23,174,230,0.07)"/></linearGradient>
-            </defs>
-            <rect x="0" y="0" width="520" height="430" fill="url(#glow1)"/>
-            <rect x="0" y="0" width="520" height="430" fill="url(#glow2)"/>
-            <!-- Desk surface always visible -->
-            <rect x="60" y="252" width="400" height="16" rx="8" fill="rgba(240,250,255,0.18)" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
-            <rect x="90" y="268" width="12" height="100" rx="4" fill="rgba(180,210,235,0.18)"/>
-            <rect x="418" y="268" width="12" height="100" rx="4" fill="rgba(180,210,235,0.18)"/>
-            <!-- CHAIR -->
-            <g id="g-chair" opacity="0" style="transition:opacity .35s">
-              <ellipse cx="260" cy="424" rx="52" ry="7" fill="rgba(80,130,180,0.22)"/>
-              <line x1="260" y1="424" x2="216" y2="422" stroke="rgba(160,200,230,0.4)" stroke-width="3.5"/><line x1="260" y1="424" x2="304" y2="422" stroke="rgba(160,200,230,0.4)" stroke-width="3.5"/>
-              <rect x="254" y="374" width="12" height="52" rx="4" fill="rgba(140,185,218,0.38)"/>
-              <rect x="220" y="348" width="80" height="30" rx="10" fill="rgba(22,48,88,0.88)" stroke="rgba(23,174,230,0.28)" stroke-width="1.5"/>
-              <rect x="228" y="278" width="64" height="76" rx="10" fill="rgba(16,42,82,0.92)" stroke="rgba(23,174,230,0.28)" stroke-width="1.5"/>
-              <rect x="234" y="322" width="52" height="14" rx="6" fill="rgba(23,174,230,0.18)"/>
-              <!-- Pro/Exec extras -->
-              <rect id="ch-head" x="236" y="262" width="48" height="20" rx="8" fill="rgba(12,36,78,0.92)" stroke="rgba(23,174,230,0.22)" stroke-width="1" opacity="0" style="transition:opacity .3s"/>
-              <rect id="ch-al" x="212" y="324" width="12" height="28" rx="4" fill="rgba(22,48,88,0.7)" opacity="0" style="transition:opacity .3s"/>
-              <rect id="ch-ar" x="296" y="324" width="12" height="28" rx="4" fill="rgba(22,48,88,0.7)" opacity="0" style="transition:opacity .3s"/>
-            </g>
-            <!-- MONITOR STAND -->
-            <g id="g-monitor-stand" opacity="0" style="transition:opacity .35s">
-              <rect x="246" y="174" width="28" height="80" rx="6" fill="rgba(175,208,228,0.38)"/>
-              <rect x="226" y="248" width="68" height="6" rx="3" fill="rgba(175,208,228,0.28)"/>
-            </g>
-            <!-- MONITOR ARM -->
-            <g id="g-monitor-arm" opacity="0" style="transition:opacity .35s">
-              <rect x="256" y="168" width="10" height="88" rx="4" fill="rgba(165,198,218,0.42)"/>
-              <rect x="198" y="164" width="60" height="8" rx="4" fill="rgba(165,198,218,0.38)"/>
-              <circle cx="198" cy="168" r="7" fill="rgba(23,174,230,0.48)"/>
-            </g>
-            <!-- MONITOR -->
-            <g id="g-monitor" opacity="0" style="transition:opacity .35s">
-              <rect x="152" y="64" width="216" height="112" rx="16" fill="#e8f5fc" stroke="rgba(200,230,245,0.5)" stroke-width="1"/>
-              <rect x="162" y="74" width="196" height="94" rx="10" fill="url(#monBg)"/>
-              <rect x="174" y="84" width="116" height="9" rx="4" fill="rgba(23,174,230,0.52)"/>
-              <rect x="174" y="99" width="78" height="9" rx="4" fill="rgba(23,174,230,0.32)"/>
-              <rect x="174" y="114" width="156" height="42" rx="8" fill="rgba(23,174,230,0.16)" stroke="rgba(23,174,230,0.28)" stroke-width="1"/>
-            </g>
-            <!-- LIGHTBAR -->
-            <g id="g-lightbar" opacity="0" style="transition:opacity .35s">
-              <rect x="150" y="60" width="126" height="7" rx="3.5" fill="#72d8ff"/>
-              <rect x="150" y="60" width="126" height="14" rx="7" fill="rgba(114,216,255,0.25)" transform="rotate(-1 150 60)"/>
-            </g>
-            <!-- NOTEBOOK -->
-            <g id="g-notebook" opacity="0" style="transition:opacity .35s">
-              <rect x="96" y="212" width="106" height="42" rx="8" fill="rgba(215,232,245,0.9)"/>
-              <rect x="100" y="216" width="98" height="34" rx="5" fill="rgba(23,174,230,0.20)" stroke="rgba(23,174,230,0.28)" stroke-width="1"/>
-              <rect x="96" y="250" width="106" height="4" rx="2" fill="rgba(175,208,228,0.45)"/>
-            </g>
-            <!-- KEYBOARD -->
-            <g id="g-keyboard" opacity="0" style="transition:opacity .35s">
-              <rect x="164" y="292" width="168" height="46" rx="10" fill="rgba(255,255,255,0.93)" stroke="rgba(220,235,245,0.4)" stroke-width="1"/>
-              <g fill="rgba(7,17,31,0.08)">
-                <rect x="172" y="299" width="11" height="9" rx="2"/><rect x="186" y="299" width="11" height="9" rx="2"/><rect x="200" y="299" width="11" height="9" rx="2"/><rect x="214" y="299" width="11" height="9" rx="2"/><rect x="228" y="299" width="11" height="9" rx="2"/><rect x="242" y="299" width="11" height="9" rx="2"/><rect x="256" y="299" width="11" height="9" rx="2"/><rect x="270" y="299" width="11" height="9" rx="2"/><rect x="284" y="299" width="11" height="9" rx="2"/><rect x="298" y="299" width="22" height="9" rx="2"/>
-                <rect x="172" y="312" width="13" height="9" rx="2"/><rect x="188" y="312" width="11" height="9" rx="2"/><rect x="202" y="312" width="11" height="9" rx="2"/><rect x="216" y="312" width="11" height="9" rx="2"/><rect x="230" y="312" width="11" height="9" rx="2"/><rect x="244" y="312" width="11" height="9" rx="2"/><rect x="258" y="312" width="11" height="9" rx="2"/><rect x="272" y="312" width="11" height="9" rx="2"/><rect x="286" y="312" width="13" height="9" rx="2"/>
-                <rect x="172" y="325" width="58" height="9" rx="2"/><rect x="233" y="325" width="54" height="9" rx="2"/><rect x="290" y="325" width="30" height="9" rx="2"/>
-              </g>
-            </g>
-            <!-- MOUSE -->
-            <g id="g-mouse" opacity="0" style="transition:opacity .35s">
-              <rect x="358" y="288" width="44" height="62" rx="22" fill="#17aee6" transform="rotate(-6 358 288)"/>
-              <line x1="380" y1="308" x2="380" y2="326" stroke="rgba(255,255,255,0.45)" stroke-width="1.5" stroke-linecap="round" transform="rotate(-6 380 308)"/>
-            </g>
-            <!-- HUB -->
-            <g id="g-hub" opacity="0" style="transition:opacity .35s">
-              <rect x="98" y="258" width="72" height="28" rx="8" fill="rgba(168,198,218,0.38)" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
-              <circle cx="114" cy="272" r="3" fill="rgba(23,174,230,0.65)"/>
-              <circle cx="126" cy="272" r="3" fill="rgba(255,255,255,0.28)"/>
-              <circle cx="138" cy="272" r="3" fill="rgba(255,255,255,0.28)"/>
-            </g>
-            <!-- PHONE -->
-            <g id="g-phone" opacity="0" style="transition:opacity .35s">
-              <rect x="410" y="198" width="34" height="60" rx="8" fill="none" stroke="rgba(220,240,252,0.48)" stroke-width="5" transform="rotate(7 410 198)"/>
-            </g>
-            <!-- CABLE ORGANIZER -->
-            <g id="g-cables" opacity="0" style="transition:opacity .35s">
-              <rect x="112" y="282" width="86" height="12" rx="4" fill="rgba(18,46,86,0.6)" stroke="rgba(23,174,230,0.18)" stroke-width="1"/>
-              <line x1="132" y1="288" x2="152" y2="288" stroke="rgba(23,174,230,0.38)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="160" y1="288" x2="176" y2="288" stroke="rgba(23,174,230,0.22)" stroke-width="1.5" stroke-linecap="round"/>
-            </g>
-            <!-- STANDING DESK -->
-            <g id="g-standing" opacity="0" style="transition:opacity .35s">
-              <rect x="86" y="196" width="14" height="60" rx="4" fill="rgba(23,174,230,0.22)" stroke="rgba(23,174,230,0.38)" stroke-width="1"/>
-              <rect x="420" y="196" width="14" height="60" rx="4" fill="rgba(23,174,230,0.22)" stroke="rgba(23,174,230,0.38)" stroke-width="1"/>
-              <text x="180" y="240" font-size="11" fill="rgba(23,174,230,0.65)" font-family="Inter,sans-serif" font-weight="700">&#8597; Standing Desk activo</text>
-            </g>
-            <!-- DESK MAT -->
-            <g id="g-mat" opacity="0" style="transition:opacity .35s">
-              <rect x="150" y="252" width="220" height="10" rx="4" fill="rgba(18,46,100,0.58)" stroke="rgba(23,174,230,0.18)" stroke-width="1"/>
-            </g>
-          </svg>
+        <div class="c3d-stage" id="c3dStage">
+          <!-- Controles de camara (HTML, externos al canvas WebGL) -->
+          <div class="c3d-toolbar" role="toolbar" aria-label="Controles de camara del visualizador 3D">
+            <button type="button" class="c3d-cam-btn is-active" data-view="perspectiva" aria-pressed="true" title="Vista perspectiva 3/4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+              <span>3/4</span>
+            </button>
+            <button type="button" class="c3d-cam-btn" data-view="frontal" aria-pressed="false" title="Vista frontal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
+              <span>Frontal</span>
+            </button>
+            <button type="button" class="c3d-cam-btn" data-view="superior" aria-pressed="false" title="Vista superior">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg>
+              <span>Superior</span>
+            </button>
+            <button type="button" class="c3d-cam-btn c3d-cam-reset" data-view="reset" aria-pressed="false" title="Restablecer camara">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+              <span>Reset</span>
+            </button>
+          </div>
+          <!-- El canvas WebGL se monta aca por JS -->
+          <div class="c3d-canvas-host" id="c3dCanvasHost"></div>
+          <!-- Placeholder mientras carga la escena -->
+          <div class="c3d-loader" id="c3dLoader">
+            <span class="c3d-spinner" aria-hidden="true"></span>
+            <p>Preparando el visualizador 3D&hellip;</p>
+          </div>
+          <!-- Fallback visible si WebGL no esta disponible -->
+          <div class="c3d-fallback" id="c3dFallback" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20v14H2z"/><path d="M8 21h8M12 17v4"/><path d="m7 8 4 4M11 8l-4 4"/></svg>
+            <h4>Tu navegador no puede mostrar la vista 3D</h4>
+            <p>Pod&eacute;s seguir armando tu setup con la lista de la derecha: el resumen y el env&iacute;o por WhatsApp funcionan igual.</p>
+          </div>
+          <p class="c3d-hint" id="c3dHint" aria-hidden="true">Arrastr&aacute; para rotar &middot; rueda o pellizco para acercar</p>
         </div>
-        <p class="config-label">Vista previa del escritorio &mdash; Selecciona productos a la derecha</p>
-        <div class="config-summary" id="configSummary">
-          <p>Productos seleccionados:</p>
-          <div class="config-tags" id="configTags"><span style="color:rgba(255,255,255,.4);font-size:13px;font-style:italic">Ningun producto seleccionado aun</span></div>
-          <a href="#contacto" class="btn btn-primary btn-sm" style="width:100%">Pedir este setup personalizado &rarr;</a>
+        <p class="config-label">Vista 3D del escritorio &mdash; los cambios se reflejan al instante</p>
+        <div class="config-summary c3d-summary">
+          <p class="c3d-summary-title">Tu configuraci&oacute;n</p>
+          <div class="c3d-summary-meta">
+            <div class="c3d-meta"><span class="c3d-meta-k">Configuraci&oacute;n</span><span class="c3d-meta-v" id="sumPreset">Pro</span></div>
+            <div class="c3d-meta"><span class="c3d-meta-k">Escritorio</span><span class="c3d-meta-v" id="sumDesk">Est&aacute;ndar</span></div>
+            <div class="c3d-meta"><span class="c3d-meta-k">Modo</span><span class="c3d-meta-v" id="sumMode">Sentado</span></div>
+          </div>
+          <p class="c3d-summary-label">Productos seleccionados:</p>
+          <div class="config-tags" id="configTags" role="status" aria-live="polite"></div>
+          <button type="button" class="btn btn-primary btn-sm c3d-wa-btn" id="c3dWhatsapp" style="width:100%">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
+            Pedir este setup por WhatsApp
+          </button>
         </div>
       </div>
 
-      <!-- CHECKLIST -->
-      <div>
-        <div style="margin-bottom:20px">
-          <h3 style="margin-bottom:8px">Elegí los productos de tu setup</h3>
-          <p style="font-size:14px;color:var(--muted)">Cada producto que marcas aparece en la visualizacion del escritorio.</p>
+      <!-- CONTROLES -->
+      <div class="c3d-controls">
+
+        <div class="c3d-block">
+          <h3 class="c3d-block-title">Configuraci&oacute;n base</h3>
+          <p class="c3d-block-sub">Empez&aacute; con un preset y ajust&aacute; lo que quieras.</p>
+          <div class="c3d-segment c3d-presets" role="radiogroup" aria-label="Configuracion predeterminada" id="presetGroup">
+            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-preset="basica">B&aacute;sica</button>
+            <button type="button" class="c3d-seg-btn is-active" role="radio" aria-checked="true" data-preset="pro">Pro</button>
+            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-preset="premium">Premium</button>
+            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-preset="personalizada">Personalizada</button>
+          </div>
         </div>
-        <div class="config-checklist" id="checklist">
-          <div class="config-item active" data-target="g-chair" data-label="Silla ergonomica" data-level="basic"><div class="config-checkbox">&#10003;</div><div class="config-item-icon">&#129681;</div><div class="config-item-text"><b>Silla ergonomica</b><span>Soporte lumbar, altura regulable, ruedas</span></div></div>
-          <div class="config-item" data-target="g-monitor" data-label="Monitor externo"><div class="config-checkbox"></div><div class="config-item-icon">&#128187;</div><div class="config-item-text"><b>Monitor externo</b><span>Mayor espacio de pantalla y mejor ergonomia</span></div></div>
-          <div class="config-item" data-target="g-monitor-stand" data-label="Soporte de monitor" data-excludes="g-monitor-arm"><div class="config-checkbox"></div><div class="config-item-icon">&#128208;</div><div class="config-item-text"><b>Soporte de monitor</b><span>Eleva la pantalla a la altura correcta</span></div></div>
-          <div class="config-item" data-target="g-monitor-arm" data-label="Brazo articulado" data-excludes="g-monitor-stand"><div class="config-checkbox"></div><div class="config-item-icon">&#129374;</div><div class="config-item-text"><b>Brazo articulado para monitor</b><span>Maxima flexibilidad, libera espacio</span></div></div>
-          <div class="config-item" data-target="g-lightbar" data-label="pLed luz de monitor"><div class="config-checkbox"></div><div class="config-item-icon">&#128161;</div><div class="config-item-text"><b>pLed &middot; Luz de monitor</b><span>Iluminacion sin reflejos, protege la vista</span></div></div>
-          <div class="config-item" data-target="g-notebook" data-label="Soporte de notebook"><div class="config-checkbox"></div><div class="config-item-icon">&#128187;</div><div class="config-item-text"><b>Soporte de notebook</b><span>Elevado a la altura del monitor</span></div></div>
-          <div class="config-item" data-target="g-keyboard" data-label="Teclado externo"><div class="config-checkbox"></div><div class="config-item-icon">&#9000;</div><div class="config-item-text"><b>Teclado externo</b><span>Ergonomico o mecanico compacto pMechanic</span></div></div>
-          <div class="config-item" data-target="g-mouse" data-label="Mouse vertical ergonomico"><div class="config-checkbox"></div><div class="config-item-icon">&#128432;</div><div class="config-item-text"><b>Mouse vertical ergonomico</b><span>Posicion natural, menos tension en muneca</span></div></div>
-          <div class="config-item" data-target="g-hub" data-label="Hub USB-C pHub"><div class="config-checkbox"></div><div class="config-item-icon">&#128268;</div><div class="config-item-text"><b>Hub USB-C / pHub</b><span>Centraliza todos tus perifericos y carga</span></div></div>
-          <div class="config-item" data-target="g-phone" data-label="Soporte de celular"><div class="config-checkbox"></div><div class="config-item-icon">&#128241;</div><div class="config-item-text"><b>Soporte de celular pPhone</b><span>A mano y bien posicionado durante la jornada</span></div></div>
-          <div class="config-item" data-target="g-cables" data-label="Organizador de cables pBox"><div class="config-checkbox"></div><div class="config-item-icon">&#129529;</div><div class="config-item-text"><b>Organizador de cables / pBox</b><span>Escritorio limpio y cables ocultos</span></div></div>
-          <div class="config-item" data-target="g-mat" data-label="Pad de escritorio pMat"><div class="config-checkbox"></div><div class="config-item-icon">&#9645;</div><div class="config-item-text"><b>Pad de escritorio pMat XL</b><span>Cuero ecologico, protege y da imagen</span></div></div>
-          <div class="config-item" data-target="g-standing" data-label="Standing Desk electrico"><div class="config-checkbox"></div><div class="config-item-icon">&#8597;</div><div class="config-item-text"><b>Standing Desk electrico pStanding</b><span>Trabaja de pie o sentado, regulable</span></div></div>
+
+        <div class="c3d-block">
+          <h3 class="c3d-block-title">Escritorio</h3>
+          <span class="c3d-field-label" id="deskSizeLabel">Tama&ntilde;o</span>
+          <div class="c3d-segment" role="radiogroup" aria-labelledby="deskSizeLabel" id="deskSizeGroup">
+            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-size="compacto">Compacto</button>
+            <button type="button" class="c3d-seg-btn is-active" role="radio" aria-checked="true" data-size="estandar">Est&aacute;ndar</button>
+            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-size="amplio">Amplio</button>
+          </div>
+          <span class="c3d-field-label" id="deskModeLabel">Modo de uso</span>
+          <div class="c3d-segment" role="radiogroup" aria-labelledby="deskModeLabel" id="deskModeGroup">
+            <button type="button" class="c3d-seg-btn is-active" role="radio" aria-checked="true" data-mode="sentado">Sentado</button>
+            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-mode="standing">Standing desk</button>
+          </div>
         </div>
+
+        <div class="c3d-block">
+          <div class="c3d-block-head">
+            <h3 class="c3d-block-title">Productos del setup</h3>
+            <span class="c3d-count" id="configCount" aria-live="polite"></span>
+          </div>
+          <p class="c3d-block-sub">Cada producto aparece o desaparece en la vista 3D. Algunos requieren o excluyen a otros.</p>
+          <div class="config-checklist c3d-checklist" id="checklist"><!-- Generado dinamicamente desde la estructura PRODUCTOS en configurador-3d.js --></div>
+          <noscript><p class="c3d-block-sub">Activ&aacute; JavaScript para usar el configurador interactivo.</p></noscript>
+        </div>
+
       </div>
     </div>
   </div>
@@ -715,6 +689,7 @@
 </a>
 
 <script src="./js/main.js"></script>
+<script type="module" src="./js/configurador-3d.js"></script>
 
 </body>
 </html>

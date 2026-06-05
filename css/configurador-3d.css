@@ -1,0 +1,234 @@
+/* ============================================================
+   PrimOffice - Configurador 3D
+   Estilos del visualizador Three.js y sus controles.
+   Reutiliza las variables globales definidas en css/styles.css
+   (--blue, --navy, --surface, --line, --r, etc.).
+   ============================================================ */
+
+/* Layout general del configurador (2 columnas reutilizando .config-grid) */
+.configurador .config-grid{align-items:start}
+
+/* ----------------------------------------------------------------
+   ESCENA / CANVAS
+   ---------------------------------------------------------------- */
+.c3d-stage{
+  position:relative;
+  width:100%;
+  aspect-ratio:4 / 3;
+  max-height:72vh;
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--sh-lg);
+  /* Fondo coherente con la identidad PrimOffice (navy del SVG anterior) */
+  background:
+    radial-gradient(60% 45% at 82% 12%, rgba(23,174,230,.22), transparent 70%),
+    radial-gradient(50% 40% at 14% 88%, rgba(23,174,230,.12), transparent 70%),
+    linear-gradient(160deg,#0a1628 0%,#0e1c30 55%,#112040 100%);
+  border:1px solid rgba(255,255,255,.06);
+  isolation:isolate;
+}
+
+/* El canvas WebGL lo inyecta JS dentro de este host */
+.c3d-canvas-host{position:absolute;inset:0;z-index:1}
+.c3d-canvas-host canvas{display:block;width:100%!important;height:100%!important;touch-action:none;outline:none}
+
+/* Barra de controles de camara (HTML, externa al canvas) */
+.c3d-toolbar{
+  position:absolute;top:12px;right:12px;z-index:3;
+  display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;
+  max-width:calc(100% - 24px);
+}
+.c3d-cam-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  min-height:38px;padding:0 12px;
+  border-radius:12px;
+  font-size:12.5px;font-weight:800;letter-spacing:-.01em;
+  color:#dcf3ff;
+  background:rgba(11,22,38,.55);
+  border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
+}
+.c3d-cam-btn svg{width:16px;height:16px;flex-shrink:0}
+.c3d-cam-btn:hover{background:rgba(23,174,230,.28);border-color:rgba(23,174,230,.55);color:#fff}
+.c3d-cam-btn:active{transform:translateY(1px)}
+.c3d-cam-btn.is-active{
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  border-color:transparent;color:#fff;
+  box-shadow:0 8px 22px rgba(23,174,230,.4);
+}
+.c3d-cam-reset{color:#bcd3e6}
+
+/* Pista de ayuda (rotar / zoom) */
+.c3d-hint{
+  position:absolute;left:12px;bottom:12px;z-index:3;
+  margin:0;padding:7px 12px;border-radius:999px;
+  font-size:11.5px;font-weight:700;color:rgba(230,246,253,.82);
+  background:rgba(11,22,38,.5);border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  pointer-events:none;
+  transition:opacity .4s ease;
+}
+.c3d-hint.is-hidden{opacity:0}
+
+/* Loader mientras inicializa la escena */
+.c3d-loader{
+  position:absolute;inset:0;z-index:4;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  color:rgba(230,246,253,.9);font-size:14px;font-weight:700;
+  background:linear-gradient(160deg,#0a1628,#112040);
+  transition:opacity .45s ease,visibility .45s ease;
+}
+.c3d-loader.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.c3d-spinner{
+  width:42px;height:42px;border-radius:50%;
+  border:3px solid rgba(23,174,230,.22);
+  border-top-color:var(--blue2);
+  animation:c3d-spin .9s linear infinite;
+}
+@keyframes c3d-spin{to{transform:rotate(360deg)}}
+
+/* Fallback si WebGL no esta disponible */
+.c3d-fallback{
+  position:absolute;inset:0;z-index:5;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:12px;padding:32px;
+  color:rgba(230,246,253,.92);
+  background:linear-gradient(160deg,#0a1628,#112040);
+}
+.c3d-fallback[hidden]{display:none}
+.c3d-fallback svg{width:46px;height:46px;color:rgba(23,174,230,.7)}
+.c3d-fallback h4{font-size:17px;font-weight:800;letter-spacing:-.03em;color:#fff}
+.c3d-fallback p{font-size:13.5px;line-height:1.55;color:rgba(230,246,253,.72);max-width:340px;margin:0}
+
+/* ----------------------------------------------------------------
+   RESUMEN + ALTERNATIVA TEXTUAL + WHATSAPP
+   ---------------------------------------------------------------- */
+.c3d-summary{margin-top:18px}
+.c3d-summary-title{font-size:14px!important;font-weight:800;color:#fff!important;margin-bottom:14px!important}
+.c3d-summary-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.c3d-meta{
+  display:flex;flex-direction:column;gap:3px;
+  padding:10px 12px;border-radius:14px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+}
+.c3d-meta-k{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.c3d-meta-v{font-size:13.5px;font-weight:800;letter-spacing:-.02em;color:#fff}
+.c3d-summary-label{font-size:12px!important;color:rgba(255,255,255,.6)!important;margin-bottom:10px!important}
+.c3d-summary .config-tags{min-height:24px}
+.c3d-summary .config-tags .c3d-empty{font-size:13px;font-style:italic;color:rgba(255,255,255,.4)}
+.c3d-wa-btn{margin-top:4px}
+
+/* ----------------------------------------------------------------
+   CONTROLES (columna derecha)
+   ---------------------------------------------------------------- */
+.c3d-controls{display:flex;flex-direction:column;gap:22px}
+.c3d-block{display:flex;flex-direction:column}
+.c3d-block-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.c3d-block-title{margin:0 0 4px;font-size:16px;font-weight:800;letter-spacing:-.03em}
+.c3d-block-sub{font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+.c3d-count{font-size:12px;font-weight:800;color:var(--blue-dark);background:var(--blue-soft);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.c3d-field-label{display:block;font-size:12px;font-weight:800;color:#344054;margin:14px 0 8px}
+.c3d-field-label:first-of-type{margin-top:0}
+
+/* Control segmentado (presets, tamano, modo) */
+.c3d-segment{
+  display:flex;gap:4px;padding:5px;
+  background:var(--bg);border:1.5px solid var(--line);border-radius:16px;
+}
+.c3d-presets{flex-wrap:wrap}
+.c3d-seg-btn{
+  flex:1 1 auto;min-width:0;min-height:44px;padding:0 12px;
+  border-radius:11px;
+  font-size:13.5px;font-weight:800;letter-spacing:-.02em;
+  color:var(--muted);
+  transition:background .18s ease,color .18s ease,box-shadow .18s ease,transform .12s ease;
+}
+.c3d-presets .c3d-seg-btn{flex:1 1 calc(50% - 4px)}
+.c3d-seg-btn:hover{color:var(--blue-dark);background:rgba(23,174,230,.10)}
+.c3d-seg-btn:active{transform:translateY(1px)}
+.c3d-seg-btn.is-active{
+  color:#fff;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  box-shadow:0 8px 20px rgba(23,174,230,.32);
+}
+
+/* ----------------------------------------------------------------
+   CHECKLIST DE PRODUCTOS (botones generados por JS)
+   Reutiliza .config-item / .config-checkbox de styles.css
+   ---------------------------------------------------------------- */
+.c3d-checklist{margin-top:2px}
+.c3d-checklist .config-item{
+  width:100%;text-align:left;font:inherit;
+  align-items:flex-start;
+}
+.c3d-checklist .config-item .config-item-icon{margin-top:1px;display:flex}
+.c3d-checklist .config-item-icon svg{width:22px;height:22px;color:var(--blue-dark)}
+.c3d-checklist .config-item.active .config-item-icon svg{color:var(--blue)}
+.c3d-checklist .config-item.active{box-shadow:0 6px 18px rgba(23,174,230,.14)}
+.c3d-checklist .config-item:focus-visible{outline:3px solid rgba(23,174,230,.5);outline-offset:2px}
+
+/* Categoria + dependencias como micro-etiquetas */
+.c3d-item-flags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.c3d-flag{
+  font-size:10px;font-weight:800;letter-spacing:.02em;
+  padding:2px 8px;border-radius:999px;
+  background:rgba(100,116,139,.12);color:var(--muted);
+}
+.c3d-flag.req{background:rgba(23,174,230,.12);color:var(--blue-dark)}
+.c3d-flag.exc{background:rgba(245,158,11,.14);color:#b45309}
+
+/* Pequeno destello cuando una dependencia cambia el item automaticamente */
+@keyframes c3d-flash{0%{background:var(--blue-soft)}100%{}}
+.c3d-checklist .config-item.c3d-auto{animation:c3d-flash .6s ease}
+
+/* Toast de aviso de dependencias (aria-live) */
+.c3d-toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);
+  z-index:300;
+  max-width:min(92vw,420px);
+  padding:13px 18px;border-radius:14px;
+  background:var(--navy);color:#fff;
+  font-size:13.5px;font-weight:700;line-height:1.4;
+  box-shadow:0 18px 50px rgba(7,17,31,.4);
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;
+}
+.c3d-toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ----------------------------------------------------------------
+   FOCUS VISIBLE GLOBAL DEL CONFIGURADOR
+   ---------------------------------------------------------------- */
+.c3d-cam-btn:focus-visible,
+.c3d-seg-btn:focus-visible,
+.c3d-wa-btn:focus-visible{outline:3px solid rgba(23,174,230,.55);outline-offset:2px}
+
+/* ----------------------------------------------------------------
+   RESPONSIVE
+   ---------------------------------------------------------------- */
+@media(max-width:1024px){
+  .c3d-stage{aspect-ratio:16 / 11;max-height:60vh}
+}
+@media(max-width:640px){
+  .c3d-stage{aspect-ratio:5 / 4;max-height:58vh;border-radius:22px}
+  .c3d-cam-btn span{display:none}          /* en movil solo iconos para ahorrar espacio */
+  .c3d-cam-btn{min-height:40px;padding:0 11px}
+  .c3d-toolbar{top:10px;right:10px;gap:5px}
+  .c3d-hint{font-size:11px;left:10px;bottom:10px}
+  .c3d-summary-meta{grid-template-columns:1fr}
+  .c3d-meta{flex-direction:row;align-items:center;justify-content:space-between}
+  .c3d-presets .c3d-seg-btn{flex:1 1 calc(50% - 4px)}
+}
+
+/* ----------------------------------------------------------------
+   PREFERS-REDUCED-MOTION
+   Reduce el movimiento decorativo sin afectar la funcionalidad.
+   (La logica 3D tambien respeta esta preferencia en JS.)
+   ---------------------------------------------------------------- */
+@media(prefers-reduced-motion:reduce){
+  .c3d-spinner{animation:none;border-top-color:var(--blue2)}
+  .c3d-cam-btn,.c3d-seg-btn,.c3d-hint,.c3d-loader,.c3d-toast{transition:none}
+  .c3d-checklist .config-item.c3d-auto{animation:none}
+  .c3d-seg-btn:active,.c3d-cam-btn:active{transform:none}
+}
