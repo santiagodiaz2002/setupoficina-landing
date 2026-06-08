@@ -23,7 +23,15 @@
      0. PREFERENCIAS / UTILIDADES
      ------------------------------------------------------------------ */
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const WHATSAPP = '5491139149688';
+  /* El número de WhatsApp no es un secreto, pero se lee desde la config
+     central si está disponible (sin hardcodear credenciales). */
+  const WHATSAPP = (window.PrimOfficeConfig && window.PrimOfficeConfig.WHATSAPP_NUMBER) || '5491139149688';
+
+  /* Analítica desacoplada: usa window.trackEvent si existe (definido en
+     main.js). Nunca rompe la escena si no está disponible. */
+  function track(nombre, datos) {
+    try { if (typeof window.trackEvent === 'function') window.trackEvent(nombre, datos); } catch (e) { /* noop */ }
+  }
 
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
@@ -74,7 +82,7 @@
       dependencias: ['monitor'], exclusiones: [], anchor: 'surface',
       posicionInicial: { x: 0, y: 0, z: -0.15 }, escala: 1,
       rutaModeloGlb: null, geometriaPlaceholder: 'luz',
-      descripcion: 'Iluminacion sin reflejos; protege la vista.'
+      descripcion: 'Iluminacion sin reflejos para una lectura mas comoda.'
     },
     {
       id: 'notebook', nombre: 'Notebook', categoria: 'Equipo', activo: false,
@@ -263,6 +271,7 @@
     state.preset = 'personalizada';
     syncUI();
     syncScene(true);
+    track('configurador_modificado', { accion: turningOn ? 'agregar' : 'quitar', producto: id, total: state.active.size });
     if (auto.length) {
       toast(`Ajustado automaticamente: ${auto.map(nameOf).join(', ')}`);
       flashItems(auto);
@@ -271,6 +280,7 @@
 
   function selectPreset(preset) {
     state.preset = preset;
+    track('configurador_modificado', { accion: 'preset', valor: preset });
     if (preset !== 'personalizada' && PRESETS[preset]) {
       const cfg = PRESETS[preset];
       state.active = new Set(cfg.productos);
@@ -294,6 +304,7 @@
     state.size = size;
     state.preset = 'personalizada';
     syncUI();
+    track('configurador_modificado', { accion: 'tamano', valor: size });
     if (sceneReady) setDeskSize(size, true);
   }
 
@@ -302,6 +313,7 @@
     state.mode = mode;
     state.preset = 'personalizada';
     syncUI();
+    track('configurador_modificado', { accion: 'modo', valor: mode });
     if (sceneReady) setDeskMode(mode, true);
   }
 
@@ -342,6 +354,138 @@
       'Me gustaria recibir asesoramiento y precios.'
     ];
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
+  }
+
+  /* ------------------------------------------------------------------
+     3.b API PÚBLICA (test diagnóstico ↔ configurador)
+     Disponible aun antes de que cargue la escena 3D: la capa UI siempre
+     está activa, así que applyRecommendation/getCurrentConfiguration
+     funcionan con o sin WebGL.
+     ------------------------------------------------------------------ */
+
+  function sameSet(a, b) {
+    if (a.size !== b.size) return false;
+    for (const v of a) if (!b.has(v)) return false;
+    return true;
+  }
+
+  /* Detecta si el estado actual coincide exactamente con un preset. */
+  function detectPreset() {
+    for (const key of ['basica', 'pro', 'premium']) {
+      const p = PRESETS[key];
+      if (p && p.size === state.size && p.mode === state.mode && sameSet(new Set(p.productos), state.active)) return key;
+    }
+    return 'personalizada';
+  }
+
+  /* Dispara la carga diferida de la escena 3D (idempotente). */
+  function preload() { return init3D(); }
+
+  /**
+   * Aplica una recomendación generada por el test diagnóstico.
+   * @param {{preset?:string, products?:string[], deskSize?:string, deskMode?:string}} reco
+   * @returns {object} configuración resultante (getCurrentConfiguration()).
+   */
+  function applyRecommendation(reco, opts) {
+    reco = reco || {};
+    opts = opts || {};
+    let presetKey = typeof reco.preset === 'string' ? reco.preset.toLowerCase() : null;
+    const presetConocido = !!presetKey && Object.prototype.hasOwnProperty.call(PRESETS, presetKey);
+    const presetValido = presetConocido && presetKey !== 'personalizada';
+
+    // 1) Base desde el preset recomendado (si es válido)
+    if (presetValido) {
+      const cfg = PRESETS[presetKey];
+      state.active = new Set(cfg.productos);
+      state.size = cfg.size;
+      state.mode = cfg.mode;
+    }
+
+    // 2) Override de productos explícitos (mapeo + dependencias + exclusiones)
+    if (Array.isArray(reco.products) && reco.products.length) {
+      const ids = reco.products.map(String).filter((id) => byId(id));
+      if (ids.length) {
+        state.active = new Set(ids);
+        ids.forEach((id) => byId(id).dependencias.forEach((d) => state.active.add(d)));
+        ids.forEach((id) => { if (state.active.has(id)) byId(id).exclusiones.forEach((x) => state.active.delete(x)); });
+      }
+    }
+
+    // 3) Override de tamaño y modo
+    if (reco.deskSize && DESK_SIZES[reco.deskSize]) state.size = reco.deskSize;
+    if (reco.deskMode && DESK_HEIGHTS[reco.deskMode]) state.mode = reco.deskMode;
+
+    // 4) Etiqueta de preset: respeta el pedido (incluye 'personalizada'); si no, detecta
+    state.preset = presetConocido ? presetKey : detectPreset();
+
+    syncUI();
+    preload();                                   // asegura que la escena empiece a cargar
+    if (sceneReady) { fullSync(); setView('perspectiva', true); }
+    const conf = getCurrentConfiguration();
+    track(opts.eventName || 'configurador_precargado', Object.assign({}, conf, opts.eventData || {}));
+    return conf;
+  }
+
+  /**
+   * Devuelve la configuración final tras los cambios manuales del usuario.
+   * @returns {{preset, presetLabel, deskSize, deskSizeLabel, deskMode, deskModeLabel, products, productNames, count}}
+   */
+  function getCurrentConfiguration() {
+    const productos = PRODUCTOS.filter((p) => state.active.has(p.id));
+    return {
+      preset: state.preset,
+      presetLabel: PRESET_LABELS[state.preset] || state.preset,
+      deskSize: state.size,
+      deskSizeLabel: SIZE_LABELS[state.size] || state.size,
+      deskMode: state.mode,
+      deskModeLabel: MODE_LABELS[state.mode] || state.mode,
+      products: productos.map((p) => p.id),
+      productNames: productos.map((p) => p.nombre),
+      count: state.active.size
+    };
+  }
+
+  /* Lee los parámetros UTM estándar presentes en la URL (para analítica). */
+  function readUTM() {
+    const utm = {};
+    try {
+      const p = new URLSearchParams(window.location.search);
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach((k) => {
+        const v = p.get(k); if (v) utm[k] = v;
+      });
+    } catch (e) { /* noop */ }
+    return utm;
+  }
+
+  /* Entrada directa OPCIONAL al configurador por URL. No altera el flujo del
+     test: si no hay parámetros válidos, no hace nada (config. predeterminada).
+     Sólo aplica valores de la lista permitida; ignora en silencio los inválidos.
+     Ver docs/ENLACES_CONFIGURADOR.md */
+  function applyDirectLink() {
+    let params;
+    try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
+    const PRESETS_OK = ['basica', 'pro', 'premium', 'personalizada'];
+    const SIZES_OK = ['compacto', 'estandar', 'amplio'];
+    const MODES_OK = ['sentado', 'standing'];
+    const rawPreset = (params.get('preset') || '').trim().toLowerCase();
+    const rawSize = (params.get('tamano') || '').trim().toLowerCase();
+    const rawMode = (params.get('modo') || '').trim().toLowerCase();
+    const preset = PRESETS_OK.indexOf(rawPreset) !== -1 ? rawPreset : null;
+    const tamano = SIZES_OK.indexOf(rawSize) !== -1 ? rawSize : null;
+    const modo = MODES_OK.indexOf(rawMode) !== -1 ? rawMode : null;
+
+    // Sin parámetros válidos → configuración predeterminada, flujo del test intacto.
+    if (!preset && !tamano && !modo) return;
+
+    const reco = {};
+    if (preset) reco.preset = preset;
+    if (tamano) reco.deskSize = tamano;
+    if (modo) reco.deskMode = modo;
+
+    applyRecommendation(reco, {
+      eventName: 'configurador_precargado_directo',
+      eventData: { fuente: 'url', preset: preset || null, tamano: tamano || null, modo: modo || null, utm: readUTM() }
+    });
   }
 
   function wireUI() {
@@ -918,13 +1062,14 @@
     // Oculta la pista al primer arrastre
     renderer.domElement.addEventListener('pointerdown', () => dom.hint && dom.hint.classList.add('is-hidden'), { once: true });
 
-    // API publica para futura edicion manual (TransformControls) y depuracion
-    window.PrimOfficeConfigurador3D = {
-      state, objects, PRODUCTOS,
+    // Augmenta la API publica (ya expuesta en start()) con metodos que
+    // requieren la escena 3D construida.
+    Object.assign(window.PrimOfficeConfigurador3D || {}, {
+      objects,
       getObject: (id) => objects[id],
-      setView, setDeskSize, setDeskMode,
+      setDeskSize, setDeskMode,
       enableManualPlacement
-    };
+    });
   }
 
   /* Arquitectura lista para mover accesorios manualmente en el futuro.
@@ -969,6 +1114,23 @@
      ------------------------------------------------------------------ */
   function start() {
     if (!wireUI()) return; // la seccion del configurador no existe en esta pagina
+
+    // API publica disponible de inmediato (capa UI), antes de cargar la
+    // escena 3D. El test diagnostico la usa para precargar la recomendacion.
+    window.PrimOfficeConfigurador3D = {
+      state, PRODUCTOS,
+      applyRecommendation,
+      getCurrentConfiguration,
+      preload,
+      selectPreset, selectSize, selectMode,
+      setView: (view, animated) => { setToolbarActive(view); if (sceneReady) setView(view, animated !== false); },
+      isSceneReady: () => sceneReady
+    };
+    document.dispatchEvent(new CustomEvent('primoffice:configurador-listo'));
+
+    // Entrada directa opcional por parámetros de URL (?preset / &tamano / &modo).
+    // Si no hay parámetros válidos, no modifica nada y el flujo del test sigue igual.
+    applyDirectLink();
 
     const section = document.getElementById('configurador');
     if (!section) return;
