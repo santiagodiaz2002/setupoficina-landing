@@ -120,3 +120,27 @@ Modelos `.glb` (o `.gltf` + texturas) **de los productos reales del catálogo**,
 respetando las convenciones de arriba (metros, origen en la base, frente hacia
 +Z). Idealmente uno por `id` de la tabla. Con eso, el configurador pasa de
 placeholders a una vista fiel del producto real sin cambios de lógica.
+
+---
+
+## API pública del configurador (integración con el test)
+
+El configurador expone, en `window.PrimOfficeConfigurador3D`, dos funciones que
+usa el test diagnóstico (`js/test-diagnostico.js`):
+
+```js
+// Precarga una recomendación generada por el test.
+window.PrimOfficeConfigurador3D.applyRecommendation({
+  preset,     // 'basica' | 'pro' | 'premium'
+  products,   // array de ids de PRODUCTOS (ej. ['silla','monitor','brazo',...])
+  deskSize,   // 'compacto' | 'estandar' | 'amplio'
+  deskMode    // 'sentado' | 'standing'
+});
+
+// Devuelve la configuración final tras los cambios manuales del usuario.
+window.PrimOfficeConfigurador3D.getCurrentConfiguration();
+// → { preset, deskSize, deskMode, products:[...ids], productNames:[...], count }
+```
+
+Ambas funcionan con o sin WebGL (la capa de UI siempre está activa). Cargar
+modelos `.glb` reales **no** cambia este contrato.
