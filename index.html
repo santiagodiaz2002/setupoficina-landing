@@ -3,6 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07111f" />
+
+  <!-- Animaciones de entrada sin parpadeo (FOUC): la clase se aplica antes del primer pintado.
+       Si JS esta deshabilitado, la clase no se agrega y todo el contenido queda visible.
+       El reveal vive aca (no en main.js) para ser resiliente e independiente. -->
+  <script>
+  (function () {
+    var de = document.documentElement;
+    de.classList.add('js-anim');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function showAll() {
+      var els = document.querySelectorAll('.reveal, .reveal-group');
+      for (var i = 0; i < els.length; i++) els[i].classList.add('is-visible');
+    }
+    function onReady(fn) {
+      if (document.readyState !== 'loading') fn();
+      else document.addEventListener('DOMContentLoaded', fn);
+    }
+    if (reduce || !('IntersectionObserver' in window)) { onReady(showAll); return; }
+    onReady(function () {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      document.querySelectorAll('.reveal, .reveal-group').forEach(function (el) { io.observe(el); });
+      // Failsafe: revela cualquier bloque visible que el observer no haya alcanzado.
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          document.querySelectorAll('.reveal:not(.is-visible), .reveal-group:not(.is-visible)').forEach(function (el) {
+            if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('is-visible');
+          });
+        }, 500);
+      });
+    });
+  })();
+  </script>
+
+  <!-- Favicon (SVG relativo, compatible con GitHub Pages /setupoficina-landing/).
+       Al declarar un icono, el navegador deja de pedir /favicon.ico y desaparece el 404. -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="apple-touch-icon" href="./favicon.svg" />
 
   <!-- SEO primario -->
   <title>Setup de Oficina Completo en Buenos Aires | PrimOffice — Sillas, Escritorios y Equipamiento</title>
@@ -163,6 +205,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#top">Saltar al contenido principal</a>
+
 <div class="bar">
   <span>30% OFF con BBVA los martes &middot; 10% OFF abonando con transferencia</span>
   <a href="#catalogo">Ver catalogo completo &rarr;</a>
@@ -170,8 +214,8 @@
 
 <header class="header" id="header">
   <nav class="nav wrap">
-    <a href="#top" class="logo" aria-label="PrimOffice">
-      <img src="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" alt="PrimOffice" />
+    <a href="#top" class="logo" aria-label="PrimOffice - inicio">
+      <img src="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" alt="PrimOffice" width="160" height="38" decoding="async" fetchpriority="high" />
     </a>
     <div class="nav-links">
       <a href="#setups">Setups</a>
@@ -181,18 +225,18 @@
       <a href="#contacto">Contacto</a>
     </div>
     <div class="nav-actions">
-      <a href="https://www.primoffice.com.ar/productos/" target="_blank" class="btn btn-outline btn-sm">Ver catalogo</a>
+      <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Ver catalogo</a>
       <a href="#contacto" class="btn btn-primary btn-sm">Pedir asesoramiento</a>
     </div>
-    <button class="hamburger" id="hamburger" aria-label="Menu">
+    <button class="hamburger" id="hamburger" aria-label="Abrir menu" aria-controls="mobileNav" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
   </nav>
 </header>
 
-<div class="mobile-nav" id="mobileNav">
+<div class="mobile-nav" id="mobileNav" aria-label="Menu de navegacion">
   <div class="mobile-panel">
-    <button class="close-btn" id="mobileClose">Cerrar X</button>
+    <button class="close-btn" id="mobileClose" aria-label="Cerrar menu">Cerrar <span aria-hidden="true">&times;</span></button>
     <a href="#setups" class="ml">Setups</a>
     <a href="#configurador" class="ml">Configurador</a>
     <a href="#catalogo" class="ml">Catalogo</a>
@@ -208,12 +252,12 @@
 <section class="hero" id="top">
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <div style="margin-bottom:22px"><span class="pill"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="5" fill="#10b981"/></svg> Enviamos a todo el pais</span></div>
+      <div style="margin-bottom:22px"><span class="pill"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><circle cx="5" cy="5" r="5" fill="#10b981"/></svg> Enviamos a todo el pais</span></div>
       <h1>Tu espacio de<br>trabajo merece<br>rendir al maximo.</h1>
       <p class="hero-sub">Silla ergonomica, monitor, conectividad y orden. Armamos puestos de trabajo completos para home office, estudios y empresas.</p>
       <div class="hero-ctas">
-        <a href="https://www.primoffice.com.ar/productos/" target="_blank" class="btn btn-primary btn-lg">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           Ver catalogo completo
         </a>
         <a href="#configurador" class="btn btn-outline btn-lg">Armar mi setup</a>
@@ -229,7 +273,7 @@
         <div class="hv-dots"><div class="hv-dot r"></div><div class="hv-dot y"></div><div class="hv-dot g"></div></div>
         <span class="hv-label">Setup Pro &middot; en vivo</span>
       </div>
-      <div class="desk-scene">
+      <div class="desk-scene" aria-hidden="true">
         <div class="lightbar"></div>
         <div class="monitor"><div class="monitor-bezel"><div class="monitor-line w70"></div><div class="monitor-line w50"></div><div class="monitor-card"></div></div></div>
         <div class="monitor-arm"></div>
@@ -239,7 +283,7 @@
         <div class="mouse"></div>
         <div class="phone-stand"></div>
         <div class="fc fc-left"><div class="fc-icon">&#127919;</div><b>Mas foco</b><span>escritorio limpio</span></div>
-        <div class="fc fc-right"><div class="fc-icon">&#128170;</div><b>Menos fatiga</b><span>postura optima</span></div>
+        <div class="fc fc-right"><div class="fc-icon">&#128170;</div><b>Mas comodidad</b><span>postura cuidada</span></div>
       </div>
       <div class="hv-bottom">
         <div class="hv-bottom-text"><b>Setup Pro &mdash; el mas elegido</b><span>Silla &middot; monitor &middot; conectividad &middot; orden</span></div>
@@ -251,31 +295,31 @@
 
 <!-- TRUST -->
 <div class="trust-band">
-  <div class="wrap trust-inner">
+  <div class="wrap trust-inner reveal">
     <span class="trust-label">Confianza PrimOffice</span>
     <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Garantia oficial 6 meses</div>
+    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Garantia oficial 6 meses</div>
     <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Envio el mismo dia CABA y GBA</div>
+    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Envio el mismo dia CABA y GBA</div>
     <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Asesoramiento incluido</div>
+    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Asesoramiento incluido</div>
     <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Cuotas sin interes</div>
+    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg> Cuotas sin interes</div>
     <div class="trust-sep"></div>
-    <div class="trust-item">&#128205; Showroom en Villa Crespo, CABA</div>
+    <div class="trust-item"><span aria-hidden="true">&#128205;</span> Showroom en Villa Crespo, CABA</div>
   </div>
 </div>
 
 <!-- PAIN -->
 <section class="section pain">
   <div class="wrap pain-grid">
-    <div>
+    <div class="reveal">
       <div style="margin-bottom:18px"><span class="pill">El problema real</span></div>
       <h2>Un escritorio improvisado le cuesta caro a tu equipo.</h2>
-      <p class="pain-sub">Silla sin soporte lumbar, pantalla baja, cables cruzados, postura forzada. Todo parece menor hasta que impacta en la salud, la productividad y la imagen de tu empresa.</p>
+      <p class="pain-sub">Silla sin soporte lumbar, pantalla baja, cables cruzados, postura forzada. Todo parece menor hasta que impacta en la comodidad, la productividad y la imagen de tu empresa.</p>
     </div>
-    <div class="pain-cards">
-      <div class="pain-card"><div class="pain-num">01</div><div><b>Dolor de espalda y cuello</b><p>Una silla sin soporte ergonomico y pantalla a mala altura generan lesiones acumulativas evitables.</p></div></div>
+    <div class="pain-cards reveal-group">
+      <div class="pain-card"><div class="pain-num">01</div><div><b>Molestias de espalda y cuello</b><p>Una silla sin soporte y una pantalla a mala altura favorecen posturas forzadas y molestias que se acumulan con las horas.</p></div></div>
       <div class="pain-card"><div class="pain-num">02</div><div><b>Escritorios que distraen</b><p>El desorden consume energia cognitiva. Un escritorio caotico baja la concentracion sin que te des cuenta.</p></div></div>
       <div class="pain-card"><div class="pain-num">03</div><div><b>Conectividad fragmentada</b><p>Cables que no alcanzan, puertos insuficientes, cargadores ocupando enchufes. Friccion constante.</p></div></div>
       <div class="pain-card"><div class="pain-num">04</div><div><b>Imagen poco profesional</b><p>Un puesto descuidado comunica desorganizacion. En reuniones por video, se nota enseguida.</p></div></div>
@@ -285,7 +329,7 @@
 
 <!-- PROMISE -->
 <div class="wrap" style="padding-bottom:0">
-  <div class="promise">
+  <div class="promise reveal">
     <div class="promise-grid">
       <div>
         <span class="pill pill-dark" style="margin-bottom:18px">La solucion PrimOffice</span>
@@ -305,20 +349,20 @@
 <!-- SETUPS -->
 <section class="section" id="setups">
   <div class="wrap">
-    <div class="setups-head">
+    <div class="setups-head reveal">
       <div>
         <span class="pill" style="margin-bottom:14px">Setups recomendados</span>
         <h2>Elegí el tuyo en 30 segundos.</h2>
       </div>
       <p>Tres configuraciones listas, con silla ergonomica incluida. O pedi la tuya a medida.</p>
     </div>
-    <div class="setup-grid">
+    <div class="setup-grid reveal-group">
 
       <article class="setup-card">
         <div class="setup-type"><span class="setup-tag">Essential</span><span class="setup-for">Home office &middot; Freelance</span></div>
         <h3>Orden, postura y comodidad para empezar bien.</h3>
         <p class="setup-desc">Para mejorar el escritorio sin una inversion grande. Resultados inmediatos desde el primer dia.</p>
-        <div class="chair-badge">&#129681; Silla ergonomica basica incluida</div>
+        <div class="chair-badge"><span aria-hidden="true">&#129681;</span>Silla ergonomica basica incluida</div>
         <ul class="setup-ul">
           <li><span class="check-icon">&#10003;</span> <strong>Silla ergonomica</strong> con soporte lumbar</li>
           <li><span class="check-icon">&#10003;</span> Soporte de notebook ergonomico</li>
@@ -336,7 +380,7 @@
         <div class="setup-type"><span class="setup-tag">Pro</span><span class="setup-for">Jornadas largas &middot; Profesionales</span></div>
         <h3>El setup ideal para trabajar muchas horas.</h3>
         <p class="setup-desc">Para profesionales que necesitan foco, comodidad y rendimiento todos los dias.</p>
-        <div class="chair-badge">&#129681; Silla con soporte lumbar ajustable</div>
+        <div class="chair-badge"><span aria-hidden="true">&#129681;</span>Silla con soporte lumbar ajustable</div>
         <ul class="setup-ul">
           <li><span class="check-icon">&#10003;</span> <strong>Silla ergonomica</strong> con soporte lumbar ajustable</li>
           <li><span class="check-icon">&#10003;</span> Brazo articulado para monitor</li>
@@ -346,7 +390,7 @@
           <li><span class="check-icon">&#10003;</span> Soporte de celular</li>
           <li><span class="check-icon">&#10003;</span> Cargador multipuerto</li>
         </ul>
-        <div class="setup-result"><div class="result-eyebrow">Resultado</div><b>Cuerpo sano, escritorio limpio, cero cansancio y conexion sin fricciones.</b></div>
+        <div class="setup-result"><div class="result-eyebrow">Resultado</div><b>Mejor postura, escritorio limpio y conexion sin fricciones durante toda la jornada.</b></div>
         <div class="setup-cta"><a href="#contacto" class="btn btn-primary" style="width:100%">Armar mi Setup Pro</a></div>
       </article>
 
@@ -354,7 +398,7 @@
         <div class="setup-type"><span class="setup-tag">Executive</span><span class="setup-for">Empresas &middot; Directores</span></div>
         <h3>Un puesto completo con imagen y ergonomia premium.</h3>
         <p class="setup-desc">Para oficinas, estudios y equipos que buscan elevar el estandar de sus espacios.</p>
-        <div class="chair-badge">&#129681; Silla premium con reposabrazos 4D</div>
+        <div class="chair-badge"><span aria-hidden="true">&#129681;</span>Silla premium con reposabrazos 4D</div>
         <ul class="setup-ul">
           <li><span class="check-icon">&#10003;</span> <strong>Silla ergonomica premium</strong> reposabrazos 4D</li>
           <li><span class="check-icon">&#10003;</span> Standing desk electrico regulable</li>
@@ -363,7 +407,7 @@
           <li><span class="check-icon">&#10003;</span> Hub profesional con LAN</li>
           <li><span class="check-icon">&#10003;</span> Organizacion integral</li>
         </ul>
-        <div class="setup-result"><div class="result-eyebrow">Resultado</div><b>Puesto moderno, comodo, saludable y de imagen impecable.</b></div>
+        <div class="setup-result"><div class="result-eyebrow">Resultado</div><b>Puesto moderno, comodo, ergonomico y de imagen impecable.</b></div>
         <div class="setup-cta"><a href="#contacto" class="btn btn-outline" style="width:100%">Cotizar Executive</a></div>
       </article>
 
@@ -374,7 +418,7 @@
 <!-- CONFIGURADOR -->
 <section class="section configurador" id="configurador">
   <div class="wrap">
-    <div class="sec-center">
+    <div class="sec-center reveal">
       <span class="pill" style="margin-bottom:18px">Configurador interactivo</span>
       <h2>Arma tu setup a medida.</h2>
       <p>Selecciona los productos que queres y ve como queda tu escritorio en tiempo real.</p>
@@ -482,12 +526,12 @@
 <!-- COMPARE -->
 <section class="section compare">
   <div class="wrap">
-    <div class="sec-center">
+    <div class="sec-center reveal">
       <span class="pill" style="margin-bottom:18px">Antes y despues</span>
       <h2>El cambio se siente. Y se ve en la jornada.</h2>
       <p>No es solo estetica. Es comodidad, postura y rendimiento real.</p>
     </div>
-    <div class="compare-grid">
+    <div class="compare-grid reveal-group">
       <div class="cmp-card bad"><span class="cmp-tag">Sin PrimOffice</span><h3>Puesto improvisado</h3><ul class="cmp-ul"><li><span class="cmp-icon">&#8600;</span> Silla de comedor sin soporte lumbar</li><li><span class="cmp-icon">&#8600;</span> Pantalla baja, postura forzada</li><li><span class="cmp-icon">&#8600;</span> Cables cruzados y expuestos</li><li><span class="cmp-icon">&#8600;</span> Cargadores ocupando enchufes</li><li><span class="cmp-icon">&#8600;</span> Escritorio sin espacio libre</li><li><span class="cmp-icon">&#8600;</span> Imagen poco profesional</li></ul></div>
       <div class="cmp-card good"><span class="cmp-tag">&#10003; Con PrimOffice</span><h3>Setup profesional completo</h3><ul class="cmp-ul"><li><span class="cmp-icon">&#10003;</span> Silla ergonomica con soporte lumbar</li><li><span class="cmp-icon">&#10003;</span> Pantalla a la altura ideal</li><li><span class="cmp-icon">&#10003;</span> Cables ordenados e invisibles</li><li><span class="cmp-icon">&#10003;</span> Carga centralizada en un punto</li><li><span class="cmp-icon">&#10003;</span> Escritorio limpio y con espacio</li><li><span class="cmp-icon">&#10003;</span> Imagen moderna y prolija</li></ul></div>
     </div>
@@ -497,12 +541,12 @@
 <!-- BENEFITS -->
 <section class="section">
   <div class="wrap">
-    <div class="sec-center"><span class="pill" style="margin-bottom:18px">Beneficios concretos</span><h2>Disenado para rendir mas cada dia.</h2><p>Cada producto cumple una funcion. Nada esta de adorno.</p></div>
-    <div class="benefits-grid">
-      <div class="benefit"><div class="benefit-icon">&#129681;</div><h3>Ergonomia de verdad</h3><p>Silla con soporte lumbar, pantalla a mejor altura y manos en posicion neutra. Menos lesiones, mas energia al final del dia.</p></div>
-      <div class="benefit"><div class="benefit-icon">&#129529;</div><h3>Orden visible</h3><p>Sin cables a la vista, sin objetos sueltos. Un escritorio que transmite control y libera espacio mental.</p></div>
-      <div class="benefit"><div class="benefit-icon">&#128268;</div><h3>Conectividad simple</h3><p>Hubs, adaptadores y cargadores multipuerto para conectar todo sin rotar cables ni buscar enchufes.</p></div>
-      <div class="benefit"><div class="benefit-icon">&#128188;</div><h3>Imagen premium</h3><p>Una oficina moderna se percibe en los detalles. El escritorio y la silla son los mas importantes.</p></div>
+    <div class="sec-center reveal"><span class="pill" style="margin-bottom:18px">Beneficios concretos</span><h2>Disenado para rendir mas cada dia.</h2><p>Cada producto cumple una funcion. Nada esta de adorno.</p></div>
+    <div class="benefits-grid reveal-group">
+      <div class="benefit"><div class="benefit-icon" aria-hidden="true">&#129681;</div><h3>Ergonomia de verdad</h3><p>Silla con soporte lumbar, pantalla a mejor altura y manos en posicion neutra. Mas comodidad y mejor postura durante la jornada.</p></div>
+      <div class="benefit"><div class="benefit-icon" aria-hidden="true">&#129529;</div><h3>Orden visible</h3><p>Sin cables a la vista, sin objetos sueltos. Un escritorio que transmite control y libera espacio mental.</p></div>
+      <div class="benefit"><div class="benefit-icon" aria-hidden="true">&#128268;</div><h3>Conectividad simple</h3><p>Hubs, adaptadores y cargadores multipuerto para conectar todo sin rotar cables ni buscar enchufes.</p></div>
+      <div class="benefit"><div class="benefit-icon" aria-hidden="true">&#128188;</div><h3>Imagen premium</h3><p>Una oficina moderna se percibe en los detalles. El escritorio y la silla son los mas importantes.</p></div>
     </div>
   </div>
 </section>
@@ -510,22 +554,22 @@
 <!-- CATALOG -->
 <section class="section products" id="catalogo">
   <div class="wrap products-grid">
-    <div>
+    <div class="reveal">
       <span class="pill" style="margin-bottom:18px">Catalogo PrimOffice</span>
       <h2>Todo lo que necesita un puesto moderno.</h2>
       <p class="products-sub">Mas de 12 categorias para cubrir cada aspecto de tu espacio de trabajo. Explora o pedi una recomendacion a medida.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <a href="https://www.primoffice.com.ar/productos/" target="_blank" class="btn btn-primary">Ver catalogo en PrimOffice.com.ar</a>
+        <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-primary">Ver catalogo en PrimOffice.com.ar</a>
         <a href="#contacto" class="btn btn-outline">Pedir recomendacion</a>
       </div>
     </div>
-    <div class="cat-list">
-      <a href="https://www.primoffice.com.ar/accesorios/comodidad/" target="_blank" class="cat-item"><div class="cat-icon">&#129681;</div><div class="cat-text"><b>Mobiliario y ergonomia</b><span>Sillas, standing desk, soportes de monitor y notebook</span></div></a>
-      <a href="https://www.primoffice.com.ar/conectividad/adaptadores-hubs/" target="_blank" class="cat-item"><div class="cat-icon">&#128279;</div><div class="cat-text"><b>Conectividad</b><span>Hubs USB-C, adaptadores HDMI, docking stations</span></div></a>
-      <a href="https://www.primoffice.com.ar/accesorios/" target="_blank" class="cat-item"><div class="cat-icon">&#128161;</div><div class="cat-text"><b>Iluminacion</b><span>pLed y barras de luz para monitor, anillos de luz</span></div></a>
-      <a href="https://www.primoffice.com.ar/conectividad/cargadores/" target="_blank" class="cat-item"><div class="cat-icon">&#9889;</div><div class="cat-text"><b>Carga</b><span>Cargadores GaN multipuerto, powerbanks, inalambrica</span></div></a>
-      <a href="https://www.primoffice.com.ar/accesorios/accesorios-de-escritorio/" target="_blank" class="cat-item"><div class="cat-icon">&#128230;</div><div class="cat-text"><b>Orden y organizacion</b><span>pBox, pMat XL, organizadores de cables</span></div></a>
-      <a href="https://www.primoffice.com.ar/accesorios/perifericos/" target="_blank" class="cat-item"><div class="cat-icon">&#9000;</div><div class="cat-text"><b>Perifericos</b><span>Mouse vertical, teclado mecanico pMechanic</span></div></a>
+    <div class="cat-list reveal-group">
+      <a href="https://www.primoffice.com.ar/accesorios/comodidad/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon" aria-hidden="true">&#129681;</div><div class="cat-text"><b>Mobiliario y ergonomia</b><span>Sillas, standing desk, soportes de monitor y notebook</span></div></a>
+      <a href="https://www.primoffice.com.ar/conectividad/adaptadores-hubs/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon" aria-hidden="true">&#128279;</div><div class="cat-text"><b>Conectividad</b><span>Hubs USB-C, adaptadores HDMI, docking stations</span></div></a>
+      <a href="https://www.primoffice.com.ar/accesorios/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon" aria-hidden="true">&#128161;</div><div class="cat-text"><b>Iluminacion</b><span>pLed y barras de luz para monitor, anillos de luz</span></div></a>
+      <a href="https://www.primoffice.com.ar/conectividad/cargadores/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon" aria-hidden="true">&#9889;</div><div class="cat-text"><b>Carga</b><span>Cargadores GaN multipuerto, powerbanks, inalambrica</span></div></a>
+      <a href="https://www.primoffice.com.ar/accesorios/accesorios-de-escritorio/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon" aria-hidden="true">&#128230;</div><div class="cat-text"><b>Orden y organizacion</b><span>pBox, pMat XL, organizadores de cables</span></div></a>
+      <a href="https://www.primoffice.com.ar/accesorios/perifericos/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon" aria-hidden="true">&#9000;</div><div class="cat-text"><b>Perifericos</b><span>Mouse vertical, teclado mecanico pMechanic</span></div></a>
     </div>
   </div>
 </section>
@@ -533,7 +577,7 @@
 <!-- ENTERPRISE -->
 <section class="section" id="empresas">
   <div class="wrap">
-    <div class="enterprise-box">
+    <div class="enterprise-box reveal">
       <div>
         <span class="pill pill-dark" style="margin-bottom:18px">Para empresas</span>
         <h2>Equipa varios puestos sin perder tiempo eligiendo producto por producto.</h2>
@@ -558,8 +602,8 @@
 <!-- STEPS -->
 <section class="section">
   <div class="wrap">
-    <div class="sec-center"><span class="pill" style="margin-bottom:18px">Asi funciona</span><h2>De escritorio comun a setup profesional en 3 pasos.</h2></div>
-    <div class="steps-grid">
+    <div class="sec-center reveal"><span class="pill" style="margin-bottom:18px">Asi funciona</span><h2>De escritorio comun a setup profesional en 3 pasos.</h2></div>
+    <div class="steps-grid reveal-group">
       <div class="step"><div class="step-num">1</div><h3>Nos contas como trabajas</h3><p>Dispositivos, horas de uso, espacio disponible y presupuesto. Con eso alcanza para empezar.</p></div>
       <div class="step"><div class="step-num">2</div><h3>Te recomendamos el pack ideal</h3><p>Essential, Pro, Executive o una combinacion a medida con silla incluida. La propuesta llega por WhatsApp o email.</p></div>
       <div class="step"><div class="step-num">3</div><h3>Lo recibis y empezas mejor</h3><p>Envio a todo el pais. Productos con garantia PrimOffice y soporte post-compra incluido.</p></div>
@@ -569,13 +613,13 @@
 
 <!-- CONVERSION -->
 <section class="conversion">
-  <div class="wrap conversion-inner">
+  <div class="wrap conversion-inner reveal">
     <div>
       <h2>El mejor momento para mejorar tu setup es antes de que el cansancio se vuelva rutina.</h2>
       <p>Explora el catalogo o usa el configurador para armar el tuyo a medida.</p>
     </div>
     <div class="conversion-ctas">
-      <a href="https://www.primoffice.com.ar/productos/" target="_blank" class="btn btn-primary btn-lg">Ver catalogo completo</a>
+      <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Ver catalogo completo</a>
       <a href="#configurador" class="btn btn-ghost btn-lg">Usar el configurador</a>
     </div>
   </div>
@@ -584,23 +628,23 @@
 <!-- TESTIMONIALS -->
 <section class="section">
   <div class="wrap">
-    <div class="sec-center"><span class="pill" style="margin-bottom:18px">Lo que dicen nuestros clientes</span><h2>Resultados que se sienten desde el primer dia.</h2></div>
-    <div class="testi-grid">
-      <div class="testi"><div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>"La silla y el brazo de monitor me cambiaron la vida."</blockquote><p class="testi-detail">Llevaba meses con dolor de cuello. Con el Setup Pro el dolor desaparecio en una semana. Ahora trabajo mas horas y termino mas descansado.</p><div class="testi-author"><div class="testi-avatar">MG</div><div><span class="testi-name">Martin G.</span><span class="testi-role">Disenador UX &middot; Home office</span></div></div></div>
-      <div class="testi"><div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>"La oficina se ve completamente diferente."</blockquote><p class="testi-detail">Equipamos 8 puestos con sillas ergonomicas y el setup completo. La diferencia visual y el impacto en el equipo fue increible. Los clientes lo notan.</p><div class="testi-author"><div class="testi-avatar">LP</div><div><span class="testi-name">Laura P.</span><span class="testi-role">Socia &middot; Estudio contable</span></div></div></div>
-      <div class="testi"><div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>"Empece con el Essential y fui sumando."</blockquote><p class="testi-detail">Todo se complementa perfectamente. Primero la silla y el soporte, despues el hub y la luz. El asesoramiento fue clave para no comprar de mas.</p><div class="testi-author"><div class="testi-avatar">JR</div><div><span class="testi-name">Juan R.</span><span class="testi-role">Desarrollador &middot; Freelance</span></div></div></div>
+    <div class="sec-center reveal"><span class="pill" style="margin-bottom:18px">Lo que dicen nuestros clientes</span><h2>Resultados que se sienten desde el primer dia.</h2></div>
+    <div class="testi-grid reveal-group">
+      <div class="testi"><div class="testi-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>"La silla y el brazo de monitor cambiaron mi forma de trabajar."</blockquote><p class="testi-detail">Pasaba muchas horas frente a la pantalla y terminaba el dia incomodo. Con el Setup Pro mejore la postura y trabajo mucho mas comodo.</p><div class="testi-author"><div class="testi-avatar">MG</div><div><span class="testi-name">Martin G.</span><span class="testi-role">Disenador UX &middot; Home office</span></div></div></div>
+      <div class="testi"><div class="testi-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>"La oficina se ve completamente diferente."</blockquote><p class="testi-detail">Equipamos 8 puestos con sillas ergonomicas y el setup completo. La diferencia visual y el impacto en el equipo fue increible. Los clientes lo notan.</p><div class="testi-author"><div class="testi-avatar">LP</div><div><span class="testi-name">Laura P.</span><span class="testi-role">Socia &middot; Estudio contable</span></div></div></div>
+      <div class="testi"><div class="testi-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</div><blockquote>"Empece con el Essential y fui sumando."</blockquote><p class="testi-detail">Todo se complementa perfectamente. Primero la silla y el soporte, despues el hub y la luz. El asesoramiento fue clave para no comprar de mas.</p><div class="testi-author"><div class="testi-avatar">JR</div><div><span class="testi-name">Juan R.</span><span class="testi-role">Desarrollador &middot; Freelance</span></div></div></div>
     </div>
   </div>
 </section>
 
 <!-- FAQ -->
 <section class="section" style="background:var(--surface)">
-  <div class="wrap faq-grid">
+  <div class="wrap faq-grid reveal-group">
     <div>
       <span class="pill" style="margin-bottom:18px">Preguntas frecuentes</span>
       <h2>Lo que suelen preguntar antes de elegir.</h2>
       <p class="faq-sub">No encontras lo que buscas? Escribinos por WhatsApp y te respondemos en minutos.</p>
-      <a href="https://wa.me/5491139149688" target="_blank" class="btn btn-outline">Hacer una pregunta</a>
+      <a href="https://wa.me/5491139149688" target="_blank" rel="noopener" class="btn btn-outline">Hacer una pregunta</a>
     </div>
     <div class="faq-list">
       <details open><summary>Las sillas ergonomicas vienen incluidas en el setup?</summary><div class="faq-body">Si. Todos los setups incluyen una silla ergonomica, con calidad que aumenta segun el nivel del pack: basica (Essential), con soporte lumbar ajustable (Pro) o premium con reposabrazos 4D (Executive).</div></details>
@@ -616,7 +660,7 @@
 <!-- CONTACT -->
 <section class="section" id="contacto">
   <div class="wrap">
-    <div class="contact-box">
+    <div class="contact-box reveal">
       <div>
         <span class="pill pill-dark" style="margin-bottom:18px">Asesoramiento sin costo</span>
         <h2>Decinos como trabajas y te recomendamos el setup ideal.</h2>
@@ -630,11 +674,12 @@
         </div>
       </div>
       <form class="form" onsubmit="handleLead(event)">
-        <div class="form-field"><label class="form-label">Nombre</label><input class="form-input" type="text" name="nombre" placeholder="Tu nombre" required></div>
-        <div class="form-field"><label class="form-label">WhatsApp o email</label><input class="form-input" type="text" name="contacto" placeholder="Ej: +54 9 11 ..." required></div>
+        <p class="form-req-note">Los campos con <span class="req" aria-hidden="true">*</span> son obligatorios.</p>
+        <div class="form-field"><label class="form-label" for="f-nombre">Nombre <span class="req" aria-hidden="true">*</span></label><input class="form-input" id="f-nombre" type="text" name="nombre" placeholder="Tu nombre" autocomplete="name" required></div>
+        <div class="form-field"><label class="form-label" for="f-contacto">WhatsApp o email <span class="req" aria-hidden="true">*</span></label><input class="form-input" id="f-contacto" type="text" name="contacto" placeholder="Ej: +54 9 11 ..." autocomplete="on" required></div>
         <div class="form-field">
-          <label class="form-label">Que queres armar?</label>
-          <select class="form-select" name="setup" required>
+          <label class="form-label" for="f-setup">Que queres armar? <span class="req" aria-hidden="true">*</span></label>
+          <select class="form-select" id="f-setup" name="setup" required>
             <option value="">Elegi una opcion</option>
             <option>Setup Essential (silla ergonomica basica)</option>
             <option>Setup Pro (silla con soporte lumbar ajustable)</option>
@@ -643,12 +688,12 @@
             <option>Solo quiero asesoramiento</option>
           </select>
         </div>
-        <div class="form-field"><label class="form-label">Contanos mas (opcional)</label><textarea class="form-textarea" name="comentario" placeholder="Ej: uso notebook + monitor externo, 8hs por dia, presupuesto aprox..."></textarea></div>
+        <div class="form-field"><label class="form-label" for="f-comentario">Contanos mas (opcional)</label><textarea class="form-textarea" id="f-comentario" name="comentario" placeholder="Ej: uso notebook + monitor externo, 8hs por dia, presupuesto aprox..."></textarea></div>
         <button class="btn btn-primary form-submit" type="submit">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
           Pedir asesoramiento por WhatsApp
         </button>
-        <p class="form-note">O visita <a href="https://www.primoffice.com.ar/contacto/" target="_blank" style="color:var(--blue)">primoffice.com.ar/contacto</a></p>
+        <p class="form-note">O visita <a href="https://www.primoffice.com.ar/contacto/" target="_blank" rel="noopener" style="color:var(--blue)">primoffice.com.ar/contacto</a></p>
       </form>
     </div>
   </div>
@@ -659,33 +704,43 @@
 <!-- FOOTER -->
 <footer class="footer">
   <div class="wrap">
-    <div class="footer-grid">
+    <div class="footer-grid reveal-group">
       <div class="footer-logo">
-        <a href="https://www.primoffice.com.ar" target="_blank">
-          <img src="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" alt="PrimOffice"/>
+        <a href="https://www.primoffice.com.ar" target="_blank" rel="noopener" aria-label="PrimOffice - sitio oficial">
+          <img src="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" alt="PrimOffice" width="150" height="34" loading="lazy" decoding="async"/>
         </a>
         <p class="footer-tagline">Espacios de trabajo que rinden mas. Ergonomia, conectividad, iluminacion y orden en un solo lugar.</p>
         <div class="footer-social">
-          <a href="https://instagram.com/PrimOffice" target="_blank" title="Instagram">&#128247;</a>
-          <a href="https://www.facebook.com/primoffice" target="_blank" title="Facebook">&#128251;</a>
-          <a href="https://www.youtube.com/channel/UCbuCp2Xp8CSkPxhMsdIMQ9g" target="_blank" title="YouTube">&#9654;</a>
-          <a href="https://www.tiktok.com/@primoffice" target="_blank" title="TikTok">&#127925;</a>
-          <a href="https://wa.me/5491139149688" target="_blank" title="WhatsApp">&#128172;</a>
+          <a href="https://instagram.com/PrimOffice" target="_blank" rel="noopener" title="Instagram" aria-label="PrimOffice en Instagram">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.22.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.05.41 2.22.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.22-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.05.36-2.22.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.22-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.05-.41-2.22C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.22.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.05-.36 2.22-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 1.44c-3.14 0-3.51.01-4.75.07-1.15.05-1.77.24-2.18.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.18-.06 1.24-.07 1.61-.07 4.75s.01 3.51.07 4.75c.05 1.15.24 1.77.4 2.18.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.18.4 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.15-.05 1.77-.24 2.18-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.18.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.15-.24-1.77-.4-2.18a3.64 3.64 0 0 0-.88-1.35 3.64 3.64 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.18-.4-1.24-.06-1.61-.07-4.75-.07Zm0 2.45a5.95 5.95 0 1 1 0 11.9 5.95 5.95 0 0 1 0-11.9Zm0 1.44a4.51 4.51 0 1 0 0 9.02 4.51 4.51 0 0 0 0-9.02Zm6.11-2.7a1.39 1.39 0 1 1 0 2.78 1.39 1.39 0 0 1 0-2.78Z"/></svg>
+          </a>
+          <a href="https://www.facebook.com/primoffice" target="_blank" rel="noopener" title="Facebook" aria-label="PrimOffice en Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07Z"/></svg>
+          </a>
+          <a href="https://www.youtube.com/channel/UCbuCp2Xp8CSkPxhMsdIMQ9g" target="_blank" rel="noopener" title="YouTube" aria-label="PrimOffice en YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.12-2.12C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.53A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.8 3 3 0 0 0 2.12 2.12c1.88.53 9.38.53 9.38.53s7.5 0 9.38-.53a3 3 0 0 0 2.12-2.12A31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-5.8ZM9.55 15.57V8.43L15.82 12l-6.27 3.57Z"/></svg>
+          </a>
+          <a href="https://www.tiktok.com/@primoffice" target="_blank" rel="noopener" title="TikTok" aria-label="PrimOffice en TikTok">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07Z"/></svg>
+          </a>
+          <a href="https://wa.me/5491139149688" target="_blank" rel="noopener" title="WhatsApp" aria-label="Escribinos por WhatsApp">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
+          </a>
         </div>
       </div>
       <div class="footer-col"><h4>Setups</h4><ul><li><a href="#setups">Essential</a></li><li><a href="#setups">Pro</a></li><li><a href="#setups">Executive</a></li><li><a href="#configurador">Configurador</a></li></ul></div>
-      <div class="footer-col"><h4>Catalogo</h4><ul><li><a href="https://www.primoffice.com.ar/accesorios/comodidad/" target="_blank">Ergonomia</a></li><li><a href="https://www.primoffice.com.ar/conectividad/" target="_blank">Conectividad</a></li><li><a href="https://www.primoffice.com.ar/mobiliario/" target="_blank">Mobiliario</a></li><li><a href="https://www.primoffice.com.ar/kits/" target="_blank">Kits</a></li><li><a href="https://www.primoffice.com.ar/ofertas/" target="_blank">Ofertas</a></li></ul></div>
-      <div class="footer-col"><h4>PrimOffice</h4><ul><li><a href="https://www.primoffice.com.ar/showroom/" target="_blank">Showroom CABA</a></li><li><a href="https://www.primoffice.com.ar/blog/" target="_blank">Blog</a></li><li><a href="https://www.primoffice.com.ar/informacion/" target="_blank">Preguntas frecuentes</a></li><li><a href="https://www.primoffice.com.ar/contacto/" target="_blank">Contacto</a></li><li><a href="#empresas">Para empresas</a></li></ul></div>
+      <div class="footer-col"><h4>Catalogo</h4><ul><li><a href="https://www.primoffice.com.ar/accesorios/comodidad/" target="_blank" rel="noopener">Ergonomia</a></li><li><a href="https://www.primoffice.com.ar/conectividad/" target="_blank" rel="noopener">Conectividad</a></li><li><a href="https://www.primoffice.com.ar/mobiliario/" target="_blank" rel="noopener">Mobiliario</a></li><li><a href="https://www.primoffice.com.ar/kits/" target="_blank" rel="noopener">Kits</a></li><li><a href="https://www.primoffice.com.ar/ofertas/" target="_blank" rel="noopener">Ofertas</a></li></ul></div>
+      <div class="footer-col"><h4>PrimOffice</h4><ul><li><a href="https://www.primoffice.com.ar/showroom/" target="_blank" rel="noopener">Showroom CABA</a></li><li><a href="https://www.primoffice.com.ar/blog/" target="_blank" rel="noopener">Blog</a></li><li><a href="https://www.primoffice.com.ar/informacion/" target="_blank" rel="noopener">Preguntas frecuentes</a></li><li><a href="https://www.primoffice.com.ar/contacto/" target="_blank" rel="noopener">Contacto</a></li><li><a href="#empresas">Para empresas</a></li></ul></div>
     </div>
     <div class="footer-bottom">
       <span>2026 PrimOffice. Todos los derechos reservados. Aguirre 407, Villa Crespo, CABA</span>
-      <span><a href="https://www.primoffice.com.ar" target="_blank">primoffice.com.ar</a></span>
+      <span><a href="https://www.primoffice.com.ar" target="_blank" rel="noopener">primoffice.com.ar</a></span>
     </div>
   </div>
 </footer>
 
-<a class="wa-float" href="https://wa.me/5491139149688?text=Hola%20PrimOffice%2C%20quiero%20consultar%20sobre%20un%20setup." target="_blank" aria-label="WhatsApp">
-  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
+<a class="wa-float" href="https://wa.me/5491139149688?text=Hola%20PrimOffice%2C%20quiero%20consultar%20sobre%20un%20setup." target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
 </a>
 
 <script src="./js/main.js"></script>

@@ -331,3 +331,93 @@
       .phone-stand,.hub,.fc{display:none}
       .footer-grid{grid-template-columns:1fr}
     }
+
+    /* ============================================================
+       PASADA DE PULIDO — accesibilidad, microinteracciones y
+       cinematicas. Todo lo animado usa solo opacity/transform/
+       translate (sin reflow ni CLS) y respeta prefers-reduced-motion.
+       ============================================================ */
+
+    /* Reduce el retardo de 300ms en tap (mejor respuesta tactil) */
+    a,button,.btn,summary,label,input,select,textarea{touch-action:manipulation}
+
+    /* Skip link para navegacion por teclado */
+    .skip-link{position:fixed;left:12px;top:-80px;z-index:1000;padding:11px 18px;border-radius:0 0 14px 14px;background:var(--navy);color:#fff;font-weight:800;font-size:14px;box-shadow:var(--sh);transition:top .2s ease}
+    .skip-link:focus{top:0}
+
+    /* Foco visible global (NUNCA se eliminan los indicadores de foco) */
+    :where(a,button,.btn,summary,[tabindex]):focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+    .bar a:focus-visible,.footer a:focus-visible,.btn-primary:focus-visible,.hv-bottom a:focus-visible{outline-color:var(--blue2)}
+
+    /* Contraste de etiqueta de confianza (AA) */
+    .trust-label{color:#5f6b7a}
+
+    /* Sombra del header al hacer scroll (clase desde JS, sin estilos inline) */
+    .header.scrolled{box-shadow:0 8px 32px rgba(7,17,31,.10)}
+
+    /* Microinteracciones: feedback de pulsado + hover suave */
+    .btn:active{transform:translateY(0)}
+    .pain-card,.testi,.step{transition:transform .2s ease,box-shadow .2s ease}
+    .cat-item{transition:transform .2s ease,box-shadow .2s ease,border-color .18s ease,background .18s ease}
+    .pain-card:hover,.testi:hover,.step:hover{transform:translateY(-3px);box-shadow:var(--sh)}
+    .cat-item:hover{transform:translateY(-2px)}
+    .footer-social a{transition:background .15s ease,transform .15s ease}
+    .footer-social a:hover{transform:translateY(-2px)}
+    .footer-col ul li a{display:inline-block}
+    .footer-col ul li a:hover{transform:translateX(2px)}
+
+    /* Iconos SVG de redes (reemplazan los emojis previos) */
+    .footer-social svg{width:18px;height:18px;display:block}
+
+    /* Formulario: marca de campo obligatorio y nota */
+    .req{color:#e5484d;font-weight:900}
+    .featured .req{color:#fca5a5}
+    .form-req-note{font-size:12px;color:var(--muted);margin:-4px 0 16px}
+
+    /* ---- Cinematicas de entrada (solo con JS; sin JS todo es visible) ---- */
+    @keyframes po-hero-up{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+    @keyframes po-hero-visual{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:none}}
+    @keyframes po-reveal{from{opacity:0;translate:0 22px}to{opacity:1;translate:none}}
+
+    /* Hero: aparicion progresiva al cargar */
+    .js-anim .hero-copy>*{opacity:0;animation:po-hero-up .7s cubic-bezier(.22,.61,.36,1) both}
+    .js-anim .hero-copy>*:nth-child(1){animation-delay:.05s}
+    .js-anim .hero-copy>*:nth-child(2){animation-delay:.13s}
+    .js-anim .hero-copy>*:nth-child(3){animation-delay:.21s}
+    .js-anim .hero-copy>*:nth-child(4){animation-delay:.29s}
+    .js-anim .hero-copy>*:nth-child(5){animation-delay:.37s}
+    .js-anim .hero-visual{opacity:0;animation:po-hero-visual .9s cubic-bezier(.22,.61,.36,1) .28s both}
+
+    /* Reveal de secciones al entrar al viewport (clase .is-visible via IntersectionObserver).
+       Usa animation + la propiedad `translate` para NO interferir con transforms existentes
+       (p. ej. la tarjeta destacada que ya usa transform:translateY). */
+    .js-anim .reveal,.js-anim .reveal-group>*{opacity:0}
+    .js-anim .reveal.is-visible,.js-anim .reveal-group.is-visible>*{animation:po-reveal .6s cubic-bezier(.22,.61,.36,1) both}
+    .js-anim .reveal-group.is-visible>*:nth-child(2){animation-delay:.07s}
+    .js-anim .reveal-group.is-visible>*:nth-child(3){animation-delay:.14s}
+    .js-anim .reveal-group.is-visible>*:nth-child(4){animation-delay:.21s}
+    .js-anim .reveal-group.is-visible>*:nth-child(5){animation-delay:.28s}
+    .js-anim .reveal-group.is-visible>*:nth-child(6){animation-delay:.35s}
+
+    /* Refinos responsive adicionales */
+    @media(max-width:1024px){
+      .setups-head{flex-direction:column;align-items:flex-start;gap:14px}
+      .setups-head p{max-width:none}
+    }
+    @media(max-width:480px){
+      .hero-stats{gap:16px 22px}
+      .stat-num{font-size:26px}
+      .promise{padding:26px}
+      .wa-float{bottom:20px;right:20px;width:54px;height:54px}
+      .bar{font-size:12px}
+    }
+
+    /* ---- Respeto por prefers-reduced-motion (desactiva movimiento) ---- */
+    @media (prefers-reduced-motion: reduce){
+      html{scroll-behavior:auto}
+      .js-anim .reveal,.js-anim .reveal-group>*{opacity:1!important}
+      .js-anim .reveal.is-visible,.js-anim .reveal-group.is-visible>*{animation:none!important;opacity:1!important;translate:none!important}
+      .js-anim .hero-copy>*,.js-anim .hero-visual{animation:none!important;opacity:1!important;transform:none!important}
+      .btn:hover,.setup-card:hover,.setup-card.featured:hover,.benefit:hover,.pain-card:hover,
+      .testi:hover,.step:hover,.cat-item:hover,.wa-float:hover,.footer-social a:hover,.footer-col ul li a:hover{transform:none}
+    }

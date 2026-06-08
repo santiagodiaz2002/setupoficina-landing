@@ -213,7 +213,7 @@
 @media(max-width:640px){
   .c3d-stage{aspect-ratio:5 / 4;max-height:58vh;border-radius:22px}
   .c3d-cam-btn span{display:none}          /* en movil solo iconos para ahorrar espacio */
-  .c3d-cam-btn{min-height:40px;padding:0 11px}
+  .c3d-cam-btn{min-height:44px;min-width:44px;justify-content:center;padding:0 11px}  /* objetivo tactil 44x44 */
   .c3d-toolbar{top:10px;right:10px;gap:5px}
   .c3d-hint{font-size:11px;left:10px;bottom:10px}
   .c3d-summary-meta{grid-template-columns:1fr}

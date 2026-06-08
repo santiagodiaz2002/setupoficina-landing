@@ -74,7 +74,7 @@
       dependencias: ['monitor'], exclusiones: [], anchor: 'surface',
       posicionInicial: { x: 0, y: 0, z: -0.15 }, escala: 1,
       rutaModeloGlb: null, geometriaPlaceholder: 'luz',
-      descripcion: 'Iluminacion sin reflejos; protege la vista.'
+      descripcion: 'Iluminacion uniforme que reduce reflejos y el deslumbramiento en pantalla.'
     },
     {
       id: 'notebook', nombre: 'Notebook', categoria: 'Equipo', activo: false,

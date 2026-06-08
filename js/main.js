@@ -1,10 +1,38 @@
 const hamburger=document.getElementById('hamburger'),mobileNav=document.getElementById('mobileNav'),mobileClose=document.getElementById('mobileClose');
-hamburger?.addEventListener('click',()=>mobileNav.classList.add('open'));
-mobileClose?.addEventListener('click',()=>mobileNav.classList.remove('open'));
-mobileNav?.addEventListener('click',e=>{if(e.target===mobileNav)mobileNav.classList.remove('open')});
-document.querySelectorAll('.ml').forEach(l=>l.addEventListener('click',()=>mobileNav.classList.remove('open')));
+
+function openMobileNav(){
+  if(!mobileNav)return;
+  mobileNav.classList.add('open');
+  hamburger&&hamburger.setAttribute('aria-expanded','true');
+  mobileClose&&mobileClose.focus();
+}
+function closeMobileNav(){
+  if(!mobileNav)return;
+  mobileNav.classList.remove('open');
+  hamburger&&hamburger.setAttribute('aria-expanded','false');
+}
+hamburger&&hamburger.addEventListener('click',openMobileNav);
+mobileClose&&mobileClose.addEventListener('click',()=>{closeMobileNav();hamburger&&hamburger.focus();});
+mobileNav&&mobileNav.addEventListener('click',e=>{if(e.target===mobileNav)closeMobileNav();});
+document.querySelectorAll('.ml').forEach(l=>l.addEventListener('click',closeMobileNav));
+// Cerrar el menu movil con la tecla Escape (accesibilidad teclado)
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&mobileNav&&mobileNav.classList.contains('open')){closeMobileNav();hamburger&&hamburger.focus();}
+});
+
+// Sombra del header al hacer scroll: alterna una clase con requestAnimationFrame
+// (evita escribir estilos inline en cada evento y reduce el trabajo en el hilo principal).
 const header=document.getElementById('header');
-window.addEventListener('scroll',()=>{header.style.boxShadow=window.scrollY>20?'0 8px 32px rgba(7,17,31,.10)':'none'},{passive:true});
+if(header){
+  let ticking=false;
+  const onScroll=()=>{
+    if(ticking)return;
+    ticking=true;
+    requestAnimationFrame(()=>{header.classList.toggle('scrolled',window.scrollY>20);ticking=false;});
+  };
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+}
 
 // CONFIGURADOR
 // La logica del configurador se movio a js/configurador-3d.js (visualizador 3D con Three.js).
