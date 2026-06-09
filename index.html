@@ -1,117 +1,328 @@
 <!DOCTYPE html>
-<html lang="es-AR">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Primoffice — Tu Setup Ideal para Trabajar Mejor</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=1" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="description" content="Descubrí qué setup necesitás para trabajar sin dolores. Combos ergonómicos. Entrega 24hs CABA y GBA." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'Open Sans', sans-serif; background: #F8FAFC; color: #020617; line-height: 1.6; overflow-x: hidden; }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
 
-  <!-- ============================================================
-       SEO PRIMARIO (FASE 13) · Concepto: test gratuito de setup
-       ============================================================ -->
-  <title>Test gratuito para mejorar tu setup de oficina | PrimOffice</title>
-  <meta name="description" content="Hacé el test gratuito de PrimOffice y recibí una recomendación personalizada para tu setup de oficina o home office: ergonomía, conectividad, orden e iluminación. Visualizá tu escritorio en 3D y evitá compras innecesarias." />
-  <link rel="canonical" href="https://setupoficina.com.ar/" />
-  <meta name="robots" content="index, follow" />
-
-  <!-- Open Graph (redes sociales / WhatsApp) -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://setupoficina.com.ar/" />
-  <meta property="og:title" content="Test gratuito para mejorar tu setup de oficina | PrimOffice" />
-  <meta property="og:description" content="Respondé 8 preguntas y obtené una recomendación personalizada para tu puesto de trabajo. Visualizalo en 3D y pedí asesoramiento por WhatsApp." />
-  <meta property="og:image" content="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" />
-  <meta property="og:image:width" content="480" />
-  <meta property="og:image:alt" content="PrimOffice · Test gratuito de setup de oficina" />
-  <meta property="og:locale" content="es_AR" />
-  <meta property="og:site_name" content="PrimOffice Setup Oficina" />
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Test gratuito para mejorar tu setup de oficina | PrimOffice" />
-  <meta name="twitter:description" content="Diagnóstico personalizado de tu puesto de trabajo y visualización en 3D. Gratis y sin compromiso." />
-  <meta name="twitter:image" content="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" />
-
-  <!-- ============================================================
-       Schema.org · Negocio (datos mínimos VALIDADOS)
-       TODO: validar con PrimOffice antes de publicar dirección,
-       horarios, rango de precios y medios de pago. Se retiraron del
-       JSON-LD por no estar confirmados (address, geo, openingHours,
-       priceRange, paymentAccepted).
-       ============================================================ -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "PrimOffice",
-    "description": "Equipamiento y mobiliario para oficina y home office en Buenos Aires. Ofrece un test gratuito y recomendación personalizada de setup.",
-    "url": "https://setupoficina.com.ar",
-    "image": "https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp",
-    "sameAs": [
-      "https://www.instagram.com/primoffice",
-      "https://www.facebook.com/primoffice",
-      "https://primoffice.com.ar"
-    ],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "customer service",
-      "telephone": "+5491139149688",
-      "availableLanguage": "Spanish"
+    :root {
+      --dark:#0F172A; --dark-2:#1E293B; --dark-3:#334155;
+      --cta:#0369A1; --cta-hover:#0284C7;
+      --accent:#38BDF8; --accent-2:#0EA5E9;
+      --bg:#F8FAFC; --bg-2:#F1F5F9;
+      --text:#020617; --text-muted:#475569;
+      --border:#E2E8F0; --white:#FFFFFF;
+      --success:#10B981; --warn:#F59E0B; --danger:#EF4444;
+      --radius:12px; --radius-lg:20px;
+      --shadow-md:0 4px 16px rgba(0,0,0,.1);
+      --shadow-lg:0 12px 40px rgba(0,0,0,.14);
     }
-  }
-  </script>
 
-  <!-- Schema.org · El test diagnóstico como servicio gratuito -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "Test gratuito de setup de oficina",
-    "serviceType": "Diagnóstico y recomendación de puesto de trabajo",
-    "provider": { "@type": "Organization", "name": "PrimOffice" },
-    "areaServed": "AR",
-    "description": "Test online de 8 pasos que genera una recomendación personalizada de setup (ergonomía, conectividad, iluminación y orden) y la visualiza en 3D.",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "ARS" }
-  }
-  </script>
+    /* ── NAVBAR ── */
+    .navbar { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(15,23,42,.92); backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,.07); }
+    .navbar__inner { max-width:1200px; margin:0 auto; padding:0 1.5rem; height:68px; display:flex; align-items:center; justify-content:space-between; gap:2rem; }
+    .navbar__logo { font-family:'Poppins',sans-serif; font-weight:700; font-size:1.3rem; color:var(--white); display:flex; align-items:center; gap:.6rem; }
+    .navbar__links { display:flex; align-items:center; gap:2rem; list-style:none; }
+    .navbar__links a { font-size:.875rem; font-weight:500; color:rgba(255,255,255,.7); transition:color 200ms; }
+    .navbar__links a:hover { color:var(--white); }
+    .navbar__cta { background:var(--cta); color:var(--white); font-size:.875rem; font-weight:600; padding:.55rem 1.25rem; border-radius:8px; transition:background 200ms, transform 150ms; }
+    .navbar__cta:hover { background:var(--cta-hover); transform:translateY(-1px); }
+    .navbar__menu-btn { display:none; flex-direction:column; gap:5px; padding:4px; cursor:pointer; }
+    .navbar__menu-btn span { display:block; width:24px; height:2px; background:var(--white); border-radius:2px; }
+    @media(max-width:768px){
+      .navbar__links,.navbar__cta{display:none;}
+      .navbar__menu-btn{display:flex;}
+      .navbar.open .navbar__links{display:flex;flex-direction:column;position:absolute;top:68px;left:0;right:0;background:var(--dark-2);padding:1.5rem;gap:1.25rem;border-bottom:1px solid rgba(255,255,255,.08);}
+      .navbar.open .navbar__cta{display:block;text-align:center;padding:.75rem 1.5rem;border-radius:8px;}
+    }
 
-  <!-- Schema.org · Niveles de setup (conceptuales, sin precios) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "Niveles de setup PrimOffice",
-    "description": "Configuraciones de puesto de trabajo como punto de partida, ajustables a medida.",
-    "url": "https://setupoficina.com.ar/#setups",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Setup Básica", "description": "Puesto de entrada: silla ergonómica, monitor, soporte, teclado, mouse, hub y orden de cables." },
-      { "@type": "ListItem", "position": 2, "name": "Setup Pro", "description": "Puesto para jornadas largas: silla con soporte lumbar, brazo articulado, luz de monitor y accesorios." },
-      { "@type": "ListItem", "position": 3, "name": "Setup Premium", "description": "Puesto completo con opción de standing desk, iluminación y máxima organización." }
-    ]
-  }
-  </script>
+    /* ── HERO ── */
+    .hero { background:linear-gradient(135deg,#0F172A 0%,#1E293B 50%,#0F2744 100%); min-height:100vh; display:flex; align-items:center; position:relative; overflow:hidden; padding-top:68px; }
+    .hero__grid { position:absolute; inset:0; background-image:linear-gradient(rgba(56,189,248,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.05) 1px,transparent 1px); background-size:48px 48px; mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%); }
+    .hero__glow { position:absolute; width:600px; height:600px; background:radial-gradient(circle,rgba(3,105,161,.3) 0%,transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
+    .hero__inner { max-width:1200px; margin:0 auto; padding:5rem 1.5rem; position:relative; z-index:1; display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+    .hero__badge { display:inline-flex; align-items:center; gap:.5rem; background:rgba(56,189,248,.12); border:1px solid rgba(56,189,248,.25); color:var(--accent); font-size:.75rem; font-weight:600; padding:.35rem .85rem; border-radius:100px; margin-bottom:1.5rem; }
+    .hero__title { font-family:'Poppins',sans-serif; font-size:clamp(2.2rem,5vw,3.5rem); font-weight:800; color:var(--white); line-height:1.15; letter-spacing:-.5px; margin-bottom:1.25rem; }
+    .hero__title em { font-style:normal; background:linear-gradient(90deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero__subtitle { font-size:1.1rem; color:rgba(255,255,255,.7); line-height:1.7; margin-bottom:2rem; max-width:480px; }
+    .hero__actions { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .btn-primary { background:linear-gradient(135deg,var(--cta),var(--cta-hover)); color:var(--white); font-size:1rem; font-weight:600; padding:.9rem 2rem; border-radius:10px; display:inline-flex; align-items:center; gap:.5rem; transition:transform 200ms,box-shadow 200ms; box-shadow:0 4px 20px rgba(3,105,161,.4); cursor:pointer; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(3,105,161,.5); }
+    .btn-ghost { color:rgba(255,255,255,.7); font-size:.95rem; font-weight:500; padding:.9rem 1.5rem; border:1px solid rgba(255,255,255,.15); border-radius:10px; transition:background 200ms,color 200ms; cursor:pointer; }
+    .btn-ghost:hover { background:rgba(255,255,255,.07); color:var(--white); }
+    .hero__stats { display:flex; gap:2.5rem; margin-top:3rem; padding-top:2.5rem; border-top:1px solid rgba(255,255,255,.1); }
+    .hero__stat-value { font-family:'Poppins',sans-serif; font-size:1.75rem; font-weight:700; color:var(--white); }
+    .hero__stat-value span { color:var(--accent); }
+    .hero__stat-label { font-size:.8rem; color:rgba(255,255,255,.5); margin-top:.1rem; }
+    .hero__visual { display:flex; justify-content:center; align-items:center; }
+    .desk-mockup { position:relative; width:100%; max-width:460px; }
+    .desk-card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:var(--radius-lg); padding:2rem; backdrop-filter:blur(10px); }
+    .desk-card__header { display:flex; gap:.5rem; margin-bottom:1.5rem; }
+    .dot { width:12px; height:12px; border-radius:50%; }
+    .dot--red{background:#FF5F57;} .dot--yellow{background:#FFBD2E;} .dot--green{background:#28C840;}
+    .setup-items { display:flex; flex-direction:column; gap:.75rem; }
+    .setup-item { display:flex; align-items:center; gap:.85rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:8px; padding:.75rem 1rem; transition:background 200ms; }
+    .setup-item:hover { background:rgba(255,255,255,.08); }
+    .setup-item__icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .setup-item__icon svg { width:18px; height:18px; }
+    .setup-item__name { font-size:.875rem; font-weight:500; color:rgba(255,255,255,.85); }
+    .setup-item__tag { margin-left:auto; font-size:.7rem; font-weight:600; padding:.2rem .55rem; border-radius:100px; flex-shrink:0; }
+    .tag--ok{background:rgba(16,185,129,.15);color:#10B981;} .tag--warn{background:rgba(245,158,11,.15);color:#F59E0B;} .tag--bad{background:rgba(239,68,68,.15);color:#EF4444;}
+    .floating-badge { position:absolute; background:var(--white); border-radius:12px; padding:.65rem 1rem; box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:.6rem; animation:float 3s ease-in-out infinite; }
+    .floating-badge--1{top:-1.5rem;right:-1.5rem;} .floating-badge--2{bottom:-1.5rem;left:-1.5rem;}
+    .floating-badge svg{width:20px;height:20px;}
+    .floating-badge__text{font-size:.75rem;font-weight:600;color:var(--text);}
+    .floating-badge__sub{font-size:.65rem;color:var(--text-muted);}
+    @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+    @media(max-width:900px){
+      .hero__inner{grid-template-columns:1fr;gap:2.5rem;text-align:center;}
+      .hero__badge,.hero__actions{justify-content:center;}
+      .hero__subtitle{margin-left:auto;margin-right:auto;}
+      .hero__stats{justify-content:center;}
+      .hero__visual{display:none;}
+    }
 
-  <!-- Schema.org · FAQ (coincide con el contenido visible y validado) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      { "@type": "Question", "name": "¿El test tiene costo?", "acceptedAnswer": { "@type": "Answer", "text": "No. El test es gratuito y sin compromiso. Al terminar recibís una recomendación personalizada." } },
-      { "@type": "Question", "name": "¿Cuánto tarda el test?", "acceptedAnswer": { "@type": "Answer", "text": "Son 8 preguntas rápidas. Te lleva pocos minutos y podés volver atrás cuando quieras." } },
-      { "@type": "Question", "name": "¿Tengo que comprar algo?", "acceptedAnswer": { "@type": "Answer", "text": "No. El test te orienta sobre qué conviene mejorar y tiene en cuenta lo que ya tenés para no recomendarte compras innecesarias." } },
-      { "@type": "Question", "name": "¿Puedo ajustar la recomendación?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. Después del diagnóstico podés modificar tu setup en el configurador 3D y pedir asesoramiento por WhatsApp." } },
-      { "@type": "Question", "name": "¿Sirve para empresas?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. Si necesitás equipar varios puestos, armamos una propuesta a medida. Indicá esa opción dentro del test." } },
-      { "@type": "Question", "name": "¿Qué pasa con mis datos?", "acceptedAnswer": { "@type": "Answer", "text": "Usamos tus datos sólo para enviarte el diagnóstico y la recomendación. Pedimos tu consentimiento antes de guardarlos." } }
-    ]
-  }
-  </script>
+    /* ── SECTIONS ── */
+    .section{padding:6rem 1.5rem;}
+    .section--alt{background:var(--bg-2);}
+    .container{max-width:1200px;margin:0 auto;}
+    .section__label{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cta);margin-bottom:.75rem;}
+    .section__title{font-family:'Poppins',sans-serif;font-size:clamp(1.75rem,3.5vw,2.5rem);font-weight:700;color:var(--dark);line-height:1.2;letter-spacing:-.3px;margin-bottom:1rem;}
+    .section__sub{font-size:1.05rem;color:var(--text-muted);line-height:1.7;max-width:560px;}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/styles.css">
-  <link rel="stylesheet" href="./css/configurador-3d.css">
-  <link rel="stylesheet" href="./css/test-diagnostico.css">
+    /* ── PAIN ── */
+    .pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem;}
+    .pain-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;transition:box-shadow 200ms,transform 200ms;}
+    .pain-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
+    .pain-card__icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;}
+    .pain-card__icon svg{width:26px;height:26px;}
+    .pain-card__title{font-family:'Poppins',sans-serif;font-size:1.1rem;font-weight:600;color:var(--dark);margin-bottom:.6rem;}
+    .pain-card__text{font-size:.9rem;color:var(--text-muted);line-height:1.7;}
+    @media(max-width:768px){.pain-grid{grid-template-columns:1fr;}}
+    @media(min-width:769px) and (max-width:1024px){.pain-grid{grid-template-columns:repeat(2,1fr);}.pain-card:last-child{grid-column:span 2;max-width:480px;margin:0 auto;width:100%;}}
 
-  <!-- Three.js (versión fijada) vía import map para módulos ES -->
+    /* ── QUIZ ── */
+    .quiz-section{background:linear-gradient(135deg,#0F172A,#1E293B);padding:6rem 1.5rem;}
+    .quiz-wrapper{max-width:720px;margin:0 auto;}
+    .quiz-header{text-align:center;margin-bottom:3rem;}
+    .quiz-header .section__label{color:var(--accent);}
+    .quiz-header .section__title{color:var(--white);}
+    .quiz-header .section__sub{color:rgba(255,255,255,.6);margin:0 auto;}
+    .quiz-progress{background:rgba(255,255,255,.1);height:6px;border-radius:3px;margin-bottom:2.5rem;overflow:hidden;}
+    .quiz-progress__bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--cta));border-radius:3px;transition:width 400ms cubic-bezier(.4,0,.2,1);}
+    .quiz-step-label{text-align:right;font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:.75rem;}
+    .quiz-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);padding:2.5rem;backdrop-filter:blur(10px);}
+    .quiz-question{font-family:'Poppins',sans-serif;font-size:1.25rem;font-weight:600;color:var(--white);margin-bottom:1.75rem;line-height:1.4;}
+    .quiz-options{display:flex;flex-direction:column;gap:.75rem;}
+    .quiz-option{background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:10px;padding:1rem 1.25rem;color:rgba(255,255,255,.8);font-size:.95rem;font-weight:500;display:flex;align-items:center;gap:1rem;cursor:pointer;transition:background 200ms,border-color 200ms,color 200ms,transform 150ms;text-align:left;width:100%;}
+    .quiz-option:hover{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.4);color:var(--white);transform:translateX(4px);}
+    .quiz-option.selected{background:rgba(3,105,161,.25);border-color:var(--accent);color:var(--white);}
+    .quiz-option.selecting{background:rgba(3,105,161,.4);border-color:var(--accent);transform:scale(.98);}
+    .quiz-option__letter{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--accent);flex-shrink:0;transition:background 200ms;}
+    .quiz-option.selected .quiz-option__letter{background:var(--accent);color:var(--dark);}
+    .quiz-nav{display:flex;align-items:center;justify-content:space-between;margin-top:2rem;}
+    .btn-back{color:rgba(255,255,255,.5);font-size:.9rem;font-weight:500;padding:.75rem 1.25rem;border:1px solid rgba(255,255,255,.12);border-radius:8px;cursor:pointer;transition:color 200ms,border-color 200ms;display:flex;align-items:center;gap:.4rem;}
+    .btn-back:hover{color:var(--white);border-color:rgba(255,255,255,.3);}
+    .btn-back:disabled{opacity:.3;cursor:not-allowed;}
+    .quiz-nav__hint{font-size:.75rem;color:rgba(255,255,255,.3);text-align:center;}
+
+    /* ── RESULT LAYOUT ── */
+    .result-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:1.5rem;align-items:start;}
+    @media(max-width:900px){.result-layout{grid-template-columns:1fr;}}
+
+    /* Score header */
+    .result-header{background:linear-gradient(135deg,#0F172A,#1E293B);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);padding:2rem;text-align:center;position:relative;overflow:hidden;margin-bottom:1.5rem;}
+    .result-header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(56,189,248,.15) 0%,transparent 65%);}
+    .result-header__label{font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;position:relative;}
+    .result-header__title{font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:.5rem;position:relative;}
+    .result-header__sub{color:rgba(255,255,255,.65);font-size:.9rem;max-width:420px;margin:0 auto;position:relative;}
+    .score-ring{width:72px;height:72px;margin:0 auto 1rem;position:relative;}
+    .score-ring svg{width:72px;height:72px;transform:rotate(-90deg);}
+    .score-ring__track{fill:none;stroke:rgba(255,255,255,.1);stroke-width:6;}
+    .score-ring__fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 800ms cubic-bezier(.4,0,.2,1);}
+    .score-ring__label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;color:var(--white);}
+    .score-ring__sub{font-size:.45rem;font-weight:500;color:rgba(255,255,255,.5);text-transform:uppercase;}
+
+    /* ── DESK PREVIEW ── */
+    .desk-preview{background:linear-gradient(160deg,#0F172A,#162035);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);padding:1.5rem;position:sticky;top:88px;}
+    .desk-preview__title{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.7);text-align:center;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.4rem;}
+    .desk-preview__title svg{width:14px;height:14px;color:var(--accent);}
+    .desk-scene{width:100%;aspect-ratio:4/3;position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#1a2744 0%,#243050 60%,#2d3a5e 100%);}
+
+    /* Scene elements — positioned/layered */
+    .ds-floor{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(180deg,#1e2d4a,#162035);}
+    .ds-wall{position:absolute;top:0;left:0;right:0;height:65%;background:linear-gradient(180deg,#0d1a30,#1a2744);}
+    /* desk */
+    .ds-desk-surface{position:absolute;left:5%;right:5%;bottom:28%;height:8%;background:linear-gradient(180deg,#c8a97a,#a8845a);border-radius:4px 4px 0 0;box-shadow:0 4px 12px rgba(0,0,0,.4);}
+    .ds-desk-legs{position:absolute;bottom:6%;left:9%;right:9%;height:22%;display:flex;justify-content:space-between;}
+    .ds-desk-leg{width:3%;background:#8b6a3e;border-radius:2px;}
+
+    /* desk items — each toggleable */
+    .ds-item{position:absolute;transition:opacity 350ms ease,transform 350ms ease;}
+    .ds-item.hidden-item{opacity:0;transform:scale(.85) translateY(8px);pointer-events:none;}
+
+    /* monitor */
+    .ds-monitor-arm{left:50%;bottom:36%;transform:translateX(-50%);width:3%;height:14%;background:#334155;border-radius:2px;}
+    .ds-monitor{left:50%;bottom:50%;transform:translateX(-50%);width:38%;height:20%;background:linear-gradient(180deg,#1e293b,#0f172a);border:3px solid #38BDF8;border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(56,189,248,.25);}
+    .ds-monitor-screen{width:85%;height:75%;background:linear-gradient(135deg,#0284c7 0%,#0ea5e9 50%,#38bdf8 100%);border-radius:3px;opacity:.9;}
+    .ds-monitor-stand{left:50%;bottom:36%;transform:translateX(-50%);width:8%;height:3%;background:#334155;border-radius:2px;}
+
+    /* laptop + stand */
+    .ds-laptop{left:50%;bottom:36%;transform:translateX(-50%);width:32%;height:12%;background:linear-gradient(180deg,#1e293b,#334155);border:2px solid #475569;border-radius:4px;display:flex;align-items:center;justify-content:center;}
+    .ds-laptop-screen{width:80%;height:70%;background:linear-gradient(135deg,#0369a1,#38bdf8);border-radius:2px;opacity:.85;}
+    .ds-stand{left:50%;bottom:36%;transform:translateX(-50%);width:28%;height:4%;background:#475569;border-radius:3px;}
+    .ds-stand-leg{position:absolute;left:50%;bottom:28%;transform:translateX(-50%);width:5%;height:8%;background:#475569;border-radius:2px;}
+
+    /* keyboard */
+    .ds-keyboard{left:50%;bottom:33%;transform:translateX(-50%);width:36%;height:5%;background:linear-gradient(180deg,#334155,#1e293b);border:1px solid #475569;border-radius:4px;display:flex;align-items:center;justify-content:center;}
+    .ds-keyboard-keys{width:88%;height:60%;background:repeating-linear-gradient(90deg,#475569 0,#475569 4%,transparent 4%,transparent 6%);border-radius:2px;opacity:.6;}
+
+    /* mouse */
+    .ds-mouse{right:18%;bottom:32%;width:5%;aspect-ratio:.6/1;background:linear-gradient(180deg,#334155,#1e293b);border:1px solid #475569;border-radius:50% 50% 40% 40%;}
+
+    /* mousepad */
+    .ds-mousepad{right:12%;bottom:32%;width:18%;height:7%;background:#1e293b;border:1px solid #0369a1;border-radius:4px;opacity:.8;}
+
+    /* hub */
+    .ds-hub{left:15%;bottom:36%;width:8%;height:3%;background:#334155;border:1px solid #475569;border-radius:4px;display:flex;align-items:center;justify-content:center;}
+    .ds-hub-dot{width:30%;aspect-ratio:1;background:#38bdf8;border-radius:50%;animation:pulse-hub 2s ease-in-out infinite;}
+    @keyframes pulse-hub{0%,100%{opacity:.6;}50%{opacity:1;}}
+
+    /* light bar */
+    .ds-lightbar{left:50%;transform:translateX(-50%);bottom:70%;width:40%;height:2%;background:linear-gradient(90deg,#fbbf24,#fef3c7,#fbbf24);border-radius:2px;box-shadow:0 2px 12px rgba(251,191,36,.5);}
+
+    /* organizer */
+    .ds-organizer{left:12%;bottom:36%;width:9%;height:10%;background:linear-gradient(180deg,#1e293b,#334155);border:1px solid #475569;border-radius:4px;}
+    .ds-organizer-pens{position:absolute;left:12%;bottom:46%;width:9%;height:5%;display:flex;gap:2%;align-items:flex-end;}
+    .ds-organizer-pen{width:15%;height:100%;border-radius:2px 2px 0 0;}
+
+    /* chair */
+    .ds-chair{left:50%;bottom:5%;transform:translateX(-50%);width:22%;height:18%;}
+    .ds-chair-back{position:absolute;top:0;left:15%;right:15%;height:55%;background:linear-gradient(180deg,#334155,#1e293b);border-radius:6px 6px 0 0;border:1px solid #475569;}
+    .ds-chair-seat{position:absolute;bottom:30%;left:5%;right:5%;height:22%;background:#334155;border-radius:4px;border:1px solid #475569;}
+    .ds-chair-leg{position:absolute;bottom:0;width:18%;height:32%;background:#1e293b;border-radius:2px;}
+    .ds-chair-leg--l{left:10%;}
+    .ds-chair-leg--r{right:10%;}
+
+    /* standing desk (raised legs) */
+    .ds-standing-legs{position:absolute;bottom:0%;left:9%;right:9%;height:28%;display:flex;justify-content:space-between;}
+    .ds-standing-leg{width:3%;background:linear-gradient(180deg,#8b6a3e,#6b5030);border-radius:2px;}
+    .ds-standing-badge{position:absolute;bottom:65%;right:6%;background:var(--success);color:white;font-size:6px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:.3px;}
+
+    /* ambient glow when items present */
+    .ds-ambient{position:absolute;inset:0;background:radial-gradient(ellipse 60% 30% at 50% 60%,rgba(56,189,248,.06),transparent);pointer-events:none;}
+
+    /* item count badge */
+    .desk-preview__count{text-align:center;margin-top:.75rem;font-size:.75rem;color:rgba(255,255,255,.4);}
+    .desk-preview__count span{color:var(--accent);font-weight:700;}
+
+    /* ── CART ── */
+    .cart-wrapper{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+    .cart-header{padding:1.25rem 1.75rem;background:var(--bg-2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+    .cart-header__title{font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:600;color:var(--dark);display:flex;align-items:center;gap:.5rem;}
+    .cart-header__note{font-size:.8rem;color:var(--text-muted);}
+    .cart-items{padding:.5rem 0;}
+    .cart-item{display:flex;align-items:center;gap:1rem;padding:.9rem 1.75rem;border-bottom:1px solid var(--border);transition:background 150ms;cursor:pointer;}
+    .cart-item:last-child{border-bottom:none;}
+    .cart-item:hover{background:var(--bg-2);}
+    .cart-item__check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:var(--white);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 200ms,border-color 200ms;appearance:none;-webkit-appearance:none;}
+    .cart-item__check:checked{background:var(--cta);border-color:var(--cta);}
+    .cart-item__check:checked::after{content:'';display:block;width:5px;height:9px;border:2px solid white;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+    .cart-item__icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .cart-item__icon svg{width:20px;height:20px;}
+    .cart-item__info{flex:1;min-width:0;}
+    .cart-item__name{font-size:.9rem;font-weight:600;color:var(--dark);}
+    .cart-item__category{font-size:.75rem;color:var(--text-muted);margin-top:.1rem;}
+    .cart-item__badge{font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:100px;flex-shrink:0;background:rgba(56,189,248,.1);color:var(--cta);}
+    .cart-item__price{font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;color:var(--dark);flex-shrink:0;}
+    .cart-item--disabled{opacity:.4;}
+    .cart-item--disabled .cart-item__name{text-decoration:line-through;}
+    .cart-extra-section{padding:1rem 1.75rem;border-top:1px solid var(--border);}
+    .cart-extra-title{font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem;}
+    .cart-extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;}
+    .cart-extra-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:border-color 200ms,background 200ms;background:var(--bg);}
+    .cart-extra-item:hover{border-color:var(--cta);background:rgba(3,105,161,.04);}
+    .cart-extra-item.selected{border-color:var(--cta);background:rgba(3,105,161,.06);}
+    .cart-extra-item input{width:16px;height:16px;accent-color:var(--cta);cursor:pointer;flex-shrink:0;}
+    .cart-extra-item__label{flex:1;font-size:.8rem;font-weight:500;color:var(--dark);}
+    .cart-extra-item__price{font-size:.8rem;font-weight:700;color:var(--text-muted);}
+    .cart-footer{padding:1.25rem 1.75rem;border-top:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:var(--bg-2);}
+    .cart-total{font-family:'Poppins',sans-serif;}
+    .cart-total__label{font-size:.8rem;color:var(--text-muted);margin-bottom:.1rem;}
+    .cart-total__value{font-size:1.75rem;font-weight:800;color:var(--dark);}
+    .cart-total__currency{font-size:1rem;font-weight:600;color:var(--text-muted);margin-right:.2rem;}
+    .btn-cart{background:#25D366;color:var(--white);font-size:1rem;font-weight:700;padding:.9rem 2rem;border-radius:10px;display:flex;align-items:center;gap:.65rem;transition:transform 200ms,box-shadow 200ms;box-shadow:0 4px 16px rgba(37,211,102,.35);cursor:pointer;white-space:nowrap;}
+    .btn-cart:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(37,211,102,.45);}
+    .btn-cart svg{width:22px;height:22px;flex-shrink:0;}
+
+    /* ── COMBOS ── */
+    .combos-section{padding:6rem 1.5rem;background:var(--bg);}
+    .combos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+    .combo-card{background:var(--white);border:2px solid var(--border);border-radius:var(--radius-lg);padding:2rem;position:relative;transition:box-shadow 200ms,transform 200ms;display:flex;flex-direction:column;}
+    .combo-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px);}
+    .combo-card--featured{border-color:var(--cta);transform:scale(1.03);}
+    .combo-card--featured:hover{transform:scale(1.03) translateY(-4px);}
+    .combo-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--cta);color:var(--white);font-size:.7rem;font-weight:700;padding:.3rem .9rem;border-radius:100px;white-space:nowrap;}
+    .combo-card__tier{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cta);margin-bottom:.5rem;}
+    .combo-card__name{font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:700;color:var(--dark);margin-bottom:.5rem;}
+    .combo-card__desc{font-size:.875rem;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6;}
+    .combo-card__price{margin-bottom:1.5rem;}
+    .combo-card__price-value{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;color:var(--dark);}
+    .combo-card__price-currency{font-size:1.1rem;font-weight:600;color:var(--text-muted);margin-right:.25rem;}
+    .combo-card__price-period{font-size:.8rem;color:var(--text-muted);display:block;margin-top:.2rem;}
+    .combo-card__items{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem;flex:1;}
+    .combo-card__items li{display:flex;align-items:flex-start;gap:.6rem;font-size:.875rem;color:var(--text-muted);}
+    .combo-card__items li svg{width:16px;height:16px;color:var(--success);flex-shrink:0;margin-top:2px;}
+    .combo-btn{display:block;width:100%;text-align:center;padding:.85rem 1.5rem;border-radius:10px;font-size:.95rem;font-weight:600;transition:background 200ms,transform 150ms;cursor:pointer;}
+    .combo-btn--primary{background:var(--cta);color:var(--white);}
+    .combo-btn--primary:hover{background:var(--cta-hover);transform:translateY(-1px);}
+    .combo-btn--outline{border:2px solid var(--border);color:var(--dark-3);}
+    .combo-btn--outline:hover{border-color:var(--cta);color:var(--cta);}
+    @media(max-width:900px){.combos-grid{grid-template-columns:1fr;}.combo-card--featured{transform:none;}}
+
+    /* ── BENEFITS ── */
+    .benefits-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3.5rem;}
+    .benefit-card{text-align:center;padding:2rem 1.25rem;}
+    .benefit-card__icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
+    .benefit-card__icon svg{width:28px;height:28px;}
+    .benefit-card__title{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:var(--dark);margin-bottom:.5rem;}
+    .benefit-card__text{font-size:.85rem;color:var(--text-muted);line-height:1.65;}
+    @media(max-width:768px){.benefits-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:480px){.benefits-grid{grid-template-columns:1fr;}}
+
+    /* ── CTA / FOOTER ── */
+    .cta-section{background:linear-gradient(135deg,#0F172A 0%,#0F2744 100%);padding:7rem 1.5rem;text-align:center;position:relative;overflow:hidden;}
+    .cta-section::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(56,189,248,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.04) 1px,transparent 1px);background-size:48px 48px;}
+    .cta-section .container{position:relative;}
+    .cta-section .section__title{color:var(--white);}
+    .cta-section .section__sub{color:rgba(255,255,255,.65);margin:1rem auto 2.5rem;text-align:center;}
+    .cta-actions{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;}
+    footer{background:var(--dark);color:rgba(255,255,255,.5);padding:3rem 1.5rem;}
+    .footer__inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+    .footer__logo{display:flex;align-items:center;gap:.5rem;}
+    .footer__links{display:flex;gap:1.5rem;list-style:none;}
+    .footer__links a{font-size:.85rem;transition:color 200ms;}
+    .footer__links a:hover{color:var(--white);}
+    .footer__copy{font-size:.8rem;}
+    .hidden{display:none!important;}
+    .text-center{text-align:center;}
+  </style>
+  <link rel="stylesheet" href="./css/integracion-canonica.css" />
+  <link rel="stylesheet" href="./css/pulido-visual.css" />
   <script type="importmap">
   {
     "imports": {
@@ -120,613 +331,842 @@
     }
   }
   </script>
-
 </head>
 <body>
 
-<!-- BARRA SUPERIOR · anuncia el test (sin promociones no validadas) -->
-<div class="bar">
-  <span>Nuevo &middot; Diagnosticá tu setup en minutos con nuestro test gratuito</span>
-  <a href="#test">Hacer test &rarr;</a>
-</div>
-
-<header class="header" id="header">
-  <nav class="nav wrap">
-    <a href="#top" class="logo" aria-label="PrimOffice — inicio">
-      <img src="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" alt="PrimOffice" />
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__inner">
+    <!-- LOGO SVG Primoffice -->
+    <a href="#" aria-label="Primoffice inicio">
+      <svg width="160" height="36" viewBox="0 0 160 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Primoffice">
+        <!-- Monitor icon -->
+        <rect x="1" y="4" width="26" height="18" rx="3" stroke="#38BDF8" stroke-width="2.2"/>
+        <path d="M10 26h8M14 22v4" stroke="#38BDF8" stroke-width="2.2" stroke-linecap="round"/>
+        <rect x="5" y="8" width="18" height="10" rx="1.5" fill="#38BDF8" fill-opacity=".18"/>
+        <!-- Wordmark -->
+        <text x="34" y="23" font-family="'Poppins',sans-serif" font-weight="700" font-size="16" fill="white" letter-spacing="-0.3">Prim</text>
+        <text x="74" y="23" font-family="'Poppins',sans-serif" font-weight="700" font-size="16" fill="#38BDF8" letter-spacing="-0.3">office</text>
+        <!-- .com.ar -->
+        <text x="122" y="23" font-family="'Open Sans',sans-serif" font-weight="400" font-size="9.5" fill="rgba(255,255,255,0.4)">.com.ar</text>
+      </svg>
     </a>
-    <div class="nav-links">
-      <a href="#test">Test</a>
-      <a href="#setups">Setups</a>
-      <a href="#configurador">Configurador 3D</a>
-      <a href="#catalogo">Catálogo</a>
-      <a href="#empresas">Empresas</a>
-    </div>
-    <div class="nav-actions">
-      <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-outline btn-sm" data-track="catalogo" data-context="nav">Ver catálogo</a>
-      <a href="#test" class="btn btn-primary btn-sm">Hacer test gratuito</a>
-    </div>
-    <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-controls="mobileNav" aria-expanded="false">
+    <ul class="navbar__links" id="nav-links">
+      <li><a href="#test">Test ergonómico</a></li>
+      <li><a href="#combos">Combos</a></li>
+      <li><a href="#beneficios">Beneficios</a></li>
+      <li><a href="#test" class="navbar__cta">Hacé el test</a></li>
+    </ul>
+    <button class="navbar__menu-btn" id="menu-btn" aria-expanded="false" aria-label="Abrir menú">
       <span></span><span></span><span></span>
     </button>
-  </nav>
-</header>
-
-<div class="mobile-nav" id="mobileNav">
-  <div class="mobile-panel">
-    <button class="close-btn" id="mobileClose">Cerrar &times;</button>
-    <a href="#test" class="ml">Test</a>
-    <a href="#setups" class="ml">Setups</a>
-    <a href="#configurador" class="ml">Configurador 3D</a>
-    <a href="#catalogo" class="ml">Catálogo</a>
-    <a href="#empresas" class="ml">Empresas</a>
-    <a href="#test" class="btn btn-primary ml" style="margin-top:16px;justify-content:center">Hacer test gratuito</a>
   </div>
-</div>
+</nav>
 
-<main>
-
-<!-- ===================== HERO (FASE 4) ===================== -->
-<section class="hero" id="top">
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <div style="margin-bottom:22px"><span class="pill"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><circle cx="5" cy="5" r="5" fill="#10b981"/></svg> Diagnóstico gratuito en minutos</span></div>
-      <h1>El setup ideal<br>para tu forma<br>de trabajar.</h1>
-      <p class="hero-sub">Hacé el test gratuito y descubrí qué conviene mejorar en tu puesto. Recibí una recomendación personalizada, evitá compras innecesarias y visualizá tu escritorio en 3D.</p>
-      <div class="hero-ctas">
-        <a href="#test" class="btn btn-primary btn-lg">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Hacer test gratuito
+<!-- HERO -->
+<section class="hero" aria-label="Sección principal">
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="hero__glow" aria-hidden="true"></div>
+  <div class="hero__inner container">
+    <div class="hero__content">
+      <div class="hero__badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#38BDF8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Ergonomía profesional · CABA y GBA
+      </div>
+      <h1 class="hero__title">¿Tu setup te está<br/><em>robando productividad?</em></h1>
+      <p class="hero__subtitle">Hacé nuestro test de 6 preguntas y recibí un combo personalizado según lo que ya tenés y lo que realmente necesitás.</p>
+      <div class="hero__actions">
+        <a href="#test" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg>
+          Hacé el test gratuito
         </a>
-        <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-outline btn-lg" data-track="catalogo" data-context="hero">Ver catálogo</a>
+        <a href="#combos" class="btn-ghost">Ver combos</a>
       </div>
-      <div class="hero-stats">
-        <div class="stat"><div class="stat-num"><span>8</span></div><div class="stat-label">preguntas guiadas</div></div>
-        <div class="stat"><div class="stat-num">Gratis</div><div class="stat-label">sin compromiso</div></div>
-        <div class="stat"><div class="stat-num"><span>3D</span></div><div class="stat-label">visualizá tu setup</div></div>
-      </div>
-    </div>
-    <div class="hero-visual" aria-hidden="true">
-      <div class="hv-bar">
-        <div class="hv-dots"><div class="hv-dot r"></div><div class="hv-dot y"></div><div class="hv-dot g"></div></div>
-        <span class="hv-label">Tu setup, paso a paso</span>
-      </div>
-      <div class="desk-scene">
-        <div class="lightbar"></div>
-        <div class="monitor"><div class="monitor-bezel"><div class="monitor-line w70"></div><div class="monitor-line w50"></div><div class="monitor-card"></div></div></div>
-        <div class="monitor-arm"></div>
-        <div class="desk-surface"></div>
-        <div class="hub"></div>
-        <div class="keyboard"><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div><div class="key"></div></div>
-        <div class="mouse"></div>
-        <div class="phone-stand"></div>
-        <div class="fc fc-left"><div class="fc-icon">&#127919;</div><b>Más foco</b><span>escritorio despejado</span></div>
-        <div class="fc fc-right"><div class="fc-icon">&#129534;</div><b>Más comodidad</b><span>postura cuidada</span></div>
-      </div>
-      <div class="hv-bottom">
-        <div class="hv-bottom-text"><b>Diagnóstico + configurador 3D</b><span>Silla &middot; monitor &middot; conectividad &middot; orden</span></div>
-        <a href="#test">Hacer test &rarr;</a>
+      <div class="hero__stats">
+        <div><div class="hero__stat-value">+<span>2.000</span></div><div class="hero__stat-label">setups instalados</div></div>
+        <div><div class="hero__stat-value"><span>4.9</span>★</div><div class="hero__stat-label">calificación promedio</div></div>
+        <div><div class="hero__stat-value"><span>24hs</span></div><div class="hero__stat-label">entrega CABA y GBA</div></div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ===================== TRUST (experiencia, sin claims no validados) ===================== -->
-<div class="trust-band">
-  <div class="wrap trust-inner">
-    <span class="trust-label">Cómo te ayudamos</span>
-    <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Recomendación personalizada</div>
-    <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg> Sin compras innecesarias</div>
-    <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg> Visualización en 3D</div>
-    <div class="trust-sep"></div>
-    <div class="trust-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Asesoramiento por WhatsApp</div>
-  </div>
-</div>
-
-<!-- ===================== CÓMO FUNCIONA (primer del flujo) ===================== -->
-<section class="section" id="como-funciona" style="padding-bottom:0">
-  <div class="wrap">
-    <div class="sec-center"><span class="pill" style="margin-bottom:18px">Cómo funciona</span><h2>De una recomendación a tu setup ideal, en 3 pasos.</h2></div>
-    <div class="steps-grid">
-      <div class="step"><div class="step-num">1</div><h3>Hacé el test gratuito</h3><p>Respondé 8 preguntas sobre cómo y dónde trabajás. Te lleva pocos minutos.</p></div>
-      <div class="step"><div class="step-num">2</div><h3>Recibí tu diagnóstico</h3><p>Obtené tus prioridades y una recomendación personalizada, según lo que ya tenés.</p></div>
-      <div class="step"><div class="step-num">3</div><h3>Ajustá en 3D y consultá</h3><p>Tu recomendación se precarga en el configurador 3D. Modificala y pedí asesoramiento por WhatsApp.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== TEST DIAGNÓSTICO (FASE 5–10) ===================== -->
-<section class="section test-section" id="test">
-  <div class="wrap">
-    <div class="sec-center">
-      <span class="pill" style="margin-bottom:18px">Test gratuito</span>
-      <h2>Descubrí qué necesita tu setup.</h2>
-      <p>Respondé 8 preguntas y obtené una recomendación personalizada. Sin costo y sin compromiso: tenemos en cuenta lo que ya tenés para no sugerirte compras de más.</p>
-    </div>
-
-    <div class="test-shell" id="testShell">
-
-      <!-- WIZARD -->
-      <div class="test-wizard" id="testWizard">
-        <div class="test-progress">
-          <div class="test-progress-meta">
-            <span class="test-step-counter" id="testStepNum">Paso 1 de 8</span>
-            <span class="test-step-cat" id="testStepCat"></span>
-          </div>
-          <div class="test-progress-track" id="testProgressBar" role="progressbar" aria-valuemin="1" aria-valuemax="8" aria-valuenow="1" aria-label="Progreso del test">
-            <div class="test-progress-fill" id="testProgressFill"></div>
+    <div class="hero__visual" aria-hidden="true">
+      <div class="desk-mockup">
+        <div class="desk-card">
+          <div class="desk-card__header"><div class="dot dot--red"></div><div class="dot dot--yellow"></div><div class="dot dot--green"></div></div>
+          <div class="setup-items">
+            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(16,185,129,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" stroke-linecap="round"/></svg></div><span class="setup-item__name">Monitor externo</span><span class="setup-item__tag tag--ok">OK</span></div>
+            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(245,158,11,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01" stroke-linecap="round"/></svg></div><span class="setup-item__name">Posición del cuello</span><span class="setup-item__tag tag--warn">Mejorar</span></div>
+            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(239,68,68,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div><span class="setup-item__name">Soporte lumbar</span><span class="setup-item__tag tag--bad">Urgente</span></div>
+            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(239,68,68,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/></svg></div><span class="setup-item__name">Organización</span><span class="setup-item__tag tag--bad">Urgente</span></div>
           </div>
         </div>
-
-        <div class="test-steps" id="testSteps"><!-- pasos generados por js/test-diagnostico.js --></div>
-
-        <p class="test-error" id="testError" role="alert" aria-live="assertive" hidden></p>
-
-        <div class="test-nav">
-          <button type="button" class="btn btn-outline" id="testPrev" disabled>Anterior</button>
-          <button type="button" class="btn btn-primary" id="testNext">Siguiente</button>
-        </div>
-
-        <noscript><p class="test-step-help" style="margin-top:18px">El test necesita JavaScript activado. Si no podés activarlo, escribinos por WhatsApp y te asesoramos igual.</p></noscript>
+        <div class="floating-badge floating-badge--1"><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div><div class="floating-badge__text">+37% productividad</div><div class="floating-badge__sub">promedio tras el setup</div></div></div>
+        <div class="floating-badge floating-badge--2"><svg viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="floating-badge__text">Entrega 24hs</div><div class="floating-badge__sub">CABA y GBA</div></div></div>
       </div>
-
-      <!-- TEASER (FASE 7 · generado por JS) -->
-      <div class="test-teaser" id="testTeaser" hidden></div>
-
-      <!-- LEAD (FASE 8) -->
-      <div class="test-lead" id="testLead" hidden>
-        <div class="test-lead-card">
-          <span class="pill" style="margin-bottom:14px">Último paso</span>
-          <h3 class="test-lead-head">¿A dónde te enviamos tu diagnóstico?</h3>
-          <p class="test-lead-sub">Completá estos datos para ver tu recomendación completa y recibirla por tu canal preferido.</p>
-
-          <form id="testLeadForm" novalidate>
-            <div class="test-field">
-              <label class="test-label" for="leadNombre">Nombre <span class="test-req" aria-hidden="true">*</span></label>
-              <input class="test-input" type="text" id="leadNombre" name="nombre" autocomplete="name" required>
-              <p class="test-field-error" id="leadNombreError" role="alert" hidden></p>
-            </div>
-
-            <div class="test-field">
-              <span class="test-label" id="leadCanalLabel">¿Cómo querés recibir el diagnóstico? <span class="test-req" aria-hidden="true">*</span></span>
-              <div class="test-channel" role="radiogroup" aria-labelledby="leadCanalLabel">
-                <label class="test-channel-opt"><input type="radio" name="canal" value="email" id="leadCanalEmail"> Email</label>
-                <label class="test-channel-opt"><input type="radio" name="canal" value="whatsapp" id="leadCanalWhatsapp"> WhatsApp</label>
-              </div>
-              <p class="test-field-error" id="leadCanalError" role="alert" hidden></p>
-            </div>
-
-            <div class="test-field" id="leadEmailField" hidden>
-              <label class="test-label" for="leadEmail">Email <span class="test-req" aria-hidden="true">*</span></label>
-              <input class="test-input" type="email" id="leadEmail" name="email" autocomplete="email" inputmode="email" disabled>
-              <p class="test-field-error" id="leadEmailError" role="alert" hidden></p>
-            </div>
-
-            <div class="test-field" id="leadWhatsappField" hidden>
-              <label class="test-label" for="leadWhatsapp">WhatsApp <span class="test-req" aria-hidden="true">*</span></label>
-              <input class="test-input" type="tel" id="leadWhatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" placeholder="Ej: +54 9 11 ..." disabled>
-              <p class="test-field-error" id="leadWhatsappError" role="alert" hidden></p>
-            </div>
-
-            <div class="test-field" id="leadEmpresaField" hidden>
-              <label class="test-label" for="leadEmpresa">Empresa <span class="test-optional">(opcional)</span></label>
-              <input class="test-input" type="text" id="leadEmpresa" name="empresa" autocomplete="organization">
-            </div>
-
-            <div class="test-field">
-              <label class="test-consent" for="leadConsent">
-                <input type="checkbox" id="leadConsent" name="consent" required>
-                <span>Acepto que PrimOffice almacene mis datos para enviarme el diagnóstico y una recomendación personalizada.</span>
-              </label>
-              <p class="test-field-error" id="leadConsentError" role="alert" hidden></p>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg test-lead-submit">Ver mi diagnóstico completo</button>
-          </form>
-        </div>
-      </div>
-
-      <!-- RESULTADO (FASE 10 · generado por JS) -->
-      <div class="test-result" id="testResult" hidden></div>
-
     </div>
   </div>
 </section>
 
-<!-- ===================== PROBLEMA (sin claims médicos) ===================== -->
-<section class="section pain">
-  <div class="wrap pain-grid">
-    <div>
-      <div style="margin-bottom:18px"><span class="pill">Por qué importa</span></div>
-      <h2>Un escritorio improvisado te resta cada día.</h2>
-      <p class="pain-sub">Silla sin buen soporte, pantalla baja, cables cruzados. Detalles que parecen menores hasta que afectan tu comodidad, tu orden y la imagen de tu trabajo.</p>
+<!-- PAIN POINTS -->
+<section class="section section--alt" aria-labelledby="pain-title">
+  <div class="container">
+    <div style="max-width:580px">
+      <span class="section__label">El problema real</span>
+      <h2 class="section__title" id="pain-title">Trabajar mal cuesta más de lo que creés</h2>
+      <p class="section__sub">La mayoría de los profesionales pierde entre 2 y 4 horas diarias por un setup mal armado. Y ni se dan cuenta.</p>
     </div>
-    <div class="pain-cards">
-      <div class="pain-card"><div class="pain-num">01</div><div><b>Postura poco cómoda</b><p>Una silla sin soporte adecuado y la pantalla a mala altura restan comodidad a lo largo de la jornada.</p></div></div>
-      <div class="pain-card"><div class="pain-num">02</div><div><b>Escritorio que distrae</b><p>El desorden consume atención. Un escritorio caótico dificulta concentrarse sin que lo notes.</p></div></div>
-      <div class="pain-card"><div class="pain-num">03</div><div><b>Conectividad fragmentada</b><p>Cables que no alcanzan, pocos puertos, cargadores ocupando enchufes. Fricción constante.</p></div></div>
-      <div class="pain-card"><div class="pain-num">04</div><div><b>Imagen poco profesional</b><p>Un puesto descuidado comunica desorganización. En reuniones por video, se nota enseguida.</p></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== PROMESA ===================== -->
-<div class="wrap" style="padding-bottom:0">
-  <div class="promise">
-    <div class="promise-grid">
-      <div>
-        <span class="pill pill-dark" style="margin-bottom:18px">El enfoque PrimOffice</span>
-        <h2>No son accesorios sueltos. Es un sistema de trabajo.</h2>
-        <p>Desde la silla hasta el hub USB-C. Todo pensado para funcionar junto y transformar un escritorio común en un puesto que acompaña tu jornada.</p>
-      </div>
-      <div class="promise-points">
-        <div class="promise-point"><div class="promise-check">&#10003;</div><div><b>Recomendación según tu uso</b><span>El test detecta tus prioridades reales</span></div></div>
-        <div class="promise-point"><div class="promise-check">&#10003;</div><div><b>Todo pensado para funcionar junto</b><span>Sin incompatibilidades ni dobles compras</span></div></div>
-        <div class="promise-point"><div class="promise-check">&#10003;</div><div><b>Asesoramiento personalizado</b><span>Te ayudamos a elegir según tu espacio y uso</span></div></div>
-        <div class="promise-point"><div class="promise-check">&#10003;</div><div><b>Escalable para empresas</b><span>De un puesto a varios, con propuesta a medida</span></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== SETUPS / PACKS ===================== -->
-<section class="section" id="setups">
-  <div class="wrap">
-    <div class="setups-head">
-      <div>
-        <span class="pill" style="margin-bottom:14px">Niveles de setup</span>
-        <h2>Tres puntos de partida claros.</h2>
-      </div>
-      <p>Configuraciones de referencia con silla ergonómica. El test te recomienda la más conveniente y la podés ajustar a medida.</p>
-    </div>
-    <div class="setup-grid">
-
-      <article class="setup-card">
-        <div class="setup-type"><span class="setup-tag">Básica</span><span class="setup-for">Home office &middot; Freelance</span></div>
-        <h3>Orden, postura y comodidad para empezar bien.</h3>
-        <p class="setup-desc">Para mejorar el escritorio con lo esencial. Resultados visibles desde el primer día.</p>
-        <div class="chair-badge">&#129681; Silla ergonómica incluida</div>
-        <ul class="setup-ul">
-          <li><span class="check-icon">&#10003;</span> <strong>Silla ergonómica</strong> con soporte lumbar</li>
-          <li><span class="check-icon">&#10003;</span> Soporte de monitor regulable</li>
-          <li><span class="check-icon">&#10003;</span> Mouse vertical ergonómico</li>
-          <li><span class="check-icon">&#10003;</span> Hub USB-C multipuerto</li>
-          <li><span class="check-icon">&#10003;</span> Organizador de cables</li>
-        </ul>
-        <div class="setup-result"><div class="result-eyebrow">Resultado</div><b>Postura más cómoda, escritorio ordenado y conectividad centralizada.</b></div>
-        <div class="setup-cta"><a href="#test" class="btn btn-outline" style="width:100%">Empezar con el test</a></div>
-      </article>
-
-      <article class="setup-card featured" style="position:relative">
-        <div class="badge-label">&#11088; El más completo a diario</div>
-        <div class="setup-type"><span class="setup-tag">Pro</span><span class="setup-for">Jornadas largas &middot; Profesionales</span></div>
-        <h3>El setup pensado para trabajar muchas horas.</h3>
-        <p class="setup-desc">Para quienes necesitan foco, comodidad y orden todos los días.</p>
-        <div class="chair-badge">&#129681; Silla con soporte lumbar ajustable</div>
-        <ul class="setup-ul">
-          <li><span class="check-icon">&#10003;</span> <strong>Silla ergonómica</strong> con soporte lumbar ajustable</li>
-          <li><span class="check-icon">&#10003;</span> Brazo articulado para monitor</li>
-          <li><span class="check-icon">&#10003;</span> Mouse vertical Pro</li>
-          <li><span class="check-icon">&#10003;</span> Luz de monitor (pLed)</li>
-          <li><span class="check-icon">&#10003;</span> Hub USB-C con HDMI</li>
-          <li><span class="check-icon">&#10003;</span> Soporte de celular y orden de cables</li>
-        </ul>
-        <div class="setup-result"><div class="result-eyebrow">Resultado</div><b>Mayor comodidad, escritorio despejado y conexión sin fricciones.</b></div>
-        <div class="setup-cta"><a href="#test" class="btn btn-primary" style="width:100%">Ver si es para mí</a></div>
-      </article>
-
-      <article class="setup-card">
-        <div class="setup-type"><span class="setup-tag">Premium</span><span class="setup-for">Empresas &middot; Puestos exigentes</span></div>
-        <h3>Un puesto completo, con imagen y ergonomía cuidadas.</h3>
-        <p class="setup-desc">Para oficinas, estudios y equipos que buscan elevar el estándar de sus espacios.</p>
-        <div class="chair-badge">&#129681; Silla premium con reposabrazos 4D</div>
-        <ul class="setup-ul">
-          <li><span class="check-icon">&#10003;</span> <strong>Silla ergonómica premium</strong> reposabrazos 4D</li>
-          <li><span class="check-icon">&#10003;</span> Opción de standing desk regulable</li>
-          <li><span class="check-icon">&#10003;</span> Brazo articulado y luz de monitor</li>
-          <li><span class="check-icon">&#10003;</span> Hub profesional</li>
-          <li><span class="check-icon">&#10003;</span> Organización integral del escritorio</li>
-        </ul>
-        <div class="setup-result"><div class="result-eyebrow">Resultado</div><b>Puesto moderno, cómodo y de imagen cuidada.</b></div>
-        <div class="setup-cta"><a href="#test" class="btn btn-outline" style="width:100%">Empezar con el test</a></div>
-      </article>
-
+    <div class="pain-grid">
+      <div class="pain-card"><div class="pain-card__icon" style="background:#FEF2F2"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01" stroke-linecap="round"/></svg></div><h3 class="pain-card__title">Dolores crónicos</h3><p class="pain-card__text">Cervical, lumbar, muñecas. El 78% de los trabajadores remotos sufre dolor crónico por mala postura frente a la pantalla.</p></div>
+      <div class="pain-card"><div class="pain-card__icon" style="background:#FFFBEB"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg></div><h3 class="pain-card__title">Tiempo perdido</h3><p class="pain-card__text">Buscar cables, mover cosas, reubicar la notebook. El desorden visual genera distracción constante todos los días.</p></div>
+      <div class="pain-card"><div class="pain-card__icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round"/></svg></div><h3 class="pain-card__title">Energía que se va</h3><p class="pain-card__text">Pantalla chica, mala iluminación, postura forzada. Al mediodía ya estás agotado y recién arrancaste.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===================== CONFIGURADOR 3D (FASE 3) ===================== -->
-<section class="section configurador" id="configurador">
-  <div class="wrap">
-    <div class="sec-center">
-      <span class="pill" style="margin-bottom:18px">Configurador 3D</span>
-      <h2>Tu recomendación, en 3D.</h2>
-      <p>Si hiciste el test, tu diagnóstico se precarga acá. Modificá productos, tamaño y modo, y mirá cómo queda tu escritorio en tiempo real.</p>
-    </div>
-    <div class="config-grid">
+<!-- QUIZ -->
+<section class="quiz-section" id="test" aria-labelledby="quiz-title">
+  <div class="quiz-wrapper">
+    <header class="quiz-header">
+      <span class="section__label">Test ergonómico</span>
+      <h2 class="section__title" id="quiz-title">¿Cómo está tu setup?</h2>
+      <p class="section__sub">Seleccioná una opción y avanzamos solos. Podés volver cuando quieras.</p>
+    </header>
 
-      <!-- VISUAL / ESCENA 3D -->
-      <div class="config-visual">
-        <div class="c3d-stage" id="c3dStage">
-          <!-- Controles de cámara (HTML, externos al canvas WebGL) -->
-          <div class="c3d-toolbar" role="toolbar" aria-label="Controles de cámara del visualizador 3D">
-            <button type="button" class="c3d-cam-btn is-active" data-view="perspectiva" aria-pressed="true" title="Vista perspectiva 3/4">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
-              <span>3/4</span>
-            </button>
-            <button type="button" class="c3d-cam-btn" data-view="frontal" aria-pressed="false" title="Vista frontal">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
-              <span>Frontal</span>
-            </button>
-            <button type="button" class="c3d-cam-btn" data-view="superior" aria-pressed="false" title="Vista superior">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg>
-              <span>Superior</span>
-            </button>
-            <button type="button" class="c3d-cam-btn c3d-cam-reset" data-view="reset" aria-pressed="false" title="Restablecer cámara">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-              <span>Reset</span>
-            </button>
-          </div>
-          <!-- El canvas WebGL se monta acá por JS -->
-          <div class="c3d-canvas-host" id="c3dCanvasHost"></div>
-          <!-- Placeholder mientras carga la escena -->
-          <div class="c3d-loader" id="c3dLoader">
-            <span class="c3d-spinner" aria-hidden="true"></span>
-            <p>Preparando el visualizador 3D&hellip;</p>
-          </div>
-          <!-- Fallback visible si WebGL no está disponible -->
-          <div class="c3d-fallback" id="c3dFallback" hidden>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h20v14H2z"/><path d="M8 21h8M12 17v4"/><path d="m7 8 4 4M11 8l-4 4"/></svg>
-            <h4>Tu navegador no puede mostrar la vista 3D</h4>
-            <p>Pod&eacute;s seguir armando tu setup con la lista de la derecha: el resumen y el env&iacute;o por WhatsApp funcionan igual.</p>
-          </div>
-          <p class="c3d-hint" id="c3dHint" aria-hidden="true">Arrastr&aacute; para rotar &middot; rueda o pellizco para acercar</p>
-        </div>
-        <p class="config-label">Vista 3D del escritorio &mdash; los cambios se reflejan al instante</p>
-        <div class="config-summary c3d-summary">
-          <p class="c3d-summary-title">Tu configuraci&oacute;n</p>
-          <div class="c3d-summary-meta">
-            <div class="c3d-meta"><span class="c3d-meta-k">Configuraci&oacute;n</span><span class="c3d-meta-v" id="sumPreset">Pro</span></div>
-            <div class="c3d-meta"><span class="c3d-meta-k">Escritorio</span><span class="c3d-meta-v" id="sumDesk">Est&aacute;ndar</span></div>
-            <div class="c3d-meta"><span class="c3d-meta-k">Modo</span><span class="c3d-meta-v" id="sumMode">Sentado</span></div>
-          </div>
-          <p class="c3d-summary-label">Productos seleccionados:</p>
-          <div class="config-tags" id="configTags" role="status" aria-live="polite"></div>
-          <button type="button" class="btn btn-primary btn-sm c3d-wa-btn" id="c3dWhatsapp" data-track="whatsapp" data-context="configurador" style="width:100%">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
-            Pedir este setup por WhatsApp
+    <!-- Questions -->
+    <div id="quiz-container">
+      <div class="quiz-step-label" aria-live="polite">Pregunta <span id="step-current">1</span> de 6</div>
+      <div class="quiz-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar-wrap">
+        <div class="quiz-progress__bar" id="progress-bar" style="width:0%"></div>
+      </div>
+      <div class="quiz-card" id="quiz-card">
+        <p class="quiz-question" id="quiz-question"></p>
+        <div class="quiz-options" id="quiz-options" role="radiogroup" aria-labelledby="quiz-question"></div>
+        <div class="quiz-nav">
+          <button class="btn-back" id="btn-back" disabled>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7" stroke-linecap="round"/></svg>
+            Anterior
           </button>
+          <span class="quiz-nav__hint" id="quiz-hint">Seleccioná para continuar</span>
         </div>
-      </div>
-
-      <!-- CONTROLES -->
-      <div class="c3d-controls">
-
-        <div class="c3d-block">
-          <h3 class="c3d-block-title">Configuraci&oacute;n base</h3>
-          <p class="c3d-block-sub">Empez&aacute; con un preset y ajust&aacute; lo que quieras.</p>
-          <div class="c3d-segment c3d-presets" role="radiogroup" aria-label="Configuración predeterminada" id="presetGroup">
-            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-preset="basica">B&aacute;sica</button>
-            <button type="button" class="c3d-seg-btn is-active" role="radio" aria-checked="true" data-preset="pro">Pro</button>
-            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-preset="premium">Premium</button>
-            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-preset="personalizada">Personalizada</button>
-          </div>
-        </div>
-
-        <div class="c3d-block">
-          <h3 class="c3d-block-title">Escritorio</h3>
-          <span class="c3d-field-label" id="deskSizeLabel">Tama&ntilde;o</span>
-          <div class="c3d-segment" role="radiogroup" aria-labelledby="deskSizeLabel" id="deskSizeGroup">
-            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-size="compacto">Compacto</button>
-            <button type="button" class="c3d-seg-btn is-active" role="radio" aria-checked="true" data-size="estandar">Est&aacute;ndar</button>
-            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-size="amplio">Amplio</button>
-          </div>
-          <span class="c3d-field-label" id="deskModeLabel">Modo de uso</span>
-          <div class="c3d-segment" role="radiogroup" aria-labelledby="deskModeLabel" id="deskModeGroup">
-            <button type="button" class="c3d-seg-btn is-active" role="radio" aria-checked="true" data-mode="sentado">Sentado</button>
-            <button type="button" class="c3d-seg-btn" role="radio" aria-checked="false" data-mode="standing">Standing desk</button>
-          </div>
-        </div>
-
-        <div class="c3d-block">
-          <div class="c3d-block-head">
-            <h3 class="c3d-block-title">Productos del setup</h3>
-            <span class="c3d-count" id="configCount" aria-live="polite"></span>
-          </div>
-          <p class="c3d-block-sub">Cada producto aparece o desaparece en la vista 3D. Algunos requieren o excluyen a otros.</p>
-          <div class="config-checklist c3d-checklist" id="checklist"><!-- Generado dinámicamente desde la estructura PRODUCTOS en configurador-3d.js --></div>
-          <noscript><p class="c3d-block-sub">Activ&aacute; JavaScript para usar el configurador interactivo.</p></noscript>
-        </div>
-
       </div>
     </div>
+
+    <!-- TEASER (inyectado · scoped .pq-*) -->
+    <div class="pq-panel" id="pqTeaser" hidden>
+      <div class="pq-card pq-teaser">
+        <div class="pq-teaser__grid">
+          <div>
+            <span class="pq-eyebrow">Adelanto de tu diagnostico</span>
+            <h3 class="pq-teaser__title">Detectamos oportunidades de mejora en tu setup.</h3>
+            <p class="pq-teaser__sub" id="pqTeaserSub"></p>
+            <div class="pq-metrics">
+              <div class="pq-metric"><span class="pq-metric__k">Areas de mejora</span><span class="pq-metric__v" id="pqMetricAreas">&mdash;</span></div>
+              <div class="pq-metric"><span class="pq-metric__k">Nivel aprox.</span><span class="pq-metric__v" id="pqMetricTier">&mdash;</span></div>
+              <div class="pq-metric"><span class="pq-metric__k">Productos</span><span class="pq-metric__v" id="pqMetricCount">&mdash;</span></div>
+            </div>
+            <button type="button" class="btn-primary" id="pqTeaserCta">Desbloquear mi recomendacion</button>
+            <p class="pq-note">Te pedimos solo un medio de contacto para mostrarte el setup completo y guardar tu configuracion.</p>
+          </div>
+          <div class="pq-locked" aria-hidden="true">
+            <div class="pq-locked__blur"></div>
+            <div class="pq-locked__lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Tu setup recomendado<br>en 3D</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPTURA DE LEAD (inyectado · obligatoria antes del resultado) -->
+    <div class="pq-panel" id="pqLead" hidden>
+      <div class="pq-card pq-lead">
+        <span class="pq-eyebrow">Ultimo paso</span>
+        <h3 class="pq-lead__title">Tu diagnostico esta listo</h3>
+        <p class="pq-lead__sub">Dejanos un medio de contacto para desbloquear tu recomendacion personalizada y guardar tu configuracion.</p>
+        <form id="pqLeadForm" novalidate>
+          <div class="pq-field">
+            <label class="pq-label" for="pqNombre">Nombre <span class="pq-req">*</span></label>
+            <input class="pq-input" type="text" id="pqNombre" name="nombre" autocomplete="name" required>
+            <p class="pq-error" id="pqNombreError" role="alert" hidden></p>
+          </div>
+          <div class="pq-field">
+            <span class="pq-label" id="pqCanalLabel">Como queres recibir el diagnostico? <span class="pq-req">*</span></span>
+            <div class="pq-channel" role="radiogroup" aria-labelledby="pqCanalLabel">
+              <label class="pq-channel__opt"><input type="radio" name="pqcanal" value="email" id="pqCanalEmail"> Email</label>
+              <label class="pq-channel__opt"><input type="radio" name="pqcanal" value="whatsapp" id="pqCanalWa"> WhatsApp</label>
+            </div>
+            <p class="pq-error" id="pqCanalError" role="alert" hidden></p>
+          </div>
+          <div class="pq-field" id="pqEmailField" hidden>
+            <label class="pq-label" for="pqEmail">Email <span class="pq-req">*</span></label>
+            <input class="pq-input" type="email" id="pqEmail" name="email" inputmode="email" autocomplete="email" disabled>
+            <p class="pq-error" id="pqEmailError" role="alert" hidden></p>
+          </div>
+          <div class="pq-field" id="pqWaField" hidden>
+            <label class="pq-label" for="pqWa">WhatsApp <span class="pq-req">*</span></label>
+            <input class="pq-input" type="tel" id="pqWa" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="Ej: +54 9 11 ..." disabled>
+            <p class="pq-error" id="pqWaError" role="alert" hidden></p>
+          </div>
+          <div class="pq-field">
+            <label class="pq-consent" for="pqConsent"><input type="checkbox" id="pqConsent" required><span>Acepto que PrimOffice utilice mis datos para contactarme por el canal seleccionado.</span></label>
+            <p class="pq-error" id="pqConsentError" role="alert" hidden></p>
+          </div>
+          <div class="pq-actions">
+            <button type="submit" class="btn-primary pq-submit">Ver mi setup recomendado</button>
+            <button type="button" class="pq-back" id="pqBack">&larr; Volver al adelanto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="quiz-result" class="hidden">
+      <div class="result-header">
+        <div class="score-ring" aria-hidden="true">
+          <svg viewBox="0 0 72 72"><circle class="score-ring__track" cx="36" cy="36" r="30"/><circle class="score-ring__fill" cx="36" cy="36" r="30" id="score-arc" stroke-dasharray="188.5" stroke-dashoffset="188.5"/></svg>
+          <div class="score-ring__label"><span id="score-display">0</span><span class="score-ring__sub">/ 18</span></div>
+        </div>
+        <div class="result-header__label" id="result-tier">Setup Pro</div>
+        <h3 class="result-header__title" id="result-title">Tu combo personalizado está listo</h3>
+        <p class="result-header__sub" id="result-description">Excluimos lo que ya tenés. Tocá para agregar o quitar antes de hacer el pedido.</p>
+      </div>
+
+      <div class="result-layout">
+        <!-- LEFT: desk preview -->
+        <div class="desk-preview">
+          <div class="desk-preview__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87V15.13a1 1 0 01-1.447.9L15 14M3 8h12v8H3V8z" stroke-linecap="round"/></svg>
+            Preview en tiempo real
+          </div>
+          <div class="s3d-stage" id="s3dStage" hidden>
+            <div class="s3d-toolbar" id="s3dToolbar" role="toolbar" aria-label="Camara 3D">
+              <button type="button" class="s3d-cam is-active" data-view="perspectiva" aria-pressed="true" title="Perspectiva 3/4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg><span>3/4</span></button>
+              <button type="button" class="s3d-cam" data-view="frontal" aria-pressed="false" title="Vista frontal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg><span>Frontal</span></button>
+              <button type="button" class="s3d-cam" data-view="superior" aria-pressed="false" title="Vista superior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg><span>Superior</span></button>
+              <button type="button" class="s3d-cam" data-view="reset" aria-pressed="false" title="Reset camara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Reset</span></button>
+            </div>
+            <div class="s3d-host" id="s3dHost"></div>
+            <div class="s3d-loader" id="s3dLoader"><span class="s3d-spin" aria-hidden="true"></span></div>
+            <p class="s3d-hint">Arrastra para rotar &middot; rueda o pellizco para acercar</p>
+          </div>
+          <!-- SVG desk scene -->
+          <div class="desk-scene" id="desk-scene">
+            <div class="ds-wall"></div>
+            <div class="ds-ambient"></div>
+
+            <!-- light bar -->
+            <div class="ds-item ds-lightbar hidden-item" id="dsi-lightbar"></div>
+
+            <!-- monitor or laptop -->
+            <div class="ds-item" id="dsi-monitor-arm" style="position:absolute;left:50%;bottom:36%;transform:translateX(-50%);width:3%;height:14%;background:#334155;border-radius:2px;display:none;"></div>
+            <div class="ds-item ds-monitor hidden-item" id="dsi-monitor">
+              <div class="ds-monitor-screen"></div>
+            </div>
+            <div class="ds-item ds-monitor-stand hidden-item" id="dsi-monitor-stand"></div>
+
+            <div class="ds-item ds-laptop hidden-item" id="dsi-laptop">
+              <div class="ds-laptop-screen"></div>
+            </div>
+            <div class="ds-item ds-stand hidden-item" id="dsi-stand"></div>
+            <div class="ds-item ds-stand-leg hidden-item" id="dsi-stand-leg"></div>
+
+            <!-- keyboard -->
+            <div class="ds-item ds-keyboard hidden-item" id="dsi-keyboard">
+              <div class="ds-keyboard-keys"></div>
+            </div>
+
+            <!-- mouse + pad -->
+            <div class="ds-item ds-mousepad hidden-item" id="dsi-mousepad"></div>
+            <div class="ds-item ds-mouse hidden-item" id="dsi-mouse"></div>
+
+            <!-- hub -->
+            <div class="ds-item ds-hub hidden-item" id="dsi-hub"><div class="ds-hub-dot"></div></div>
+
+            <!-- organizer -->
+            <div class="ds-item ds-organizer hidden-item" id="dsi-organizer"></div>
+            <div class="ds-item ds-organizer-pens hidden-item" id="dsi-pens">
+              <div class="ds-organizer-pen" style="background:#38bdf8;height:90%"></div>
+              <div class="ds-organizer-pen" style="background:#f59e0b;height:70%"></div>
+              <div class="ds-organizer-pen" style="background:#10b981;height:80%"></div>
+            </div>
+
+            <!-- desk surface (always visible) -->
+            <div class="ds-desk-surface"></div>
+
+            <!-- standing desk badge -->
+            <div class="ds-item hidden-item" id="dsi-standing-badge" style="position:absolute;bottom:34%;right:5%;background:#10b981;color:white;font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;">STANDING</div>
+
+            <!-- normal desk legs -->
+            <div class="ds-desk-legs" id="ds-normal-legs">
+              <div class="ds-desk-leg"></div>
+              <div class="ds-desk-leg"></div>
+            </div>
+
+            <!-- chair -->
+            <div class="ds-item ds-chair hidden-item" id="dsi-chair">
+              <div class="ds-chair-back"></div>
+              <div class="ds-chair-seat"></div>
+              <div class="ds-chair-leg ds-chair-leg--l"></div>
+              <div class="ds-chair-leg ds-chair-leg--r"></div>
+            </div>
+
+            <div class="ds-floor"></div>
+          </div>
+          <div class="desk-preview__count">
+            <span id="preview-count">0</span> productos en tu setup
+          </div>
+        </div>
+
+        <!-- RIGHT: cart -->
+        <div class="cart-wrapper">
+          <div class="cart-header">
+            <div class="cart-header__title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" stroke-linecap="round"/></svg>
+              Tu carrito personalizado
+            </div>
+            <span class="cart-header__note">Tildá o destildá según lo que ya tenés</span>
+          </div>
+          <div class="cart-items" id="cart-items-list"></div>
+          <div class="cart-extra-section" id="cart-extras-section">
+            <div class="cart-extra-title">Extras opcionales</div>
+            <div class="cart-extras" id="cart-extras-list"></div>
+          </div>
+          <div class="cart-footer">
+            <div class="cart-total">
+              <div class="cart-total__label">Total estimado</div>
+              <div class="cart-total__value"><span class="cart-total__currency">$</span><span id="cart-total-value">0</span> <span style="font-size:.75rem;font-weight:400;color:var(--text-muted)">ARS</span></div>
+            </div>
+            <button class="btn-cart" onclick="sendWhatsApp()">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Pedir por WhatsApp
+            </button>
+          </div>
+        </div>
+      </div><!-- /result-layout -->
+    </div><!-- /quiz-result -->
   </div>
 </section>
 
-<!-- ===================== BENEFICIOS (sin claims médicos) ===================== -->
-<section class="section">
-  <div class="wrap">
-    <div class="sec-center"><span class="pill" style="margin-bottom:18px">Beneficios concretos</span><h2>Pensado para acompañar tu jornada.</h2><p>Cada producto cumple una función. Nada está de adorno.</p></div>
-    <div class="benefits-grid">
-      <div class="benefit"><div class="benefit-icon">&#129681;</div><h3>Ergonomía real</h3><p>Silla con soporte lumbar, pantalla a mejor altura y manos en posición neutra. Más comodidad para alternar posturas durante el día.</p></div>
-      <div class="benefit"><div class="benefit-icon">&#129529;</div><h3>Orden visible</h3><p>Sin cables a la vista ni objetos sueltos. Un escritorio que transmite control y libera espacio.</p></div>
-      <div class="benefit"><div class="benefit-icon">&#128268;</div><h3>Conectividad simple</h3><p>Hubs, adaptadores y cargadores multipuerto para conectar todo sin rotar cables ni buscar enchufes.</p></div>
-      <div class="benefit"><div class="benefit-icon">&#128188;</div><h3>Imagen cuidada</h3><p>Una oficina moderna se percibe en los detalles. El escritorio y la silla son los más importantes.</p></div>
+<!-- COMBOS STATIC -->
+<section class="combos-section" id="combos" aria-labelledby="combos-title">
+  <div class="container">
+    <div class="text-center" style="max-width:560px;margin:0 auto 3.5rem">
+      <span class="section__label">Los combos</span>
+      <h2 class="section__title" id="combos-title">O elegí directamente tu nivel</h2>
+      <p class="section__sub" style="margin:0 auto">Hacé el test para recibir uno personalizado o elegí el combo que mejor se adapte a tu perfil.</p>
     </div>
-  </div>
-</section>
-
-<!-- ===================== CATÁLOGO (salida secundaria) ===================== -->
-<section class="section products" id="catalogo">
-  <div class="wrap products-grid">
-    <div>
-      <span class="pill" style="margin-bottom:18px">Catálogo PrimOffice</span>
-      <h2>Todo lo que necesita un puesto moderno.</h2>
-      <p class="products-sub">Más de 12 categorías para cubrir cada aspecto de tu espacio de trabajo. Explorá el catálogo o empezá con el test para una recomendación a medida.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <a href="#test" class="btn btn-primary">Hacer test gratuito</a>
-        <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-outline" data-track="catalogo" data-context="catalogo-section">Ver catálogo completo</a>
-      </div>
-    </div>
-    <div class="cat-list">
-      <a href="https://www.primoffice.com.ar/accesorios/comodidad/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon">&#129681;</div><div class="cat-text"><b>Mobiliario y ergonomía</b><span>Sillas, standing desk, soportes de monitor y notebook</span></div></a>
-      <a href="https://www.primoffice.com.ar/conectividad/adaptadores-hubs/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon">&#128279;</div><div class="cat-text"><b>Conectividad</b><span>Hubs USB-C, adaptadores HDMI, docking stations</span></div></a>
-      <a href="https://www.primoffice.com.ar/accesorios/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon">&#128161;</div><div class="cat-text"><b>Iluminación</b><span>pLed y barras de luz para monitor, anillos de luz</span></div></a>
-      <a href="https://www.primoffice.com.ar/conectividad/cargadores/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon">&#9889;</div><div class="cat-text"><b>Carga</b><span>Cargadores GaN multipuerto, powerbanks, inalámbrica</span></div></a>
-      <a href="https://www.primoffice.com.ar/accesorios/accesorios-de-escritorio/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon">&#128230;</div><div class="cat-text"><b>Orden y organización</b><span>pBox, pMat XL, organizadores de cables</span></div></a>
-      <a href="https://www.primoffice.com.ar/accesorios/perifericos/" target="_blank" rel="noopener" class="cat-item"><div class="cat-icon">&#9000;</div><div class="cat-text"><b>Periféricos</b><span>Mouse vertical, teclado mecánico pMechanic</span></div></a>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== EMPRESAS ===================== -->
-<section class="section" id="empresas">
-  <div class="wrap">
-    <div class="enterprise-box">
-      <div>
-        <span class="pill pill-dark" style="margin-bottom:18px">Para empresas</span>
-        <h2>Equipá varios puestos sin elegir producto por producto.</h2>
-        <p>Definimos qué necesita cada puesto según uso, espacio, cantidad de personas y estética. Armamos una propuesta a medida para equipar tu equipo.</p>
-        <a href="#contacto" class="btn btn-white btn-lg">Cotizar para mi empresa</a>
-      </div>
-      <div class="enterprise-card">
-        <h3>Casos de uso frecuentes</h3>
-        <ul class="enterprise-ul">
-          <li><span class="e-check">&#10003;</span> Apertura de oficinas nuevas</li>
-          <li><span class="e-check">&#10003;</span> Renovación de puestos existentes</li>
-          <li><span class="e-check">&#10003;</span> Regalos corporativos útiles</li>
-          <li><span class="e-check">&#10003;</span> Equipos híbridos y remotos</li>
-          <li><span class="e-check">&#10003;</span> Estudios y despachos profesionales</li>
-          <li><span class="e-check">&#10003;</span> Startups y pymes en crecimiento</li>
+    <div class="combos-grid">
+      <div class="combo-card">
+        <div class="combo-card__tier">Combo 01</div><div class="combo-card__name">Setup Starter</div>
+        <p class="combo-card__desc">Para quienes están dando sus primeros pasos en armar un espacio de trabajo decente.</p>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>89.000</span><span class="combo-card__price-period">ARS · entrega 24hs CABA y GBA</span></div>
+        <ul class="combo-card__items">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte para notebook (ajustable)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mouse ergonómico inalámbrico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mousepad XXL antideslizante</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Organizador de escritorio</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Guía de ergonomía digital</li>
         </ul>
+        <a href="https://primoffice.com.ar" class="combo-btn combo-btn--outline" target="_blank" rel="noopener">Quiero este combo</a>
+      </div>
+      <div class="combo-card combo-card--featured">
+        <div class="combo-badge">⭐ Más popular</div>
+        <div class="combo-card__tier">Combo 02</div><div class="combo-card__name">Setup Pro</div>
+        <p class="combo-card__desc">El equilibrio ideal: máxima ergonomía y productividad sin gastar de más. El más elegido.</p>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>189.000</span><span class="combo-card__price-period">ARS · entrega 24hs CABA y GBA</span></div>
+        <ul class="combo-card__items">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Monitor externo 24" Full HD</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte articulado para monitor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Teclado inalámbrico compacto</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mouse ergonómico vertical</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Hub USB-C multipuerto</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Barra de luz LED escritorio</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte notebook + mousepad XXL</li>
+        </ul>
+        <a href="https://primoffice.com.ar" class="combo-btn combo-btn--primary" target="_blank" rel="noopener">Quiero este combo</a>
+      </div>
+      <div class="combo-card">
+        <div class="combo-card__tier">Combo 03</div><div class="combo-card__name">Setup Elite</div>
+        <p class="combo-card__desc">Para el profesional que pasa 8+ horas al día trabajando y no tolera ningún compromiso.</p>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>389.000</span><span class="combo-card__price-period">ARS · entrega 24hs CABA y GBA</span></div>
+        <ul class="combo-card__items">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Silla ergonómica con soporte lumbar</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Monitor curvo 27" QHD</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte dual articulado</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Teclado mecánico TKL</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mouse trackball ergonómico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Hub USB-C 10-en-1 con HDMI</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Standing desk eléctrico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Asesoría de setup personalizada</li>
+        </ul>
+        <a href="https://primoffice.com.ar" class="combo-btn combo-btn--outline" target="_blank" rel="noopener">Quiero este combo</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== CONVERSIÓN (CTA principal: test) ===================== -->
-<section class="conversion">
-  <div class="wrap conversion-inner">
-    <div>
-      <h2>El mejor primer paso es saber qué te conviene mejorar.</h2>
-      <p>Hacé el test gratuito y obtené tu recomendación en minutos. Después ajustás todo en 3D.</p>
+<!-- BENEFITS -->
+<section class="section" id="beneficios" aria-labelledby="benefits-title">
+  <div class="container">
+    <div class="text-center" style="max-width:560px;margin:0 auto">
+      <span class="section__label">¿Por qué Primoffice?</span>
+      <h2 class="section__title" id="benefits-title">No vendemos productos. Armamos setups.</h2>
+      <p class="section__sub" style="margin:0 auto">Cualquiera puede comprar partes sueltas. Nosotros te damos un sistema que funciona junto.</p>
     </div>
-    <div class="conversion-ctas">
-      <a href="#test" class="btn btn-primary btn-lg">Hacer test gratuito</a>
-      <a href="https://www.primoffice.com.ar/productos/" target="_blank" rel="noopener" class="btn btn-ghost btn-lg" data-track="catalogo" data-context="conversion">Ver catálogo</a>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== FAQ (reescrita y validada) ===================== -->
-<section class="section" style="background:var(--surface)">
-  <div class="wrap faq-grid">
-    <div>
-      <span class="pill" style="margin-bottom:18px">Preguntas frecuentes</span>
-      <h2>Lo que conviene saber antes de empezar.</h2>
-      <p class="faq-sub">¿No encontrás lo que buscás? Escribinos por WhatsApp y te respondemos.</p>
-      <a href="https://wa.me/5491139149688" target="_blank" rel="noopener" class="btn btn-outline" data-track="whatsapp" data-context="faq">Hacer una pregunta</a>
-    </div>
-    <div class="faq-list">
-      <details open><summary>¿El test tiene costo?</summary><div class="faq-body">No. El test es gratuito y sin compromiso. Al terminar recibís una recomendación personalizada para tu setup.</div></details>
-      <details><summary>¿Cuánto tarda el test?</summary><div class="faq-body">Son 8 preguntas rápidas. Te lleva pocos minutos y podés volver atrás cuando quieras.</div></details>
-      <details><summary>¿Tengo que comprar algo?</summary><div class="faq-body">No. El test te orienta sobre qué conviene mejorar y tiene en cuenta lo que ya tenés para no recomendarte compras innecesarias.</div></details>
-      <details><summary>¿Puedo ajustar la recomendación?</summary><div class="faq-body">Sí. Después del diagnóstico podés modificar tu setup en el configurador 3D (productos, tamaño y modo) y pedir asesoramiento por WhatsApp.</div></details>
-      <details><summary>¿Sirve para empresas con varios puestos?</summary><div class="faq-body">Sí. Si necesitás equipar varios puestos, armamos una propuesta a medida. Indicá esa opción dentro del test o escribinos.</div></details>
-      <details><summary>¿Qué pasa con mis datos?</summary><div class="faq-body">Usamos tus datos sólo para enviarte el diagnóstico y la recomendación. Pedimos tu consentimiento antes de guardarlos.</div></details>
+    <div class="benefits-grid">
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Productos curados</h3><p class="benefit-card__text">Cada producto fue testeado por especialistas en ergonomía. Nada es al azar.</p></div>
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Entrega 24hs</h3><p class="benefit-card__text">Todo junto, a tu puerta, en CABA y GBA. Sin coordinar múltiples proveedores.</p></div>
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#FFF7ED"><svg viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"><path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Soporte incluido</h3><p class="benefit-card__text">Te ayudamos por WhatsApp hasta que tu setup esté 100% perfecto.</p></div>
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#FDF4FF"><svg viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Garantía 30 días</h3><p class="benefit-card__text">Si en 30 días no notás la diferencia, te devolvemos el dinero. Sin letra chica.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===================== CONTACTO ===================== -->
-<section class="section" id="contacto">
-  <div class="wrap">
-    <div class="contact-box">
-      <div>
-        <span class="pill pill-dark" style="margin-bottom:18px">Asesoramiento sin costo</span>
-        <h2>¿Preferís que te asesoremos directo?</h2>
-        <p>Contanos cómo trabajás y te ayudamos a elegir los productos que realmente tienen sentido para tu espacio y presupuesto. También podés empezar por el test.</p>
-        <div class="contact-perks">
-          <div class="perk"><div class="perk-dot"></div> Propuesta personalizada sin compromiso</div>
-          <div class="perk"><div class="perk-dot"></div> Asesoramiento sin costo</div>
-          <div class="perk"><div class="perk-dot"></div> Recomendación según tu espacio y uso</div>
-          <div class="perk"><div class="perk-dot"></div> Opciones para equipar empresas</div>
-        </div>
-      </div>
-      <form class="form" onsubmit="handleLead(event)">
-        <div class="form-field"><label class="form-label" for="cNombre">Nombre</label><input class="form-input" id="cNombre" type="text" name="nombre" placeholder="Tu nombre" autocomplete="name" required></div>
-        <div class="form-field"><label class="form-label" for="cContacto">WhatsApp o email</label><input class="form-input" id="cContacto" type="text" name="contacto" placeholder="Ej: +54 9 11 ..." required></div>
-        <div class="form-field">
-          <label class="form-label" for="cSetup">¿Qué te interesa?</label>
-          <select class="form-select" id="cSetup" name="setup" required>
-            <option value="">Elegí una opción</option>
-            <option>Setup Básica</option>
-            <option>Setup Pro</option>
-            <option>Setup Premium</option>
-            <option>Varios puestos para empresa</option>
-            <option>Sólo quiero asesoramiento</option>
-          </select>
-        </div>
-        <div class="form-field"><label class="form-label" for="cComentario">Contanos más (opcional)</label><textarea class="form-textarea" id="cComentario" name="comentario" placeholder="Ej: uso notebook + monitor externo, varias horas por día, espacio compacto..."></textarea></div>
-        <button class="btn btn-primary form-submit" type="submit" data-track="whatsapp" data-context="contacto">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
-          Pedir asesoramiento por WhatsApp
-        </button>
-        <p class="form-note">O visitá <a href="https://www.primoffice.com.ar/contacto/" target="_blank" rel="noopener" style="color:var(--blue)">primoffice.com.ar/contacto</a></p>
-      </form>
-    </div>
+<!-- CTA -->
+<section class="cta-section"><div class="container">
+  <span class="section__label" style="color:var(--accent)">Empezá hoy</span>
+  <h2 class="section__title">Tu mejor versión laboral<br/>empieza con el setup correcto</h2>
+  <p class="section__sub">Miles de profesionales ya transformaron su forma de trabajar.<br/>Hacé el test y recibí tu combo en 2 minutos. Entrega en 24hs.</p>
+  <div class="cta-actions">
+    <a href="#test" class="btn-primary" style="font-size:1.05rem;padding:1rem 2.25rem">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg>
+      Hacé el test gratis
+    </a>
+    <a href="https://primoffice.com.ar" class="btn-ghost" target="_blank" rel="noopener">Ir a la tienda</a>
   </div>
-</section>
+</div></section>
 
-</main>
-
-<!-- ===================== FOOTER (sin dirección no validada) ===================== -->
-<footer class="footer">
-  <div class="wrap">
-    <div class="footer-grid">
-      <div class="footer-logo">
-        <a href="https://www.primoffice.com.ar" target="_blank" rel="noopener">
-          <img src="https://acdn-us.mitiendanube.com/stores/001/717/384/themes/common/logo-160332847-1733334081-bd0860c1f05e593717fb3939930e9c5a1733334082-480-0.webp" alt="PrimOffice"/>
-        </a>
-        <p class="footer-tagline">Espacios de trabajo que acompañan tu jornada. Ergonomía, conectividad, iluminación y orden en un solo lugar.</p>
-        <div class="footer-social">
-          <a href="https://instagram.com/PrimOffice" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">&#128247;</a>
-          <a href="https://www.facebook.com/primoffice" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">&#128251;</a>
-          <a href="https://www.youtube.com/channel/UCbuCp2Xp8CSkPxhMsdIMQ9g" target="_blank" rel="noopener" aria-label="YouTube" title="YouTube">&#9654;</a>
-          <a href="https://www.tiktok.com/@primoffice" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok">&#127925;</a>
-          <a href="https://wa.me/5491139149688" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp" data-track="whatsapp" data-context="footer">&#128172;</a>
-        </div>
-      </div>
-      <div class="footer-col"><h4>Empezá acá</h4><ul><li><a href="#test">Test gratuito</a></li><li><a href="#configurador">Configurador 3D</a></li><li><a href="#setups">Niveles de setup</a></li><li><a href="#empresas">Para empresas</a></li></ul></div>
-      <div class="footer-col"><h4>Catálogo</h4><ul><li><a href="https://www.primoffice.com.ar/accesorios/comodidad/" target="_blank" rel="noopener">Ergonomía</a></li><li><a href="https://www.primoffice.com.ar/conectividad/" target="_blank" rel="noopener">Conectividad</a></li><li><a href="https://www.primoffice.com.ar/mobiliario/" target="_blank" rel="noopener">Mobiliario</a></li><li><a href="https://www.primoffice.com.ar/kits/" target="_blank" rel="noopener">Kits</a></li></ul></div>
-      <div class="footer-col"><h4>PrimOffice</h4><ul><li><a href="https://www.primoffice.com.ar/blog/" target="_blank" rel="noopener">Blog</a></li><li><a href="https://www.primoffice.com.ar/informacion/" target="_blank" rel="noopener">Preguntas frecuentes</a></li><li><a href="https://www.primoffice.com.ar/contacto/" target="_blank" rel="noopener">Contacto</a></li><li><a href="#contacto">Asesoramiento</a></li></ul></div>
-    </div>
-    <div class="footer-bottom">
-      <span>&copy; 2026 PrimOffice. Todos los derechos reservados.</span>
-      <span><a href="https://www.primoffice.com.ar" target="_blank" rel="noopener">primoffice.com.ar</a></span>
-    </div>
+<footer><div class="footer__inner">
+  <div class="footer__logo">
+    <svg width="130" height="28" viewBox="0 0 130 28" fill="none">
+      <rect x="1" y="3" width="20" height="13" rx="2" stroke="#38BDF8" stroke-width="1.8"/>
+      <path d="M7 20h6M10 16v4" stroke="#38BDF8" stroke-width="1.8" stroke-linecap="round"/>
+      <rect x="4" y="6" width="14" height="7" rx="1" fill="#38BDF8" fill-opacity=".15"/>
+      <text x="26" y="18" font-family="'Poppins',sans-serif" font-weight="700" font-size="13" fill="white">Prim</text>
+      <text x="57" y="18" font-family="'Poppins',sans-serif" font-weight="700" font-size="13" fill="#38BDF8">office</text>
+    </svg>
   </div>
-</footer>
+  <ul class="footer__links">
+    <li><a href="https://primoffice.com.ar" target="_blank" rel="noopener">Tienda</a></li>
+    <li><a href="#test">Test ergonómico</a></li>
+    <li><a href="#combos">Combos</a></li>
+  </ul>
+  <p class="footer__copy">© 2026 Primoffice.com.ar · Entrega 24hs CABA y GBA</p>
+</div></footer>
 
-<a class="wa-float" href="https://wa.me/5491139149688?text=Hola%20PrimOffice%2C%20quiero%20consultar%20sobre%20un%20setup." target="_blank" rel="noopener" aria-label="Abrir WhatsApp" data-track="whatsapp" data-context="float">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2c-5.523 0-9.999 4.478-9.999 10 0 1.762.458 3.418 1.262 4.855L2 22l5.266-1.258A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.522 2 11.999 2z"/></svg>
-</a>
+<script>
+(function(){
+'use strict';
 
-<!-- ============================================================
-     SCRIPTS · orden importante:
-     1) main.js (clásico) define window.trackEvent y la navegación.
-     2) app-config (módulo) publica window.PrimOfficeConfig antes de que
-        lo lea el configurador.
-     3) leads-service, configurador y test (módulos ES).
-     ============================================================ -->
-<script src="./js/main.js"></script>
+// ── NAVBAR ──────────────────────────────────────────────
+var navbar=document.getElementById('navbar'),menuBtn=document.getElementById('menu-btn');
+menuBtn.addEventListener('click',function(){var o=navbar.classList.toggle('open');this.setAttribute('aria-expanded',o);});
+document.addEventListener('click',function(e){if(!navbar.contains(e.target))navbar.classList.remove('open');});
+
+// ── PRODUCT CATALOGUE ────────────────────────────────────
+var P={
+  soporte_notebook: {name:'Soporte para notebook ajustable',   cat:'Ergonomía',    price:12000, icon:'laptop',  dsEl:'dsi-stand,dsi-stand-leg'},
+  mouse_ergo:       {name:'Mouse ergonómico inalámbrico',       cat:'Periférico',   price:15000, icon:'mouse',   dsEl:'dsi-mouse'},
+  mousepad_xxl:     {name:'Mousepad XXL antideslizante',        cat:'Accesorio',    price:8000,  icon:'pad',     dsEl:'dsi-mousepad'},
+  organizador:      {name:'Organizador de escritorio',          cat:'Orden',        price:9000,  icon:'org',     dsEl:'dsi-organizer,dsi-pens'},
+  guia:             {name:'Guía de ergonomía digital',          cat:'Extra',        price:0,     icon:'book',    dsEl:''},
+  monitor_24:       {name:'Monitor externo 24" Full HD',        cat:'Pantalla',     price:85000, icon:'monitor', dsEl:'dsi-monitor,dsi-monitor-stand', badge:'Nuevo'},
+  soporte_monitor:  {name:'Soporte articulado para monitor',    cat:'Ergonomía',    price:18000, icon:'arm',     dsEl:'dsi-monitor-arm'},
+  teclado:          {name:'Teclado inalámbrico compacto',       cat:'Periférico',   price:22000, icon:'kbd',     dsEl:'dsi-keyboard'},
+  mouse_vertical:   {name:'Mouse ergonómico vertical',          cat:'Periférico',   price:19000, icon:'mouse',   dsEl:'dsi-mouse'},
+  hub_usb:          {name:'Hub USB-C multipuerto',              cat:'Conectividad', price:14000, icon:'hub',     dsEl:'dsi-hub'},
+  luz_led:          {name:'Barra de luz LED escritorio',        cat:'Iluminación',  price:11000, icon:'light',   dsEl:'dsi-lightbar'},
+  silla:            {name:'Silla ergonómica con soporte lumbar',cat:'Mueble',       price:180000,icon:'chair',   dsEl:'dsi-chair'},
+  monitor_27:       {name:'Monitor curvo 27" QHD',              cat:'Pantalla',     price:130000,icon:'monitor', dsEl:'dsi-monitor,dsi-monitor-stand', badge:'Elite'},
+  soporte_dual:     {name:'Soporte dual articulado',            cat:'Ergonomía',    price:28000, icon:'arm',     dsEl:'dsi-monitor-arm'},
+  teclado_mec:      {name:'Teclado mecánico TKL',               cat:'Periférico',   price:38000, icon:'kbd',     dsEl:'dsi-keyboard'},
+  mouse_trackball:  {name:'Mouse trackball ergonómico',         cat:'Periférico',   price:29000, icon:'mouse',   dsEl:'dsi-mouse'},
+  hub_usb_pro:      {name:'Hub USB-C 10-en-1 con HDMI',         cat:'Conectividad', price:22000, icon:'hub',     dsEl:'dsi-hub'},
+  organizador_prem: {name:'Organizador de escritorio premium',  cat:'Orden',        price:16000, icon:'org',     dsEl:'dsi-organizer,dsi-pens'},
+  asesoria:         {name:'Asesoría de setup personalizada',    cat:'Servicio',     price:12000, icon:'star',    dsEl:''},
+  almohadilla:      {name:'Almohadilla lumbar para silla',      cat:'Ergonomía',    price:7500,  icon:'back',    dsEl:''},
+  reposamuñecas:    {name:'Reposabrazos / reposamuñecas',       cat:'Ergonomía',    price:6500,  icon:'wrist',   dsEl:''},
+  webcam:           {name:'Webcam HD para videollamadas',       cat:'Periférico',   price:26000, icon:'cam',     dsEl:''},
+  auriculares:      {name:'Auriculares con micrófono',          cat:'Audio',        price:31000, icon:'head',    dsEl:''},
+  standing_desk:    {name:'Standing desk eléctrico',            cat:'Mueble',       price:95000, icon:'stand',   dsEl:'dsi-standing-badge', badge:'Pausas activas'},
+  laptop_base:      {name:'Notebook en escritorio (sin soporte)',cat:'Base',        price:0,     icon:'laptop',  dsEl:'dsi-laptop'},
+};
+
+var ICON_BG={
+  'Ergonomía':['#EFF6FF','#3B82F6'],'Periférico':['#F0FDF4','#10B981'],
+  'Accesorio':['#FFF7ED','#F97316'],'Orden':['#FDF4FF','#A855F7'],
+  'Extra':['#F0FDF4','#10B981'],'Pantalla':['#EFF6FF','#0369A1'],
+  'Conectividad':['#FFFBEB','#F59E0B'],'Iluminación':['#FFFBEB','#F59E0B'],
+  'Mueble':['#FEF2F2','#EF4444'],'Servicio':['#EFF6FF','#3B82F6'],
+  'Audio':['#F0FDF4','#10B981'],'Base':['#F1F5F9','#64748B'],
+};
+
+function svgIcon(t){
+  var m={
+    laptop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M22 19H2M10 19l1-2h2l1 2" stroke-linecap="round"/></svg>',
+    mouse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v7M9 9h6" stroke-linecap="round"/></svg>',
+    pad:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="2"/></svg>',
+    org:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/></svg>',
+    book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5z" stroke-linecap="round"/></svg>',
+    monitor:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" stroke-linecap="round"/></svg>',
+    arm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M12 9l-4 4M12 9l4 4" stroke-linecap="round"/></svg>',
+    kbd:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8" stroke-linecap="round"/></svg>',
+    hub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke-linecap="round"/></svg>',
+    light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6M10 22h4M12 2a7 7 0 017 7c0 2.5-1 4.5-2.5 6H7.5C6 14.5 5 12.5 5 9a7 7 0 017-7z" stroke-linecap="round"/></svg>',
+    chair:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h12v8H6zM4 12h16M12 12v8M8 20h8" stroke-linecap="round"/></svg>',
+    star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke-linecap="round"/></svg>',
+    back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="10" width="18" height="8" rx="4"/></svg>',
+    wrist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="10" width="18" height="8" rx="4"/><path d="M7 10V7a5 5 0 0110 0v3" stroke-linecap="round"/></svg>',
+    cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+    head:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>',
+    stand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="4" rx="2"/><path d="M8 7v14M16 7v14M5 21h14" stroke-linecap="round"/></svg>',
+  };
+  return m[t]||m['org'];
+}
+
+// ── QUIZ ─────────────────────────────────────────────────
+var questions=[
+  {text:'¿Cuántas horas por día trabajás frente a la computadora?',
+   opts:[{l:'Menos de 4 horas',s:1},{l:'Entre 4 y 7 horas',s:2},{l:'8 horas o más',s:3}]},
+  {text:'¿Terminás el día con dolor de cuello, espalda o muñecas?',
+   opts:[{l:'Rara vez o nunca',s:1},{l:'A veces, depende del día',s:2},{l:'Casi siempre, es habitual',s:3}]},
+  {text:'¿Cómo trabajás habitualmente con tu computadora?',  // idx 2 — monitor key
+   opts:[{l:'Notebook directamente en el escritorio, sin soporte',s:3},{l:'Tengo monitor externo, pero sin soporte articulado',s:2},{l:'Monitor bien posicionado a la altura de mis ojos',s:1}]},
+  {text:'¿Cómo describirías el estado de tu escritorio?',
+   opts:[{l:'Ordenado, todo en su lugar, sin cables visibles',s:1},{l:'Algo desordenado, suelo perder tiempo buscando cosas',s:2},{l:'Un caos: cables por todos lados, cosas apiladas',s:3}]},
+  {text:'¿Qué silla usás para trabajar?',  // idx 4 — chair key
+   opts:[{l:'Silla ergonómica con soporte lumbar ajustable',s:1},{l:'Silla básica de escritorio, sin mucho ajuste',s:2},{l:'Silla de comedor, sillón o lo que haya',s:3}]},
+  {text:'¿Cuál es tu mayor queja de productividad?',
+   opts:[{l:'Tengo todo bastante bajo control',s:1},{l:'Me distraigo fácil y pierdo el foco',s:2},{l:'Me canso rápido y rindo menos a la tarde',s:3}]},
+];
+
+var step=0, answers=new Array(questions.length).fill(null), advancing=false;
+var qCard=document.getElementById('quiz-card');
+var qText=document.getElementById('quiz-question');
+var qOpts=document.getElementById('quiz-options');
+var pBar =document.getElementById('progress-bar');
+var pWrap=document.getElementById('progress-bar-wrap');
+var sCurr=document.getElementById('step-current');
+var btnBack=document.getElementById('btn-back');
+var hint=document.getElementById('quiz-hint');
+
+function renderQ(s){
+  advancing=false;
+  var q=questions[s];
+  pBar.style.width=Math.round(s/questions.length*100)+'%';
+  pWrap.setAttribute('aria-valuenow',Math.round(s/questions.length*100));
+  sCurr.textContent=s+1;
+  hint.textContent='Seleccioná para continuar';
+  qCard.style.transition='none'; qCard.style.opacity='0'; qCard.style.transform='translateX(20px)';
+  setTimeout(function(){
+    qText.textContent=q.text;
+    qOpts.innerHTML='';
+    ['A','B','C'].forEach(function(l,i){
+      var btn=document.createElement('button');
+      btn.className='quiz-option'+(answers[s]===i?' selected':'');
+      btn.setAttribute('role','radio');
+      btn.setAttribute('aria-checked',answers[s]===i?'true':'false');
+      btn.innerHTML='<span class="quiz-option__letter">'+l+'</span>'+q.opts[i].l;
+      btn.addEventListener('click',function(){
+        if(advancing)return;
+        // Mark selected
+        answers[s]=i;
+        qOpts.querySelectorAll('.quiz-option').forEach(function(b,j){
+          b.classList.toggle('selected',j===i);
+          b.setAttribute('aria-checked',j===i?'true':'false');
+        });
+        hint.textContent='Avanzando…';
+        advancing=true;
+        // Auto-advance after 420ms
+        setTimeout(function(){
+          if(s<questions.length-1){step++;renderQ(step);}
+          else{pqOnComplete();}
+        },420);
+      });
+      qOpts.appendChild(btn);
+    });
+    btnBack.disabled=s===0;
+    qCard.style.transition='opacity 250ms,transform 250ms';
+    qCard.style.opacity='1'; qCard.style.transform='translateX(0)';
+  },150);
+}
+
+btnBack.addEventListener('click',function(){
+  if(step>0 && !advancing){advancing=false;step--;renderQ(step);}
+});
+
+renderQ(0);
+
+// ── CART + PREVIEW STATE ──────────────────────────────────
+var cartState={}, extrasState={};
+
+// Map product id → desk scene element ids
+function getDsIds(id){
+  var p=P[id]; if(!p||!p.dsEl)return[];
+  return p.dsEl.split(',').filter(function(x){return x;});
+}
+
+function updatePreview(){
+  // Collect all active product ids from cart + extras
+  var active={};
+  Object.keys(cartState).forEach(function(id){if(cartState[id])active[id]=true;});
+  Object.keys(extrasState).forEach(function(id){if(extrasState[id])active[id]=true;});
+
+  // Collect which ds elements should be visible
+  var visible={};
+  Object.keys(active).forEach(function(id){
+    getDsIds(id).forEach(function(el){visible[el]=true;});
+  });
+
+  // Show laptop base if no monitor and has keyboard/mouse
+  var hasMonitor=active['monitor_24']||active['monitor_27'];
+  if(!hasMonitor&&(active['teclado']||active['teclado_mec']||active['mouse_ergo']||active['mouse_vertical']||active['mouse_trackball'])){
+    visible['dsi-laptop']=true;
+  }
+
+  // Toggle elements
+  ['dsi-lightbar','dsi-monitor','dsi-monitor-stand','dsi-monitor-arm',
+   'dsi-laptop','dsi-stand','dsi-stand-leg','dsi-keyboard','dsi-mousepad',
+   'dsi-mouse','dsi-hub','dsi-organizer','dsi-pens','dsi-chair','dsi-standing-badge'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    if(visible[id]){el.classList.remove('hidden-item');}
+    else{el.classList.add('hidden-item');}
+  });
+
+  // Count
+  var cnt=Object.keys(active).filter(function(id){return P[id]&&P[id].price>0;}).length;
+  document.getElementById('preview-count').textContent=cnt;
+  if(window.Setup3D){window.Setup3D.setVisible(visible,{standing:!!visible['dsi-standing-badge']});}
+}
+
+function updateTotal(){
+  var t=0;
+  Object.keys(cartState).forEach(function(id){if(cartState[id]&&P[id])t+=P[id].price;});
+  Object.keys(extrasState).forEach(function(id){if(extrasState[id]&&P[id])t+=P[id].price;});
+  document.getElementById('cart-total-value').textContent=t.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+
+function buildCart(ans){
+  var score=ans.reduce(function(s,a,qi){return s+(a!==null?questions[qi].opts[a].s:0);},0);
+  var mon=ans[2]; // 0=no mon,1=has mon no arm,2=all good
+  var chair=ans[4]; // 0=good,1=basic,2=none
+  var items=[],extras=[];
+
+  if(score<=8){
+    items=['soporte_notebook','mouse_ergo','mousepad_xxl'];
+    if(ans[3]>=1)items.push('organizador');
+    items.push('guia');
+    extras=['reposamuñecas','luz_led','hub_usb','teclado','standing_desk'];
+  } else if(score<=13){
+    if(mon===0)items.push('monitor_24');
+    if(mon<=1)items.push('soporte_monitor');
+    items.push('teclado','mouse_vertical','hub_usb','luz_led','mousepad_xxl');
+    if(mon===0)items.push('soporte_notebook');
+    if(ans[3]>=1)items.push('organizador');
+    if(chair>=1)extras.push('almohadilla');
+    extras.push('webcam','auriculares','reposamuñecas','standing_desk');
+    if(mon>0)extras.push('monitor_24');
+  } else {
+    if(chair>=1)items.push('silla');
+    if(mon===0)items.push('monitor_27');
+    if(mon<=1)items.push('soporte_dual');
+    items.push('teclado_mec','mouse_trackball','hub_usb_pro');
+    if(ans[3]>=1)items.push('organizador_prem');
+    items.push('asesoria','standing_desk');
+    if(mon>0)extras.push('monitor_27');
+    if(chair===0)extras.push('almohadilla');
+    extras.push('webcam','auriculares','luz_led');
+  }
+  return{score:score,items:items,extras:extras};
+}
+
+function renderCart(items,extras){
+  cartState={}; extrasState={};
+  items.forEach(function(id){cartState[id]=true;});
+
+  var listEl=document.getElementById('cart-items-list');
+  listEl.innerHTML='';
+  items.forEach(function(id){
+    var p=P[id]; if(!p)return;
+    var bg=(ICON_BG[p.cat]||['#F1F5F9','#64748B'])[0];
+    var col=(ICON_BG[p.cat]||['#F1F5F9','#64748B'])[1];
+    var row=document.createElement('label');
+    row.className='cart-item'; row.style.cursor='pointer';
+    row.innerHTML=
+      '<input type="checkbox" class="cart-item__check" checked>'+
+      '<div class="cart-item__icon" style="background:'+bg+';color:'+col+'">'+svgIcon(p.icon)+'</div>'+
+      '<div class="cart-item__info"><div class="cart-item__name">'+p.name+'</div><div class="cart-item__category">'+p.cat+'</div></div>'+
+      (p.badge?'<span class="cart-item__badge">'+p.badge+'</span>':'')+
+      '<div class="cart-item__price">'+(p.price>0?'$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'Gratis')+'</div>';
+    var chk=row.querySelector('input');
+    chk.addEventListener('change',function(){
+      cartState[id]=this.checked;
+      row.classList.toggle('cart-item--disabled',!this.checked);
+      updateTotal(); updatePreview();
+    });
+    listEl.appendChild(row);
+  });
+
+  var extrasEl=document.getElementById('cart-extras-list');
+  extrasEl.innerHTML='';
+  if(!extras.length){document.getElementById('cart-extras-section').classList.add('hidden');return;}
+  document.getElementById('cart-extras-section').classList.remove('hidden');
+  extras.forEach(function(id){
+    var p=P[id]; if(!p)return;
+    extrasState[id]=false;
+    var cell=document.createElement('label');
+    cell.className='cart-extra-item';
+    cell.innerHTML=
+      '<input type="checkbox">'+
+      '<span class="cart-extra-item__label">'+p.name+(p.badge?' <small style="color:var(--cta);font-weight:700">'+p.badge+'</small>':'')+'</span>'+
+      '<span class="cart-extra-item__price">$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'</span>';
+    var chk=cell.querySelector('input');
+    chk.addEventListener('change',function(){
+      extrasState[id]=this.checked;
+      cell.classList.toggle('selected',this.checked);
+      updateTotal(); updatePreview();
+    });
+    extrasEl.appendChild(cell);
+  });
+}
+
+function showResult(){
+  var r=buildCart(answers);
+  var tier,title,desc;
+  if(r.score<=8){tier='Setup Starter recomendado';title='¡Buen punto de partida!';desc='Tu setup tiene las bases. Con estos ajustes vas a notar una diferencia enorme en comodidad y foco.';}
+  else if(r.score<=13){tier='Setup Pro recomendado';title='Tu setup necesita una actualización';desc='Estás trabajando por debajo de tu potencial. Mirá lo que armamos para vos — excluimos lo que ya tenés.';}
+  else{tier='Setup Elite recomendado';title='Tu setup necesita atención urgente';desc='Estás acumulando desgaste físico todos los días. Este es el combo que te cambia la vida laboral.';}
+
+  document.getElementById('result-tier').textContent=tier;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-description').textContent=desc;
+  document.getElementById('score-display').textContent=r.score;
+  setTimeout(function(){
+    document.getElementById('score-arc').style.strokeDashoffset=188.5-(r.score/18)*188.5;
+  },350);
+
+  renderCart(r.items,r.extras);
+  updateTotal();
+  updatePreview();
+
+  // Progress bar full
+  pBar.style.width='100%'; pWrap.setAttribute('aria-valuenow',100);
+
+  // Transition
+  var qc=document.getElementById('quiz-container');
+  qc.style.transition='opacity 250ms,transform 250ms';
+  qc.style.opacity='0'; qc.style.transform='translateY(16px)';
+  setTimeout(function(){
+    qc.classList.add('hidden');
+    var qr=document.getElementById('quiz-result');
+    qr.classList.remove('hidden');
+    qr.style.opacity='0'; qr.style.transition='opacity 400ms';
+    requestAnimationFrame(function(){qr.style.opacity='1';});
+  },260);
+}
+
+
+// ── TEASER + CAPTURA DE LEAD (inyectado) ─────────────────
+var pqTeaser=document.getElementById('pqTeaser'),pqLead=document.getElementById('pqLead'),qContainer=document.getElementById('quiz-container');
+function pqShow(el){if(el)el.removeAttribute('hidden');}
+function pqHide(el){if(el)el.setAttribute('hidden','');}
+function pqScroll(){var s=document.getElementById('test');if(s){var t=s.getBoundingClientRect().top;if(t<0||t>window.innerHeight*0.5)s.scrollIntoView({behavior:'smooth',block:'start'});}}
+function pqOnComplete(){
+  var r=buildCart(answers);var tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Elite');
+  var areas=answers.filter(function(a,i){return a!==null&&questions[i].opts[a].s>=2;}).length;
+  var a1=document.getElementById('pqMetricAreas');if(a1)a1.textContent=areas||1;
+  var a2=document.getElementById('pqMetricTier');if(a2)a2.textContent='Setup '+tier;
+  var a3=document.getElementById('pqMetricCount');if(a3)a3.textContent=r.items.length;
+  var sub=document.getElementById('pqTeaserSub');if(sub)sub.innerHTML='Segun tus respuestas, te recomendamos un <strong>Setup '+tier+'</strong>. Desbloquealo y ajustalo en 3D.';
+  pqHide(qContainer);pqShow(pqTeaser);pqScroll();
+}
+function pqCanal(){var c=document.querySelector('input[name=pqcanal]:checked');return c?c.value:'';}
+function pqToggle(w,i,on){var W=document.getElementById(w),X=document.getElementById(i);if(!W||!X)return;if(on){W.removeAttribute('hidden');X.disabled=false;X.required=true;}else{W.setAttribute('hidden','');X.disabled=true;X.required=false;pqClearErr(i);}}
+function pqUpdateCanal(){var c=pqCanal();pqToggle('pqEmailField','pqEmail',c==='email');pqToggle('pqWaField','pqWa',c==='whatsapp');}
+function pqErr(id,msg,eid){var x=document.getElementById(id),e=document.getElementById(eid||id+'Error');if(e){e.textContent=msg;e.removeAttribute('hidden');}if(x)x.setAttribute('aria-invalid','true');}
+function pqClearErr(id,eid){var x=document.getElementById(id),e=document.getElementById(eid||id+'Error');if(e){e.textContent='';e.setAttribute('hidden','');}if(x)x.removeAttribute('aria-invalid');}
+function pqUTM(){var u={};try{var p=new URLSearchParams(location.search);['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function(k){var v=p.get(k);if(v)u[k]=v;});}catch(e){}return u;}
+function pqValidate(){
+  var first=null;function bad(id,msg,eid){pqErr(id,msg,eid);if(!first)first=id;}
+  pqClearErr('pqNombre');pqClearErr('pqEmail');pqClearErr('pqWa');pqClearErr('pqCanalEmail','pqCanalError');pqClearErr('pqConsent','pqConsentError');
+  if(!document.getElementById('pqNombre').value.trim())bad('pqNombre','Ingresa tu nombre.');
+  var c=pqCanal();
+  if(!c)bad('pqCanalEmail','Elegi como queres recibir el diagnostico.','pqCanalError');
+  if(c==='email'){var em=document.getElementById('pqEmail').value.trim();if(!em)bad('pqEmail','Ingresa tu email.');else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))bad('pqEmail','Revisa el formato del email.');}
+  if(c==='whatsapp'){var wv=document.getElementById('pqWa').value,wc=wv.replace(/[\s()\-]/g,'');if(!wv.trim())bad('pqWa','Ingresa tu WhatsApp.');else if(!/^\+?\d{8,15}$/.test(wc))bad('pqWa','Ingresa un numero valido.');}
+  if(!document.getElementById('pqConsent').checked)bad('pqConsent','Necesitamos tu consentimiento para continuar.','pqConsentError');
+  if(first){var f=document.getElementById(first);if(f){try{f.focus();}catch(e){}}return false;}
+  return true;
+}
+function pqPayload(){
+  var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Elite'),c=pqCanal(),total=0;
+  r.items.forEach(function(id){if(P[id])total+=P[id].price;});
+  var cfg=(window.PrimOfficeConfig||{});
+  return {leadId:'lead_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),createdAt:new Date().toISOString(),
+    source:cfg.LEAD_ORIGIN||'landing-primoffice',utm:pqUTM(),
+    contact:{name:document.getElementById('pqNombre').value.trim(),preferredChannel:c||'email',
+      email:c==='email'?document.getElementById('pqEmail').value.trim():'',whatsapp:c==='whatsapp'?document.getElementById('pqWa').value.trim():'',consent:!!document.getElementById('pqConsent').checked},
+    diagnosis:{rawAnswers:answers.slice(),totalScore:r.score,recommendedTier:'Setup '+tier,recommendedPreset:tier.toLowerCase()},
+    configuration:{recommendedProducts:r.items.slice(),selectedProducts:r.items.slice(),selectedExtras:[],estimatedTotal:total,currency:'ARS'}};
+}
+function pqSubmit(e){
+  e.preventDefault();if(!pqValidate())return;
+  var btn=document.querySelector('#pqLeadForm [type=submit]'),prev='';
+  if(btn){prev=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="pq-spin" aria-hidden="true"></span> Procesando...';}
+  var payload=pqPayload();
+  function done(){if(btn){btn.disabled=false;btn.innerHTML=prev;}pqHide(pqLead);showResult();}
+  try{
+    if(window.PrimOfficeLeads&&window.PrimOfficeLeads.submitLead){window.PrimOfficeLeads.submitLead(payload).then(done).catch(done);}
+    else{try{var k='primoffice_leads_demo',arr=JSON.parse(localStorage.getItem(k)||'[]');arr.push(payload);localStorage.setItem(k,JSON.stringify(arr));console.warn('[lead] MODO DEMO (sin modulo): guardado en localStorage.',payload);}catch(e){}done();}
+  }catch(err){done();}
+}
+if(pqTeaser){var pqCta=document.getElementById('pqTeaserCta');if(pqCta)pqCta.addEventListener('click',function(){pqHide(pqTeaser);pqShow(pqLead);var n=document.getElementById('pqNombre');if(n){try{n.focus();}catch(e){}}});}
+var pqForm=document.getElementById('pqLeadForm');
+if(pqForm){pqForm.addEventListener('submit',pqSubmit);Array.prototype.forEach.call(pqForm.querySelectorAll('input[name=pqcanal]'),function(r){r.addEventListener('change',pqUpdateCanal);});pqUpdateCanal();}
+var pqBack=document.getElementById('pqBack');if(pqBack)pqBack.addEventListener('click',function(){pqHide(pqLead);pqShow(pqTeaser);});
+
+// ── WHATSAPP ──────────────────────────────────────────────
+window.sendWhatsApp=function(){
+  var lines=['Hola Primoffice! 👋 Hice el test ergonómico y me armó este carrito:',''];
+  lines.push('*'+document.getElementById('result-tier').textContent+'*','');
+  lines.push('*Productos seleccionados:*');
+  var total=0;
+  Object.keys(cartState).forEach(function(id){
+    if(cartState[id]&&P[id]){
+      var p=P[id];
+      lines.push('  ✅ '+p.name+(p.price>0?' — $'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'):''));
+      total+=p.price;
+    }
+  });
+  var hasE=false;
+  Object.keys(extrasState).forEach(function(id){
+    if(extrasState[id]&&P[id]){
+      if(!hasE){lines.push('','*Extras agregados:*');hasE=true;}
+      var p=P[id];
+      lines.push('  ➕ '+p.name+' — $'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'));
+      total+=p.price;
+    }
+  });
+  lines.push('','*Total estimado: $'+total.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' ARS*','','¿Me podés confirmar disponibilidad y entrega en 24hs? ¡Gracias!');
+  var __wa=(window.PrimOfficeConfig&&window.PrimOfficeConfig.WHATSAPP_NUMBER)||'5491139149688';
+  window.open('https://wa.me/'+__wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank');
+};
+
+// ── SCROLL REVEAL ─────────────────────────────────────────
+if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';obs.unobserve(e.target);}});
+  },{threshold:.1});
+  document.querySelectorAll('.pain-card,.combo-card,.benefit-card').forEach(function(el,i){
+    el.style.opacity='0';el.style.transform='translateY(24px)';
+    el.style.transition='opacity 400ms '+(i%3*80)+'ms,transform 400ms '+(i%3*80)+'ms';
+    obs.observe(el);
+  });
+}
+
+})();
+</script>
+<script defer src="./js/pulido-visual.js"></script>
 <script type="module" src="./js/config/app-config.js"></script>
 <script type="module" src="./js/services/leads-service.js"></script>
-<script type="module" src="./js/configurador-3d.js"></script>
-<script type="module" src="./js/test-diagnostico.js"></script>
-
+<script type="module" src="./js/setup-3d.js"></script>
 </body>
 </html>

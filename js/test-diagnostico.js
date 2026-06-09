@@ -1,18 +1,23 @@
 /* =====================================================================
-   PrimOffice · Test diagnóstico de setup (módulo ES)
+   PrimOffice · Test ergonómico de setup (módulo ES)
    ---------------------------------------------------------------------
-   Flujo: wizard 8 pasos → teaser → captura de lead → resultado →
-          precarga del configurador 3D → WhatsApp con la configuración.
+   Flujo: wizard 6 pasos → teaser parcial → captura OBLIGATORIA de lead →
+          resultado completo → precarga del configurador 3D → WhatsApp.
 
    - Sitio estático (Live Server / GitHub Pages), sin bundler.
    - Accesible: roles ARIA, navegación por teclado, foco visible, errores
      con aria-live, respeta prefers-reduced-motion.
    - Persistencia desacoplada vía services/leads-service.js (modo demo si
-     no hay endpoint configurado).
+     no hay endpoint). Payload anidado preparado para Odoo CRM
+     (ver docs/INTEGRACION_ODOO_CRM.md).
+
+   Las 6 preguntas son EXACTAMENTE las definidas por PrimOffice. No se
+   recuperan las 8 preguntas de la landing anterior.
    ===================================================================== */
 
 import { submitLead } from './services/leads-service.js';
 import { APP_CONFIG } from './config/app-config.js';
+import { CATALOGO, precioDe, formatARS } from './config/catalogo-precios.js';
 
 (() => {
   'use strict';
@@ -20,27 +25,23 @@ import { APP_CONFIG } from './config/app-config.js';
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const CFG = Object.assign({}, APP_CONFIG, window.PrimOfficeConfig || {});
   const WHATSAPP = CFG.WHATSAPP_NUMBER || '5491139149688';
+  const AUTO_MS = reduceMotion ? 120 : 460; // breve transición antes de autoavanzar
 
   function track(nombre, datos) {
     try { if (typeof window.trackEvent === 'function') window.trackEvent(nombre, datos); } catch (e) { /* noop */ }
   }
 
   /* ==================================================================
-     1. DATOS DEL TEST (preguntas y opciones)
+     1. LAS 6 PREGUNTAS (texto literal de PrimOffice)
+     Ajustes de copy documentados en el reporte:
+       · Se agregó tilde a “Cómo” / “Cuál” / “Qué” donde faltaba.
+       · No se alteró el sentido de ninguna pregunta.
+     Todas son de selección única → permiten autoavance accesible.
      ================================================================== */
   const QUESTIONS = [
     {
-      id: 'lugar', tipo: 'single', categoria: 'Lugar de trabajo',
-      titulo: '¿Dónde utilizás principalmente tu espacio de trabajo?',
-      opciones: [
-        { value: 'casa', label: 'Casa' },
-        { value: 'oficina', label: 'Oficina' },
-        { value: 'hibrida', label: 'Modalidad híbrida' }
-      ]
-    },
-    {
-      id: 'horas', tipo: 'single', categoria: 'Uso diario',
-      titulo: '¿Cuántas horas por día utilizás el escritorio?',
+      id: 'horas', categoria: 'Uso diario',
+      titulo: '¿Cuántas horas por día trabajás frente a la computadora?',
       opciones: [
         { value: 'menos4', label: 'Menos de 4 horas' },
         { value: '4a6', label: 'Entre 4 y 6 horas' },
@@ -49,88 +50,62 @@ import { APP_CONFIG } from './config/app-config.js';
       ]
     },
     {
-      id: 'dispositivos', tipo: 'multi', min: 1, categoria: 'Dispositivos',
-      titulo: '¿Qué dispositivos utilizás habitualmente?',
-      ayuda: 'Podés elegir varios.',
+      id: 'dolor', categoria: 'Ergonomía',
+      titulo: '¿Terminás el día con dolor de cuello, espalda o muñecas?',
       opciones: [
-        { value: 'notebook', label: 'Notebook' },
-        { value: 'monitor', label: 'Monitor externo' },
-        { value: 'celular', label: 'Celular' },
-        { value: 'teclado', label: 'Teclado externo' },
-        { value: 'mouse', label: 'Mouse' },
-        { value: 'otros', label: 'Otros' }
+        { value: 'nunca', label: 'Casi nunca' },
+        { value: 'aveces', label: 'A veces' },
+        { value: 'frecuente', label: 'Seguido' },
+        { value: 'siempre', label: 'Casi todos los días' }
       ]
     },
     {
-      id: 'mejorar', tipo: 'multi', min: 1, categoria: 'Objetivos',
-      titulo: '¿Qué aspectos querés mejorar?',
-      ayuda: 'Elegí todo lo que aplique.',
+      id: 'modo', categoria: 'Equipo',
+      titulo: '¿Cómo trabajás habitualmente con tu computadora?',
       opciones: [
-        { value: 'comodidad', label: 'Comodidad' },
-        { value: 'postura', label: 'Postura' },
-        { value: 'orden', label: 'Orden' },
-        { value: 'cables', label: 'Cables' },
-        { value: 'iluminacion', label: 'Iluminación' },
-        { value: 'conectividad', label: 'Conectividad' },
-        { value: 'espacio', label: 'Espacio disponible' },
-        { value: 'estetica', label: 'Estética' }
+        { value: 'notebook', label: 'Sólo con la notebook' },
+        { value: 'notebook_monitor', label: 'Notebook + monitor externo' },
+        { value: 'pc', label: 'PC de escritorio con monitor' },
+        { value: 'dual', label: 'Con dos monitores o más' }
       ]
     },
     {
-      id: 'yaTengo', tipo: 'multi', min: 1, categoria: 'Lo que ya tenés', exclusivo: 'ninguno',
-      titulo: '¿Qué elementos ya tenés?',
-      ayuda: 'Nos ayuda a no recomendarte algo que ya tengas.',
+      id: 'escritorio', categoria: 'Orden',
+      titulo: '¿Cómo describirías el estado de tu escritorio?',
       opciones: [
-        { value: 'silla', label: 'Silla ergonómica' },
-        { value: 'monitor', label: 'Monitor' },
-        { value: 'soporte', label: 'Soporte de monitor' },
-        { value: 'brazo', label: 'Brazo articulado' },
-        { value: 'luz', label: 'Luz de monitor' },
-        { value: 'notebook', label: 'Notebook' },
-        { value: 'teclado', label: 'Teclado externo' },
-        { value: 'mouse', label: 'Mouse ergonómico' },
-        { value: 'hub', label: 'Hub USB-C' },
-        { value: 'celular', label: 'Soporte de celular' },
-        { value: 'cables', label: 'Organizador de cables' },
-        { value: 'pad', label: 'Pad de escritorio' },
-        { value: 'standing', label: 'Standing desk' },
-        { value: 'ninguno', label: 'Ninguno' }
+        { value: 'ordenado', label: 'Ordenado y despejado' },
+        { value: 'normal', label: 'Normal, podría mejorar' },
+        { value: 'cables', label: 'Con cables a la vista' },
+        { value: 'saturado', label: 'Saturado, sin espacio libre' }
       ]
     },
     {
-      id: 'espacio', tipo: 'single', categoria: 'Espacio',
-      titulo: '¿Cuánto espacio tenés disponible?',
+      id: 'silla', categoria: 'Mobiliario',
+      titulo: '¿Qué silla usás para trabajar?',
       opciones: [
-        { value: 'compacto', label: 'Compacto' },
-        { value: 'estandar', label: 'Estándar' },
-        { value: 'amplio', label: 'Amplio' }
+        { value: 'ergonomica', label: 'Una silla ergonómica' },
+        { value: 'oficina', label: 'Una silla de oficina común' },
+        { value: 'comedor', label: 'Una silla de comedor o cualquiera' },
+        { value: 'variable', label: 'Cambio de lugar (sillón, cama…)' }
       ]
     },
     {
-      id: 'prioridad', tipo: 'single', categoria: 'Prioridad',
-      titulo: '¿Qué querés priorizar?',
+      id: 'queja', categoria: 'Productividad',
+      titulo: '¿Cuál es tu mayor queja de productividad?',
       opciones: [
-        { value: 'comodidad', label: 'Comodidad' },
-        { value: 'productividad', label: 'Productividad' },
-        { value: 'estetica', label: 'Estética' },
-        { value: 'completa', label: 'Solución completa' }
-      ]
-    },
-    {
-      id: 'paraQuien', tipo: 'single', categoria: 'Alcance',
-      titulo: '¿Para quién es el setup?',
-      opciones: [
-        { value: 'personal', label: 'Uso personal' },
-        { value: 'empresa', label: 'Varios puestos para una empresa' }
+        { value: 'cansancio', label: 'Me canso o me duele el cuerpo' },
+        { value: 'desorden', label: 'El desorden me distrae' },
+        { value: 'cables', label: 'Pelear con cables y adaptadores' },
+        { value: 'pantalla', label: 'Poca pantalla / vista cansada' }
       ]
     }
   ];
 
   /* ==================================================================
-     2. SISTEMA DE PUNTUACIÓN (FASE 6)
-     Estructura central, legible y configurable. Cada respuesta suma
-     puntajes explícitos por categoría. 'yaTengo' no puntúa: se usa para
-     filtrar productos y evitar recomendar compras innecesarias.
+     2. SISTEMA DE PUNTUACIÓN
+     Reutiliza las categorías del scoring previo como punto de partida.
+     'yaTengo' no existe como pregunta: lo que el usuario ya tiene se
+     infiere de "silla" (ergonómica) y "modo" (tiene monitor).
      ================================================================== */
   const CATEGORIAS = ['ergonomia', 'conectividad', 'iluminacion', 'orden', 'superficieTrabajo', 'mobiliario', 'usoCorporativo'];
 
@@ -139,55 +114,47 @@ import { APP_CONFIG } from './config/app-config.js';
     conectividad: 'Conectividad',
     iluminacion: 'Iluminación',
     orden: 'Orden y cables',
-    superficieTrabajo: 'Superficie de trabajo',
+    superficieTrabajo: 'Espacio de trabajo',
     mobiliario: 'Mobiliario',
     usoCorporativo: 'Equipamiento corporativo'
   };
 
   const SCORING = {
-    lugar: {
-      casa: { mobiliario: 2, ergonomia: 1 },
-      oficina: { orden: 1, usoCorporativo: 1 },
-      hibrida: { conectividad: 2, mobiliario: 1 }
-    },
     horas: {
       menos4: { ergonomia: 1 },
       '4a6': { ergonomia: 2 },
       '6a8': { ergonomia: 3, mobiliario: 1 },
       mas8: { ergonomia: 4, mobiliario: 2 }
     },
-    dispositivos: {
-      notebook: { ergonomia: 1, conectividad: 1 },
-      monitor: { superficieTrabajo: 1, ergonomia: 1 },
-      celular: { orden: 1 },
-      teclado: { superficieTrabajo: 1 },
-      mouse: { ergonomia: 1 },
-      otros: { conectividad: 1 }
+    dolor: {
+      nunca: {},
+      aveces: { ergonomia: 2 },
+      frecuente: { ergonomia: 4 },
+      siempre: { ergonomia: 5, mobiliario: 1 }
     },
-    mejorar: {
-      comodidad: { ergonomia: 3 },
-      postura: { ergonomia: 3 },
-      orden: { orden: 3 },
-      cables: { orden: 2, conectividad: 2 },
-      iluminacion: { iluminacion: 3 },
-      conectividad: { conectividad: 3 },
-      espacio: { superficieTrabajo: 3 },
-      estetica: { orden: 1, mobiliario: 1 }
+    modo: {
+      notebook: { ergonomia: 2, superficieTrabajo: 1, conectividad: 1 },
+      notebook_monitor: { conectividad: 2, superficieTrabajo: 1 },
+      pc: { superficieTrabajo: 1 },
+      dual: { superficieTrabajo: 2, conectividad: 2 }
     },
-    espacio: {
-      compacto: { superficieTrabajo: 1 },
-      estandar: {},
-      amplio: { mobiliario: 1 }
+    escritorio: {
+      ordenado: {},
+      normal: { orden: 1 },
+      cables: { orden: 3, conectividad: 2 },
+      saturado: { orden: 3, superficieTrabajo: 2 }
     },
-    prioridad: {
-      comodidad: { ergonomia: 2 },
-      productividad: { conectividad: 2, superficieTrabajo: 1 },
-      estetica: { orden: 2, iluminacion: 1 },
-      completa: { ergonomia: 1, conectividad: 1, iluminacion: 1, orden: 1, superficieTrabajo: 1, mobiliario: 1 }
+    silla: {
+      ergonomica: {},
+      oficina: { ergonomia: 1, mobiliario: 1 },
+      comedor: { ergonomia: 3, mobiliario: 2 },
+      variable: { ergonomia: 3, mobiliario: 2, superficieTrabajo: 1 }
     },
-    paraQuien: {
-      personal: {},
-      empresa: { usoCorporativo: 5 }
+    queja: {
+      cansancio: { ergonomia: 3 },
+      desorden: { orden: 3 },
+      cables: { conectividad: 3, orden: 1 },
+      pantalla: { superficieTrabajo: 2, iluminacion: 2 }
     }
   };
 
@@ -198,7 +165,6 @@ import { APP_CONFIG } from './config/app-config.js';
     premium: ['silla', 'monitor', 'brazo', 'luz', 'notebook', 'teclado', 'mouse', 'hub', 'celular', 'pad', 'cables']
   };
 
-  /* Nombres de producto (respaldo si el configurador aún no expuso PRODUCTOS). */
   const PRODUCT_NAMES_FALLBACK = {
     silla: 'Silla ergonómica', monitor: 'Monitor externo', soporte: 'Soporte de monitor',
     brazo: 'Brazo articulado', luz: 'Luz de monitor (pLed)', notebook: 'Notebook',
@@ -206,7 +172,7 @@ import { APP_CONFIG } from './config/app-config.js';
     cables: 'Organizador de cables (pBox)', pad: 'Pad de escritorio (pMat XL)'
   };
 
-  const PRESET_LABEL = { basica: 'Básica', pro: 'Pro', premium: 'Premium' };
+  const PRESET_LABEL = { basica: 'Essential', pro: 'Pro', premium: 'Executive' };
   const SIZE_LABEL = { compacto: 'Compacto', estandar: 'Estándar', amplio: 'Amplio' };
   const MODE_LABEL = { sentado: 'Sentado', standing: 'Standing desk' };
 
@@ -224,13 +190,10 @@ import { APP_CONFIG } from './config/app-config.js';
     CATEGORIAS.forEach((c) => { scores[c] = 0; });
     Object.keys(SCORING).forEach((stepId) => {
       const tabla = SCORING[stepId];
-      const resp = answers[stepId];
-      if (resp == null) return;
-      const valores = Array.isArray(resp) ? resp : [resp];
-      valores.forEach((val) => {
-        const aporte = tabla[val];
-        if (aporte) Object.keys(aporte).forEach((cat) => { scores[cat] += aporte[cat]; });
-      });
+      const val = answers[stepId];
+      if (val == null) return;
+      const aporte = tabla[val];
+      if (aporte) Object.keys(aporte).forEach((cat) => { scores[cat] += aporte[cat]; });
     });
     return scores;
   }
@@ -238,8 +201,9 @@ import { APP_CONFIG } from './config/app-config.js';
   /* Genera la recomendación completa a partir de respuestas + puntajes. */
   function derivarRecomendacion(answers) {
     const scores = computeScores(answers);
+    const totalScore = CATEGORIAS.reduce((s, c) => s + scores[c], 0);
 
-    // Categorías prioritarias (con puntaje > 0, top 3)
+    // Categorías prioritarias (puntaje > 0, top 3)
     const ordenadas = Object.keys(scores)
       .map((k) => [k, scores[k]])
       .filter((e) => e[1] > 0)
@@ -247,92 +211,82 @@ import { APP_CONFIG } from './config/app-config.js';
     const categoriasPrioritarias = ordenadas.slice(0, 3).map((e) => e[0]);
     const areasMejora = Math.min(Math.max(ordenadas.length, 1), 6);
 
-    // Tamaño (de la pregunta de espacio)
-    const tamano = answers.espacio || 'estandar';
+    // Nivel → preset (horas + dolor + silla)
+    const horasW = { menos4: 1, '4a6': 2, '6a8': 3, mas8: 4 }[answers.horas] || 2;
+    const dolorW = { nunca: 0, aveces: 1, frecuente: 2, siempre: 3 }[answers.dolor] || 0;
+    const sillaW = { ergonomica: 0, oficina: 1, comedor: 2, variable: 2 }[answers.silla] || 0;
+    const nivel = horasW + dolorW + sillaW;
+    const preset = nivel <= 3 ? 'basica' : nivel <= 6 ? 'pro' : 'premium';
 
-    // Nivel → preset
-    const horasMap = { menos4: 1, '4a6': 2, '6a8': 3, mas8: 4 };
-    let nivel = horasMap[answers.horas] || 2;
-    nivel += (answers.mejorar ? answers.mejorar.length : 0);
-    if (answers.prioridad === 'completa') nivel += 3;
-    else if (answers.prioridad === 'productividad') nivel += 1;
-    if (answers.paraQuien === 'empresa') nivel += 2;
-    const preset = nivel <= 4 ? 'basica' : nivel <= 7 ? 'pro' : 'premium';
-
-    // Modo (sentado / standing)
-    const yaTengo = answers.yaTengo || [];
-    const quiereMovilidad = (answers.mejorar || []).includes('postura') || (answers.mejorar || []).includes('comodidad');
+    // Tamaño y modo de escritorio
+    let tamano = preset === 'premium' ? 'amplio' : 'estandar';
+    if (answers.escritorio === 'saturado') tamano = 'amplio';
     let modo = 'sentado';
-    if (yaTengo.includes('standing')) modo = 'standing';
-    else if (answers.horas === 'mas8' && answers.espacio !== 'compacto' && quiereMovilidad) modo = 'standing';
+    if (answers.horas === 'mas8' && (answers.dolor === 'frecuente' || answers.dolor === 'siempre')) modo = 'standing';
 
     // Setup completo (ids del configurador)
     const setup = new Set(PRESET_PRODUCTS[preset]);
-    const mejorar = answers.mejorar || [];
-    const disp = answers.dispositivos || [];
-    if (mejorar.includes('iluminacion')) setup.add('luz');
-    if (mejorar.includes('orden') || mejorar.includes('cables')) { setup.add('cables'); setup.add('pad'); }
-    if (mejorar.includes('conectividad')) setup.add('hub');
-    if (disp.includes('notebook')) setup.add('notebook');
-    if (disp.includes('monitor')) setup.add('monitor');
+    if (answers.queja === 'pantalla') { setup.add('monitor'); setup.add('luz'); }
+    if (answers.escritorio === 'cables' || answers.queja === 'cables') { setup.add('hub'); setup.add('cables'); }
+    if (answers.escritorio === 'saturado') { setup.add('pad'); setup.add('cables'); }
+    if (answers.modo === 'notebook') setup.add('notebook'); // sigue usando su notebook
 
-    // Reglas de coherencia (soporte/brazo excluyentes; luz depende de monitor)
+    // Coherencia monitor / soporte / brazo / luz
     if (setup.has('monitor')) {
       if (preset === 'basica') { setup.add('soporte'); setup.delete('brazo'); }
       else { setup.add('brazo'); setup.delete('soporte'); }
     } else {
       setup.delete('soporte'); setup.delete('brazo'); setup.delete('luz');
     }
-    if (!setup.has('monitor')) setup.delete('luz');
 
     const productosSetup = Array.from(setup);
 
-    // Productos a sumar = setup - lo que ya tiene (evita compras innecesarias)
-    const yaSet = new Set(yaTengo.filter((x) => x !== 'ninguno'));
-    const productosRecomendados = productosSetup.filter((id) => !yaSet.has(id));
+    // Lo que el usuario ya tiene (inferido)
+    const yaTiene = new Set();
+    if (answers.silla === 'ergonomica') yaTiene.add('silla');
+    if (answers.modo !== 'notebook') yaTiene.add('monitor'); // ya usa monitor
+    if (answers.modo === 'notebook') yaTiene.add('notebook'); // ya tiene la notebook
+
+    const productosRecomendados = productosSetup.filter((id) => !yaTiene.has(id));
+
+    // Total estimado (precios de referencia)
+    const estimatedTotal = productosSetup.reduce((s, id) => s + precioDe(id), 0);
 
     return {
-      scores,
+      scores, totalScore,
       categoriasPrioritarias,
       categoriasPrioritariasLabels: categoriasPrioritarias.map((c) => CATEGORIA_LABEL[c]),
       areasMejora,
-      tamano,
-      modo,
-      preset,
+      tamano, modo, preset,
       productosSetup,
       productosRecomendados,
-      yaTiene: Array.from(yaSet),
-      tipoUsuario: answers.paraQuien === 'empresa' ? 'empresa' : 'personal',
-      explicacion: explicar(categoriasPrioritarias[0], preset, modo)
+      yaTiene: Array.from(yaTiene),
+      estimatedTotal,
+      explicacion: explicar(categoriasPrioritarias[0], preset, modo, answers)
     };
   }
 
-  function explicar(catPrincipal, preset, modo) {
+  function explicar(catPrincipal, preset, modo, answers) {
     const frases = {
-      ergonomia: 'priorizar la comodidad y la alternancia de posturas durante la jornada',
-      conectividad: 'simplificar la conectividad y reducir la fricción con cables y puertos',
-      iluminacion: 'mejorar la iluminación del puesto para una experiencia de trabajo más cuidada',
+      ergonomia: 'cuidar tu postura y reducir las molestias al final del día',
+      conectividad: 'simplificar la conectividad y dejar de pelear con cables y adaptadores',
+      iluminacion: 'mejorar la iluminación y descansar la vista',
       orden: 'ordenar el escritorio y ocultar los cables para despejar la superficie',
-      superficieTrabajo: 'aprovechar mejor el espacio disponible sobre el escritorio',
-      mobiliario: 'renovar el mobiliario base para un puesto más cómodo',
+      superficieTrabajo: 'ganar espacio de pantalla y de escritorio',
+      mobiliario: 'renovar el mobiliario base para trabajar más cómodo',
       usoCorporativo: 'estandarizar varios puestos con una propuesta a medida'
     };
-    const base = frases[catPrincipal] || 'mejorar la organización general del puesto';
-    const extra = modo === 'standing' ? ' Sumamos la opción de standing desk para alternar entre estar sentado y de pie.' : '';
-    return `Según tus respuestas, conviene ${base}. Preparamos una configuración ${PRESET_LABEL[preset]} como punto de partida, que podés ajustar libremente en el configurador 3D.${extra}`;
+    const base = frases[catPrincipal] || 'mejorar la organización general de tu puesto';
+    const extra = modo === 'standing'
+      ? ' Como pasás muchas horas, sumamos la opción de standing desk para alternar entre estar sentado y de pie.'
+      : '';
+    return `Por cómo trabajás, lo más importante es ${base}. Armamos una configuración ${PRESET_LABEL[preset]} como punto de partida, que podés ajustar libremente en el configurador 3D.${extra}`;
   }
 
   /* ==================================================================
      3. ESTADO + REFERENCIAS DOM
      ================================================================== */
-  const state = {
-    paso: 0,
-    answers: {},
-    diagnostico: null,
-    lead: null,
-    iniciado: false
-  };
-
+  const state = { paso: 0, answers: {}, diagnostico: null, lead: null, iniciado: false, autoTimer: null };
   const $ = (id) => document.getElementById(id);
   const dom = {};
 
@@ -381,9 +335,9 @@ import { APP_CONFIG } from './config/app-config.js';
 
       const group = document.createElement('div');
       group.className = 'test-options';
-      group.setAttribute('role', q.tipo === 'single' ? 'radiogroup' : 'group');
+      group.setAttribute('role', 'radiogroup');
       group.setAttribute('aria-labelledby', legend.id);
-      group.dataset.tipo = q.tipo;
+      group.dataset.tipo = 'single';
       group.dataset.step = q.id;
 
       q.opciones.forEach((op) => {
@@ -391,17 +345,16 @@ import { APP_CONFIG } from './config/app-config.js';
         btn.type = 'button';
         btn.className = 'test-option';
         btn.dataset.value = op.value;
-        btn.setAttribute('role', q.tipo === 'single' ? 'radio' : 'checkbox');
+        btn.setAttribute('role', 'radio');
         btn.setAttribute('aria-checked', 'false');
-        btn.tabIndex = -1; // gestionado por roving tabindex
+        btn.tabIndex = -1;
         btn.innerHTML =
           '<span class="test-option-mark" aria-hidden="true"></span>' +
           '<span class="test-option-label">' + op.label + '</span>';
-        btn.addEventListener('click', () => onOptionActivate(q, btn));
+        btn.addEventListener('click', () => onOptionActivate(q, btn, true));
         group.appendChild(btn);
       });
 
-      // Primer opción enfocable
       const first = group.querySelector('.test-option');
       if (first) first.tabIndex = 0;
 
@@ -417,37 +370,30 @@ import { APP_CONFIG } from './config/app-config.js';
     return fs ? fs.querySelector('.test-options') : null;
   }
 
-  function onOptionActivate(q, btn) {
+  /* advance=true → además de seleccionar, autoavanza (click / Enter / Espacio).
+     advance=false → sólo selecciona (navegación con flechas, patrón WAI-ARIA). */
+  function onOptionActivate(q, btn, advance) {
     if (!state.iniciado) { state.iniciado = true; track('diagnostico_iniciado', {}); }
     const value = btn.dataset.value;
-    if (q.tipo === 'single') {
-      state.answers[q.id] = value;
-      const group = btn.parentElement;
-      group.querySelectorAll('.test-option').forEach((b) => {
-        const on = b === btn;
-        b.classList.toggle('is-selected', on);
-        b.setAttribute('aria-checked', on ? 'true' : 'false');
-      });
-      moveFocus(group, btn);
-    } else {
-      let arr = Array.isArray(state.answers[q.id]) ? state.answers[q.id].slice() : [];
-      const group = btn.parentElement;
-      // Opción exclusiva (ej. "Ninguno"): al activarla limpia el resto y viceversa
-      if (q.exclusivo && value === q.exclusivo) {
-        arr = arr.includes(value) ? [] : [value];
-      } else {
-        if (q.exclusivo) arr = arr.filter((v) => v !== q.exclusivo);
-        arr = arr.includes(value) ? arr.filter((v) => v !== value) : arr.concat(value);
-      }
-      state.answers[q.id] = arr;
-      group.querySelectorAll('.test-option').forEach((b) => {
-        const on = arr.includes(b.dataset.value);
-        b.classList.toggle('is-selected', on);
-        b.setAttribute('aria-checked', on ? 'true' : 'false');
-      });
-      moveFocus(group, btn);
-    }
+    state.answers[q.id] = value;
+    const group = btn.parentElement;
+    group.querySelectorAll('.test-option').forEach((b) => {
+      const on = b === btn;
+      b.classList.toggle('is-selected', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    moveFocus(group, btn);
     clearError();
+
+    if (advance) {
+      clearTimeout(state.autoTimer);
+      group.classList.add('is-locking'); // micro feedback (CSS)
+      state.autoTimer = setTimeout(() => {
+        group.classList.remove('is-locking');
+        if (state.paso === QUESTIONS.length - 1) finalizar();
+        else showStep(state.paso + 1, true);
+      }, AUTO_MS);
+    }
   }
 
   function moveFocus(group, btn) {
@@ -467,7 +413,7 @@ import { APP_CONFIG } from './config/app-config.js';
       case ' ': case 'Enter':
         e.preventDefault();
         if (document.activeElement && document.activeElement.classList.contains('test-option')) {
-          onOptionActivate(q, document.activeElement);
+          onOptionActivate(q, document.activeElement, true);
         }
         return;
       default: return;
@@ -476,22 +422,20 @@ import { APP_CONFIG } from './config/app-config.js';
       e.preventDefault();
       moveFocus(group, target);
       target.focus();
-      // En radiogroup, las flechas también seleccionan (patrón WAI-ARIA)
-      if (q.tipo === 'single') onOptionActivate(q, target);
+      onOptionActivate(q, target, false); // selecciona sin autoavanzar
     }
   }
 
-  function stepIsValid(q) {
-    const resp = state.answers[q.id];
-    if (q.tipo === 'single') return !!resp;
-    return Array.isArray(resp) && resp.length >= (q.min || 1);
-  }
+  function stepIsValid(q) { return !!state.answers[q.id]; }
 
   function showStep(n, dir) {
+    clearTimeout(state.autoTimer);
     const total = QUESTIONS.length;
     state.paso = Math.max(0, Math.min(n, total - 1));
     dom.steps.querySelectorAll('.test-step').forEach((fs) => {
-      fs.hidden = Number(fs.dataset.step) !== state.paso;
+      const on = Number(fs.dataset.step) === state.paso;
+      fs.hidden = !on;
+      if (on && !reduceMotion) { fs.classList.remove('is-in'); void fs.offsetWidth; fs.classList.add('is-in'); }
     });
     const q = currentQuestion();
     dom.stepNum.textContent = 'Paso ' + (state.paso + 1) + ' de ' + total;
@@ -505,7 +449,6 @@ import { APP_CONFIG } from './config/app-config.js';
     dom.next.textContent = state.paso === total - 1 ? 'Ver mi adelanto' : 'Siguiente';
     clearError();
 
-    // Foco al primer control del paso (sin romper reduced-motion)
     const group = currentGroup();
     if (group) {
       const sel = group.querySelector('.test-option.is-selected') || group.querySelector('.test-option');
@@ -517,41 +460,32 @@ import { APP_CONFIG } from './config/app-config.js';
   function next() {
     const q = currentQuestion();
     if (!stepIsValid(q)) {
-      showError(q.tipo === 'single'
-        ? 'Elegí una opción para continuar.'
-        : 'Elegí al menos una opción para continuar.');
+      showError('Elegí una opción para continuar.');
       const group = currentGroup();
       const first = group && group.querySelector('.test-option');
       if (first) { first.tabIndex = 0; first.focus(); }
       return;
     }
     track('diagnostico_paso_completado', { paso: state.paso + 1, pregunta: q.id });
-    if (state.paso === QUESTIONS.length - 1) {
-      finalizar();
-    } else {
-      showStep(state.paso + 1, true);
-    }
+    if (state.paso === QUESTIONS.length - 1) finalizar();
+    else showStep(state.paso + 1, true);
   }
 
-  function prev() {
-    if (state.paso > 0) showStep(state.paso - 1, true);
-  }
+  function prev() { if (state.paso > 0) showStep(state.paso - 1, true); }
 
-  function showError(msg) {
-    dom.error.textContent = msg;
-    dom.error.hidden = false;
-  }
+  function showError(msg) { dom.error.textContent = msg; dom.error.hidden = false; }
   function clearError() { dom.error.hidden = true; dom.error.textContent = ''; }
 
   /* ==================================================================
-     5. TEASER (FASE 7)
+     5. TEASER (adelanto parcial · sin precios ni listado completo)
      ================================================================== */
   function finalizar() {
+    clearTimeout(state.autoTimer);
     state.diagnostico = derivarRecomendacion(state.answers);
     track('diagnostico_finalizado', {
       preset: state.diagnostico.preset,
       categorias: state.diagnostico.categoriasPrioritarias,
-      puntajes: state.diagnostico.scores
+      totalScore: state.diagnostico.totalScore
     });
     renderTeaser();
   }
@@ -564,17 +498,26 @@ import { APP_CONFIG } from './config/app-config.js';
 
     dom.teaser.innerHTML =
       '<div class="test-teaser-card">' +
-        '<span class="pill">Adelanto de tu diagnóstico</span>' +
-        '<h3 class="test-teaser-head">Detectamos ' + d.areasMejora + ' ' +
-          (d.areasMejora === 1 ? 'oportunidad' : 'oportunidades') + ' de mejora.</h3>' +
-        '<p class="test-teaser-sub">Tu prioridad principal está en <strong>' + prioridadTxt + '</strong>.</p>' +
-        '<div class="test-teaser-metrics">' +
-          metric('Áreas de mejora', String(d.areasMejora)) +
-          metric('Prioridad principal', d.categoriasPrioritariasLabels[0] || '—') +
-          metric('Nivel recomendado', PRESET_LABEL[d.preset]) +
+        '<div class="test-teaser-main">' +
+          '<span class="pill">Adelanto de tu diagnóstico</span>' +
+          '<h3 class="test-teaser-head">Detectamos ' + d.areasMejora + ' ' +
+            (d.areasMejora === 1 ? 'oportunidad' : 'oportunidades') + ' de mejora en tu setup.</h3>' +
+          '<p class="test-teaser-sub">Tu prioridad principal está en <strong>' + prioridadTxt + '</strong>.</p>' +
+          '<div class="test-teaser-metrics">' +
+            metric('Áreas de mejora', String(d.areasMejora)) +
+            metric('Prioridad principal', d.categoriasPrioritariasLabels[0] || '—') +
+            metric('Nivel aproximado', PRESET_LABEL[d.preset]) +
+          '</div>' +
+          '<button type="button" class="btn btn-primary btn-lg" id="testTeaserCta">Desbloquear mi recomendación</button>' +
+          '<p class="test-teaser-note">Te pedimos sólo un medio de contacto para mostrarte el setup completo y guardar tu configuración.</p>' +
         '</div>' +
-        '<button type="button" class="btn btn-primary btn-lg" id="testTeaserCta">Ver mi diagnóstico completo</button>' +
-        '<p class="test-teaser-note">Te pedimos sólo unos datos para enviártelo y armar la recomendación.</p>' +
+        '<div class="test-teaser-locked" aria-hidden="true">' +
+          '<div class="test-teaser-preview">' + miniDesk() + '</div>' +
+          '<div class="test-teaser-lock">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+            '<span>Tu setup recomendado<br>en 3D</span>' +
+          '</div>' +
+        '</div>' +
       '</div>';
 
     switchPanel(dom.teaser);
@@ -583,23 +526,28 @@ import { APP_CONFIG } from './config/app-config.js';
     focusHeading(dom.teaser);
   }
 
+  /* Mini escritorio decorativo (se muestra borroso/bloqueado en el teaser). */
+  function miniDesk() {
+    return '<div class="md-scene"><div class="md-monitor"></div><div class="md-arm"></div>' +
+           '<div class="md-desk"></div><div class="md-kb"></div><div class="md-mouse"></div>' +
+           '<div class="md-chair"></div><div class="md-glow"></div></div>';
+  }
+
   function metric(k, v) {
     return '<div class="test-metric"><span class="test-metric-k">' + k + '</span><span class="test-metric-v">' + v + '</span></div>';
   }
 
   /* ==================================================================
-     6. CAPTURA DE LEAD (FASE 8)
-     El formulario es estático en index.html; acá se cablea su lógica
+     6. CAPTURA OBLIGATORIA DE LEAD
+     El formulario es estático en el HTML; acá se cablea su lógica
      condicional, validación accesible y envío.
      ================================================================== */
   function mostrarLeadForm() {
-    // Empresa visible si el test indicó varios puestos
-    const empresaField = $('leadEmpresaField');
-    if (empresaField) empresaField.hidden = state.diagnostico.tipoUsuario !== 'empresa';
-
     switchPanel(dom.lead);
-    track('lead_form_mostrado', { tipoUsuario: state.diagnostico.tipoUsuario });
+    track('lead_form_mostrado', { preset: state.diagnostico.preset });
     focusHeading(dom.lead);
+    const nombre = $('leadNombre');
+    if (nombre) { try { nombre.focus({ preventScroll: true }); } catch (e) { nombre.focus(); } }
   }
 
   function wireLeadForm() {
@@ -608,6 +556,8 @@ import { APP_CONFIG } from './config/app-config.js';
     radios.forEach((r) => r.addEventListener('change', updateCanalFields));
     updateCanalFields();
     dom.leadForm.addEventListener('submit', onLeadSubmit);
+    const back = $('testLeadBack');
+    back && back.addEventListener('click', () => { switchPanel(dom.teaser); focusHeading(dom.teaser); });
   }
 
   function getCanal() {
@@ -615,8 +565,6 @@ import { APP_CONFIG } from './config/app-config.js';
     return checked ? checked.value : '';
   }
 
-  /* Muestra/oculta y habilita/inhabilita los campos condicionales.
-     Los campos ocultos quedan disabled para no validarse ni recibir foco. */
   function updateCanalFields() {
     const canal = getCanal();
     toggleField('leadEmailField', 'leadEmail', canal === 'email');
@@ -628,16 +576,15 @@ import { APP_CONFIG } from './config/app-config.js';
     wrap.hidden = !visible;
     input.disabled = !visible;
     input.required = visible;
-    if (!visible) { clearFieldError(inputId); }
+    if (!visible) clearFieldError(inputId);
   }
 
   function onLeadSubmit(e) {
     e.preventDefault();
     const errores = validarLead();
     if (errores.length) {
-      // Foco al primer campo inválido (focus-management)
       const primero = $(errores[0].id);
-      if (primero) primero.focus();
+      if (primero) { try { primero.focus({ preventScroll: false }); } catch (er) { primero.focus(); } }
       return;
     }
     enviarLead();
@@ -648,7 +595,6 @@ import { APP_CONFIG } from './config/app-config.js';
     const nombre = $('leadNombre');
     const canal = getCanal();
     const consent = $('leadConsent');
-
     clearAllFieldErrors();
 
     if (!nombre.value.trim()) errores.push(fieldError('leadNombre', 'Ingresá tu nombre.'));
@@ -666,14 +612,12 @@ import { APP_CONFIG } from './config/app-config.js';
       else if (!/^\+?\d{8,15}$/.test(limpio)) errores.push(fieldError('leadWhatsapp', 'Ingresá un número válido (sólo dígitos).'));
     }
     if (consent && !consent.checked) errores.push(fieldError('leadConsent', 'Necesitamos tu consentimiento para continuar.', 'leadConsentError'));
-
     return errores;
   }
 
   function fieldError(inputId, msg, errorId) {
     const input = $(inputId);
-    const eId = errorId || (inputId + 'Error');
-    const errEl = $(eId);
+    const errEl = $(errorId || (inputId + 'Error'));
     if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
     if (input) input.setAttribute('aria-invalid', 'true');
     return { id: inputId, msg };
@@ -702,41 +646,46 @@ import { APP_CONFIG } from './config/app-config.js';
     return utm;
   }
 
+  function generarLeadId() {
+    const rnd = Math.random().toString(36).slice(2, 8);
+    return 'lead_' + Date.now() + '_' + rnd;
+  }
+
+  /* Payload ANIDADO (esquema v1, preparado para Odoo CRM). */
   function construirPayload() {
     const d = state.diagnostico;
     const canal = getCanal();
     const nombre = $('leadNombre').value.trim();
     const email = canal === 'email' ? ($('leadEmail').value.trim()) : '';
     const whatsapp = canal === 'whatsapp' ? ($('leadWhatsapp').value.trim()) : '';
-    const empresaEl = $('leadEmpresa');
-    const empresa = (d.tipoUsuario === 'empresa' && empresaEl) ? empresaEl.value.trim() : '';
 
     return {
-      nombre: nombre,
-      canalPreferido: canal || 'email',
-      email: email,
-      whatsapp: whatsapp,
-      empresa: empresa,
-      tipoUsuario: d.tipoUsuario,
-      respuestasTest: Object.assign({}, state.answers),
-      puntajes: {
-        ergonomia: d.scores.ergonomia,
-        conectividad: d.scores.conectividad,
-        iluminacion: d.scores.iluminacion,
-        orden: d.scores.orden,
-        superficieTrabajo: d.scores.superficieTrabajo,
-        mobiliario: d.scores.mobiliario,
-        usoCorporativo: d.scores.usoCorporativo
-      },
-      categoriasPrioritarias: d.categoriasPrioritarias.slice(),
-      presetRecomendado: d.preset,
-      tamanoEscritorio: d.tamano,
-      modoEscritorio: d.modo,
-      productosRecomendados: d.productosRecomendados.slice(),
-      productosFinales: d.productosSetup.slice(),
-      origen: CFG.LEAD_ORIGIN || 'landing-setup-oficina',
+      leadId: generarLeadId(),
+      createdAt: new Date().toISOString(),
+      source: CFG.LEAD_ORIGIN || 'landing-primoffice',
       utm: leerUTM(),
-      fechaIso: new Date().toISOString()
+      contact: {
+        name: nombre,
+        preferredChannel: canal || 'email',
+        email: email,
+        whatsapp: whatsapp,
+        consent: !!($('leadConsent') && $('leadConsent').checked)
+      },
+      diagnosis: {
+        rawAnswers: Object.assign({}, state.answers),
+        totalScore: d.totalScore,
+        scoresByCategory: Object.assign({}, d.scores),
+        recommendedTier: PRESET_LABEL[d.preset],
+        recommendedPreset: d.preset
+      },
+      configuration: {
+        recommendedProducts: d.productosRecomendados.slice(),
+        selectedProducts: d.productosSetup.slice(),
+        selectedExtras: [],
+        estimatedTotal: d.estimatedTotal,
+        currency: CATALOGO.MONEDA || 'ARS',
+        pricesConfirmed: !!CATALOGO.PRECIOS_CONFIRMADOS
+      }
     };
   }
 
@@ -745,7 +694,6 @@ import { APP_CONFIG } from './config/app-config.js';
     const payload = construirPayload();
     state.lead = payload;
 
-    // Estado de carga del botón (loading-buttons)
     let textoPrevio = '';
     if (submitBtn) {
       textoPrevio = submitBtn.innerHTML;
@@ -762,7 +710,7 @@ import { APP_CONFIG } from './config/app-config.js';
       resultado = { ok: false, mode: 'error', error: String(err) };
     }
 
-    track('lead_enviado', { modo: resultado.mode, canal: payload.canalPreferido, tipoUsuario: payload.tipoUsuario });
+    track('lead_enviado', { modo: resultado.mode, canal: payload.contact.preferredChannel });
 
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -770,16 +718,16 @@ import { APP_CONFIG } from './config/app-config.js';
       submitBtn.innerHTML = textoPrevio;
     }
 
-    // Siempre permitimos continuar al resultado (no bloqueamos por persistencia).
+    // Siempre se revela el resultado, aunque falle la persistencia.
     renderResultado(resultado);
   }
 
   /* ==================================================================
-     7. RESULTADO PERSONALIZADO (FASE 10) + PRECARGA 3D (FASE 3) + WA (FASE 11)
+     7. RESULTADO COMPLETO + PRECARGA 3D + WHATSAPP
      ================================================================== */
   function renderResultado(resultadoEnvio) {
     const d = state.diagnostico;
-    const nombre = (state.lead && state.lead.nombre) ? state.lead.nombre : '';
+    const nombre = (state.lead && state.lead.contact && state.lead.contact.name) ? state.lead.contact.name : '';
     const prioridades = d.categoriasPrioritariasLabels.slice(0, 3);
     const aSumar = d.productosRecomendados.map(productName);
 
@@ -821,18 +769,15 @@ import { APP_CONFIG } from './config/app-config.js';
     switchPanel(dom.result);
     track('resultado_mostrado', { preset: d.preset, tamano: d.tamano, modo: d.modo });
 
-    // Precarga del configurador 3D según el diagnóstico (FASE 3)
     precargarConfigurador();
-
     $('testGoConfig') && $('testGoConfig').addEventListener('click', irAlConfigurador);
     $('testGoWa') && $('testGoWa').addEventListener('click', enviarWhatsApp);
     focusHeading(dom.result);
   }
 
-  /* Nota honesta: en modo demo no afirmamos persistencia real. */
   function demoNota(resultadoEnvio) {
     if (resultadoEnvio && resultadoEnvio.mode === 'demo') {
-      return '<p class="test-result-note" role="note">Estás viendo una vista previa funcional. La conexión con la base de datos de PrimOffice todavía está pendiente, así que por ahora tu consulta se completa por WhatsApp. <span class="test-todo">TODO: validar con PrimOffice</span></p>';
+      return '<p class="test-result-note" role="note">Estás viendo una vista previa funcional. La conexión con el CRM de PrimOffice todavía está pendiente, así que por ahora tu consulta se completa por WhatsApp. <span class="test-todo">TODO: validar con PrimOffice</span></p>';
     }
     if (resultadoEnvio && resultadoEnvio.ok === false) {
       return '<p class="test-result-note" role="note">No pudimos registrar tu solicitud automáticamente. Podés enviarnos tu diagnóstico por WhatsApp y te respondemos.</p>';
@@ -857,7 +802,6 @@ import { APP_CONFIG } from './config/app-config.js';
     });
   }
 
-  /* Espera a que el configurador exponga su API (módulo deferido). */
   function waitForConfigurador(timeout) {
     const api = window.PrimOfficeConfigurador3D;
     if (api && api.applyRecommendation) return Promise.resolve(api);
@@ -880,26 +824,29 @@ import { APP_CONFIG } from './config/app-config.js';
 
   function enviarWhatsApp() {
     const d = state.diagnostico;
-    const lead = state.lead || {};
+    const lead = (state.lead && state.lead.contact) ? state.lead.contact : {};
     const api = window.PrimOfficeConfigurador3D;
     const conf = (api && typeof api.getCurrentConfiguration === 'function') ? api.getCurrentConfiguration() : null;
 
-    const recomendadosNombres = d.productosRecomendados.map(productName);
-    const finalesNombres = conf ? conf.productNames : d.productosSetup.map(productName);
+    const productos = conf ? conf.productNames : d.productosSetup.map(productName);
+    const extras = (conf && conf.extraNames && conf.extraNames.length) ? conf.extraNames : [];
+    const total = conf && typeof conf.estimatedTotal === 'number' ? conf.estimatedTotal : d.estimatedTotal;
 
     const lines = [
-      'Hola PrimOffice! Soy ' + (lead.nombre || '') + ' y completé el test de diagnóstico.',
+      'Hola PrimOffice 👋',
       '',
-      'Prioridades: ' + (d.categoriasPrioritariasLabels.join(', ') || '—'),
-      'Nivel recomendado: ' + PRESET_LABEL[d.preset],
-      'Escritorio: ' + SIZE_LABEL[d.tamano] + ' · Modo: ' + MODE_LABEL[d.modo],
+      'Completé el test ergonómico desde la landing y quiero consultar por mi setup personalizado.',
       '',
-      'Productos recomendados inicialmente: ' + (recomendadosNombres.join(', ') || '—'),
-      'Mi configuración final' + (conf ? ' (' + conf.count + ')' : '') + ': ' + (finalesNombres.join(', ') || '—'),
+      'Nombre: ' + (lead.name || '—'),
+      'Recomendación: ' + PRESET_LABEL[d.preset],
       '',
-      'Canal preferido: ' + (lead.canalPreferido === 'whatsapp' ? 'WhatsApp' : 'Email'),
-      'Me gustaría recibir asesoramiento y precios.'
+      'Productos seleccionados:',
+      ...(productos.length ? productos.map((n) => '✅ ' + n) : ['✅ (a definir)'])
     ];
+    if (extras.length) { lines.push('', 'Extras:', ...extras.map((n) => '➕ ' + n)); }
+    lines.push('', 'Total estimado: ' + formatARS(total) + (CATALOGO.PRECIOS_CONFIRMADOS ? '' : ' (de referencia, a confirmar)'));
+    lines.push('', '¿Me pueden confirmar disponibilidad y entrega en 24hs? Gracias.');
+
     track('whatsapp_clicked', { contexto: 'resultado-test' });
     window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
   }
@@ -909,7 +856,7 @@ import { APP_CONFIG } from './config/app-config.js';
      ================================================================== */
   function switchPanel(panel) {
     [dom.wizard, dom.teaser, dom.lead, dom.result].forEach((p) => { if (p) p.hidden = (p !== panel); });
-    // Scroll suave al inicio de la sección si el panel queda fuera de vista
+    if (panel && !reduceMotion) { panel.classList.remove('is-in'); void panel.offsetWidth; panel.classList.add('is-in'); }
     if (dom.section) {
       const top = dom.section.getBoundingClientRect().top;
       if (top < 0 || top > window.innerHeight * 0.5) {
@@ -922,7 +869,6 @@ import { APP_CONFIG } from './config/app-config.js';
     const h = panel.querySelector('h3, h4, [tabindex]');
     if (h) {
       h.setAttribute('tabindex', '-1');
-      // Evita scroll brusco: foco sin desplazamiento adicional
       try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
     }
   }
@@ -939,17 +885,25 @@ import { APP_CONFIG } from './config/app-config.js';
      9. ARRANQUE
      ================================================================== */
   function start() {
-    if (!cacheDom()) return; // la sección del test no existe en esta página
+    if (!cacheDom()) return;
     buildSteps();
     showStep(0, false);
     dom.next.addEventListener('click', next);
     dom.prev.addEventListener('click', prev);
     wireLeadForm();
+
+    // CTA del hero que dispara el test: scroll suave + foco al primer paso.
+    document.querySelectorAll('[data-test-start]').forEach((el) => {
+      el.addEventListener('click', () => {
+        setTimeout(() => {
+          const group = currentGroup();
+          const first = group && group.querySelector('.test-option');
+          if (first && !reduceMotion) first.focus({ preventScroll: true });
+        }, 600);
+      });
+    });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start);
-  } else {
-    start();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();

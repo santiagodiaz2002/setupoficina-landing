@@ -1,31 +1,52 @@
 /* =====================================================================
    PrimOffice · Configuración central de la app (estática)
    ---------------------------------------------------------------------
-   Punto único para parámetros configurables del sitio.
-   - Sitio 100% estático (Live Server / GitHub Pages), sin bundler.
-   - NO incluir secretos ni credenciales acá: este archivo es público.
-   - El endpoint real de leads se completa cuando PrimOffice lo provea
-     (ver docs/INTEGRACION_BASE_DATOS.md).
+   Punto ÚNICO para parámetros configurables del sitio.
 
-   Se exporta como módulo ES y, además, se publica en `window.PrimOfficeConfig`
-   para consumidores que no usan módulos (depuración / scripts clásicos).
+   - Sitio 100% estático (Live Server / GitHub Pages), sin bundler.
+   - NO incluir secretos ni credenciales acá: este archivo es PÚBLICO y
+     viaja al navegador. Para Odoo CRM nunca se envían credenciales desde
+     el front (ver docs/INTEGRACION_ODOO_CRM.md).
+   - El número de WhatsApp se centraliza acá y se consume desde
+     main.js, test-diagnostico.js y configurador-3d.js (no se hardcodea
+     en cada script).
+
+   Se exporta como módulo ES y, además, se publica en
+   `window.PrimOfficeConfig` para consumidores que no usan módulos
+   (depuración / scripts clásicos como main.js).
    ===================================================================== */
 
 export const APP_CONFIG = {
-  /* ------------------------------------------------------------------
-     LEADS / PERSISTENCIA
-     ------------------------------------------------------------------ */
+  /* ==================================================================
+     CONTACTO / CANALES
+     ================================================================== */
 
-  /* URL del endpoint que recibe los leads por POST.
-     Mientras esté vacío (''), el servicio funciona en MODO DEMO:
-     guarda el lead en localStorage y deja la integración real pendiente.
-     Para conectar el backend real, completar esta URL (o sobreescribir
-     window.PrimOfficeConfig.LEADS_API_URL antes de cargar el sitio). */
+  /* Número de WhatsApp comercial confirmado, en formato internacional
+     sin '+' (para construir enlaces wa.me).  +54 11 3914-9688 */
+  WHATSAPP_NUMBER: '5491139149688',
+
+  /* ==================================================================
+     LEADS / PERSISTENCIA  (preparado para Odoo CRM)
+     ================================================================== */
+
+  /* Modo demo explícito.
+     - true  → submitLead() persiste en localStorage y NO simula una
+               integración real (estado actual: sin endpoint).
+     - false → submitLead() hace POST a LEADS_API_URL (backend propio que
+               luego hablará con Odoo del lado servidor).
+     Si LEADS_API_URL está vacío, el modo demo se fuerza igual por
+     seguridad (nunca se queda “colgado” esperando un endpoint inexistente). */
+  DEMO_MODE: true,
+
+  /* URL del endpoint del BACKEND PROPIO (no Odoo directo) que recibirá los
+     leads por POST y los reenviará a Odoo CRM con credenciales del servidor.
+     Mientras esté vacío (''), rige el modo demo. Completar cuando PrimOffice
+     provea la URL.  Ver docs/INTEGRACION_ODOO_CRM.md */
   LEADS_API_URL: '',
 
-  /* Token opcional para el endpoint. NO hardcodear secretos reales:
-     dejar vacío y, si el backend lo requiere, inyectarlo en runtime
-     desde un entorno seguro. Ver docs/INTEGRACION_BASE_DATOS.md. */
+  /* Token opcional para el endpoint propio. NO hardcodear secretos reales:
+     dejar vacío y, si hace falta, inyectarlo en runtime desde un entorno
+     seguro (window.PrimOfficeConfig.LEADS_API_TOKEN). */
   LEADS_API_TOKEN: '',
 
   /* Tiempo máximo de espera (ms) para la request de leads. */
@@ -34,27 +55,42 @@ export const APP_CONFIG = {
   /* Clave de localStorage donde el modo demo acumula los leads. */
   LEADS_STORAGE_KEY: 'primoffice_leads_demo',
 
-  /* ------------------------------------------------------------------
-     CONTACTO / CANALES
-     ------------------------------------------------------------------ */
+  /* ==================================================================
+     ORIGEN / TRAZABILIDAD
+     ================================================================== */
 
-  /* Número de WhatsApp en formato internacional sin '+' (wa.me). */
-  WHATSAPP_NUMBER: '5491139149688',
+  /* Origen declarado en cada lead (campo `source` del payload). */
+  LEAD_ORIGIN: 'landing-primoffice',
 
-  /* ------------------------------------------------------------------
+  /* Nombre legible de la landing (útil para Odoo / analítica). */
+  LANDING_SOURCE: 'Landing PrimOffice · Test ergonómico',
+
+  /* ==================================================================
+     FLAGS DE INTEGRACIÓN
+     ================================================================== */
+
+  INTEGRATION: {
+    /* Proveedor de CRM objetivo (documentación / futuro). */
+    crm: 'odoo',
+    /* Cuando el backend propio esté listo, poner en true para activar el
+       POST real (junto con DEMO_MODE:false y LEADS_API_URL completo). */
+    odooEnabled: false,
+    /* Versión del esquema de payload (por si Odoo pide cambios de mapeo). */
+    payloadSchema: 'v1'
+  },
+
+  /* ==================================================================
      ANALÍTICA
-     ------------------------------------------------------------------ */
+     ================================================================== */
 
   /* Prefijo opcional para nombrar eventos de analítica. */
-  ANALYTICS_PREFIX: '',
-
-  /* Origen declarado en cada lead (trazabilidad). */
-  LEAD_ORIGIN: 'landing-setup-oficina'
+  ANALYTICS_PREFIX: ''
 };
 
 /* Permite override en runtime sin tocar el archivo (ej.: una variable
-   global definida por el hosting o un <script> previo) y publica el
-   objeto en window para consumidores no-módulo. */
+   global definida por el hosting o un <script> previo) y publica el objeto
+   en window para consumidores no-módulo. El merge es superficial: los
+   objetos anidados (INTEGRATION) se reemplazan completos si se sobreescriben. */
 if (typeof window !== 'undefined') {
   window.PrimOfficeConfig = Object.assign({}, APP_CONFIG, window.PrimOfficeConfig || {});
 }

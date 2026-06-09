@@ -14,7 +14,14 @@
      · Capa UI  -> siempre activa (checklist, presets, resumen, WhatsApp).
                    Funciona aunque WebGL no este disponible.
      · Capa 3D  -> diferida y opcional. Si falla, la UI sigue operativa.
+
+   El CARRITO (productos + extras + total estimado) usa precios de
+   referencia centralizados en js/config/catalogo-precios.js. Mientras
+   PRECIOS_CONFIRMADOS sea false, la UI rotula los importes como
+   “estimados / de referencia”.  TODO: cargar precios reales.
    ===================================================================== */
+
+import { CATALOGO, precioDe, extraDe, formatARS } from './config/catalogo-precios.js';
 
 (() => {
   'use strict';
@@ -184,8 +191,19 @@
     preset: 'pro',
     size: PRESETS.pro.size,
     mode: PRESETS.pro.mode,
-    active: new Set(PRESETS.pro.productos)
+    active: new Set(PRESETS.pro.productos),
+    extras: new Set() // extras opcionales del carrito (ids de CATALOGO.EXTRAS)
   };
+
+  /* ----- CARRITO / PRECIOS DE REFERENCIA ----- */
+  const EXTRAS = Array.isArray(CATALOGO.EXTRAS) ? CATALOGO.EXTRAS : [];
+  const extraName = (id) => { const e = extraDe(id); return e ? e.nombre : id; };
+  function computeTotal() {
+    let t = 0;
+    state.active.forEach((id) => { t += precioDe(id); });
+    state.extras.forEach((id) => { const e = extraDe(id); if (e) t += e.precio; });
+    return t;
+  }
 
   /* Referencias DOM */
   const $ = (id) => document.getElementById(id);
@@ -206,13 +224,61 @@
         .concat(p.dependencias.map((d) => `<span class="c3d-flag req">Requiere ${nameOf(d)}</span>`))
         .concat(p.exclusiones.map((x) => `<span class="c3d-flag exc">No con ${nameOf(x)}</span>`))
         .join('');
+      const precio = precioDe(p.id);
+      const precioHtml = precio > 0
+        ? `<span class="c3d-item-price" aria-label="Precio de referencia">${formatARS(precio)}</span>`
+        : `<span class="c3d-item-price c3d-item-price-zero">Tu equipo</span>`;
       btn.innerHTML =
         `<span class="config-checkbox"></span>` +
         `<span class="config-item-icon">${iconSvg(p.geometriaPlaceholder)}</span>` +
-        `<span class="config-item-text"><b>${p.nombre}</b><span>${p.descripcion}</span><span class="c3d-item-flags">${flags}</span></span>`;
+        `<span class="config-item-text"><b>${p.nombre}</b><span>${p.descripcion}</span><span class="c3d-item-flags">${flags}</span></span>` +
+        precioHtml;
       btn.addEventListener('click', () => toggleProduct(p.id));
       dom.checklist.appendChild(btn);
     });
+  }
+
+  /* Extras opcionales del carrito (no afectan la escena 3D). */
+  function buildExtras() {
+    if (!dom.extras) return;
+    dom.extras.innerHTML = '';
+    EXTRAS.forEach((e) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'config-item c3d-extra';
+      btn.dataset.extra = e.id;
+      btn.setAttribute('aria-pressed', state.extras.has(e.id) ? 'true' : 'false');
+      btn.innerHTML =
+        `<span class="config-checkbox"></span>` +
+        `<span class="config-item-text"><b>${e.nombre}</b><span>${e.descripcion}</span></span>` +
+        `<span class="c3d-item-price">${formatARS(e.precio)}</span>`;
+      btn.addEventListener('click', () => toggleExtra(e.id));
+      dom.extras.appendChild(btn);
+    });
+  }
+
+  function toggleExtra(id) {
+    if (state.extras.has(id)) state.extras.delete(id); else state.extras.add(id);
+    syncUI();
+    track('configurador_extra', { extra: id, activo: state.extras.has(id) });
+  }
+
+  function syncExtras() {
+    if (!dom.extras) return;
+    dom.extras.querySelectorAll('.c3d-extra').forEach((btn) => {
+      const on = state.extras.has(btn.dataset.extra);
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      const cb = btn.querySelector('.config-checkbox');
+      if (cb) cb.innerHTML = on ? '&#10003;' : '';
+    });
+  }
+
+  function renderTotal() {
+    if (dom.total) dom.total.textContent = formatARS(computeTotal());
+    if (dom.totalNote) {
+      dom.totalNote.hidden = !!CATALOGO.PRECIOS_CONFIRMADOS;
+    }
   }
 
   function syncUI() {
@@ -236,6 +302,8 @@
       ? activos.map((p) => `<span class="config-tag">${p.nombre}</span>`).join('')
       : '<span class="c3d-empty">Ningun producto seleccionado aun</span>';
     dom.configCount.textContent = `${state.active.size} de ${PRODUCTOS.length}`;
+    syncExtras();
+    renderTotal();
   }
 
   function setSegActive(group, key, value) {
@@ -340,19 +408,24 @@
   }
 
   function sendWhatsApp() {
-    const activos = PRODUCTOS.filter((p) => state.active.has(p.id)).map((p) => '- ' + p.nombre);
+    const activos = PRODUCTOS.filter((p) => state.active.has(p.id)).map((p) => '✅ ' + p.nombre);
+    const extras = EXTRAS.filter((e) => state.extras.has(e.id)).map((e) => '➕ ' + e.nombre);
+    const total = computeTotal();
     const lines = [
-      'Hola PrimOffice! Arme mi setup con el configurador 3D:',
+      'Hola PrimOffice 👋',
       '',
-      `Configuracion: ${PRESET_LABELS[state.preset]}`,
-      `Escritorio: ${SIZE_LABELS[state.size]}`,
-      `Modo: ${MODE_LABELS[state.mode]}`,
+      'Armé mi setup en el configurador 3D y quiero consultar disponibilidad.',
+      '',
+      `Configuración: ${PRESET_LABELS[state.preset]}`,
+      `Escritorio: ${SIZE_LABELS[state.size]} · Modo: ${MODE_LABELS[state.mode]}`,
       '',
       `Productos seleccionados (${state.active.size}):`,
-      ...(activos.length ? activos : ['- (ninguno todavia)']),
-      '',
-      'Me gustaria recibir asesoramiento y precios.'
+      ...(activos.length ? activos : ['✅ (ninguno todavía)'])
     ];
+    if (extras.length) { lines.push('', 'Extras:', ...extras); }
+    lines.push('', 'Total estimado: ' + formatARS(total) + (CATALOGO.PRECIOS_CONFIRMADOS ? '' : ' (de referencia, a confirmar)'));
+    lines.push('', '¿Me pueden confirmar disponibilidad y entrega en 24hs? Gracias.');
+    track('whatsapp_clicked', { contexto: 'configurador', total: total });
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
   }
 
@@ -432,6 +505,7 @@
    */
   function getCurrentConfiguration() {
     const productos = PRODUCTOS.filter((p) => state.active.has(p.id));
+    const extras = EXTRAS.filter((e) => state.extras.has(e.id));
     return {
       preset: state.preset,
       presetLabel: PRESET_LABELS[state.preset] || state.preset,
@@ -441,7 +515,12 @@
       deskModeLabel: MODE_LABELS[state.mode] || state.mode,
       products: productos.map((p) => p.id),
       productNames: productos.map((p) => p.nombre),
-      count: state.active.size
+      extras: extras.map((e) => e.id),
+      extraNames: extras.map((e) => e.nombre),
+      count: state.active.size,
+      estimatedTotal: computeTotal(),
+      currency: CATALOGO.MONEDA || 'ARS',
+      pricesConfirmed: !!CATALOGO.PRECIOS_CONFIRMADOS
     };
   }
 
@@ -505,10 +584,14 @@
     dom.configTags = $('configTags');
     dom.configCount = $('configCount');
     dom.whatsapp = $('c3dWhatsapp');
+    dom.extras = $('c3dExtras');
+    dom.total = $('c3dTotal');
+    dom.totalNote = $('c3dTotalNote');
 
     if (!dom.checklist) return false; // seccion no presente
 
     buildChecklist();
+    buildExtras();
     syncUI();
 
     dom.presetGroup && dom.presetGroup.querySelectorAll('.c3d-seg-btn').forEach((b) =>

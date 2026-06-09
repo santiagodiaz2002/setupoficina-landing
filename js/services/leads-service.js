@@ -5,14 +5,16 @@
    backend: sólo llama a submitLead(payload) y reacciona al resultado.
 
    Estados:
-     · MODO REAL  -> si APP_CONFIG.LEADS_API_URL tiene una URL, hace POST.
-     · MODO DEMO  -> si la URL está vacía, guarda en localStorage, registra
-                     en consola que la integración real está pendiente y
-                     resuelve con { mode: 'demo' } (sin simular una
-                     confirmación de persistencia real).
+     · MODO REAL  -> si DEMO_MODE es false Y hay LEADS_API_URL, hace POST a
+                     un backend propio (que del lado servidor habla con
+                     Odoo CRM usando credenciales que NUNCA viajan al front).
+     · MODO DEMO  -> si DEMO_MODE es true o la URL está vacía: guarda en
+                     localStorage, registra en consola que la integración
+                     real está pendiente y resuelve con { mode: 'demo' }
+                     (sin simular una confirmación de persistencia real).
 
-   El contrato esperado del endpoint está documentado en
-   docs/INTEGRACION_BASE_DATOS.md.
+   El contrato esperado del endpoint y el mapeo a Odoo están documentados
+   en docs/INTEGRACION_ODOO_CRM.md.
    ===================================================================== */
 
 import { APP_CONFIG } from '../config/app-config.js';
@@ -86,14 +88,17 @@ async function enviarReal(url, payload, conf) {
 export async function submitLead(payload) {
   const conf = cfg();
   const url = (conf.LEADS_API_URL || '').trim();
+  /* Demo si está pedido explícitamente (DEMO_MODE) o si no hay endpoint.
+     Así nunca se intenta un POST contra una URL inexistente. */
+  const esDemo = conf.DEMO_MODE === true || !url;
 
-  if (!url) {
+  if (esDemo) {
     const guardado = guardarDemo(payload);
     console.warn(
-      '[leads-service] MODO DEMO activo: la integración real con la base de datos está PENDIENTE.\n' +
+      '[leads-service] MODO DEMO activo: la integración real (backend propio → Odoo CRM) está PENDIENTE.\n' +
       'El lead se guardó ' + (guardado ? 'en localStorage' : 'SÓLO en memoria (localStorage no disponible)') +
-      '. Configurá APP_CONFIG.LEADS_API_URL para habilitar el envío real.\n' +
-      'Contrato esperado: docs/INTEGRACION_BASE_DATOS.md',
+      '. Para habilitar el envío real: DEMO_MODE:false + LEADS_API_URL completa.\n' +
+      'Contrato y mapeo a Odoo: docs/INTEGRACION_ODOO_CRM.md',
       payload
     );
     return { ok: true, mode: 'demo', stored: guardado };

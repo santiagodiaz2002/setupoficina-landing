@@ -60,9 +60,9 @@ assets/images/setups/
 
 La estructura ya está pensada para sumar las fotos con cambios mínimos:
 
-1. **Hero:** dentro de `.hero-visual` (en `index.html`) se puede reemplazar la
-   ilustración CSS por una `<img>` real con `srcset`/`sizes`, declarando
-   `width`/`height` o `aspect-ratio` para evitar saltos de layout (CLS):
+1. **Hero:** dentro de `.hero-visual` (en `primoffice-landing.html`) se puede
+   reemplazar la ilustración CSS por una `<img>` real con `srcset`/`sizes`,
+   declarando `width`/`height` o `aspect-ratio` para evitar saltos de layout (CLS):
 
    ```html
    <img
@@ -86,3 +86,19 @@ La estructura ya está pensada para sumar las fotos con cambios mínimos:
 > Pautas: imágenes con `width`/`height` o `aspect-ratio` (evitar CLS),
 > `loading="lazy"` salvo el hero, `alt` significativo (accesibilidad/SEO) y
 > formatos modernos (`webp`/`avif`).
+
+---
+
+## Textos `alt` sugeridos (accesibilidad / SEO)
+
+Cada foto debe llevar un `alt` descriptivo y específico. Ejemplos:
+
+- Hero: `Setup de oficina PrimOffice: silla ergonómica, monitor en brazo articulado y escritorio ordenado`.
+- Home office: `Puesto de home office con silla ergonómica, notebook elevada y luz de monitor`.
+- Oficina: `Varios puestos de trabajo equipados por PrimOffice en una oficina`.
+- Setup Executive: `Setup Executive con standing desk regulable, doble monitor y cables ocultos`.
+- Detalle silla: `Silla ergonómica con soporte lumbar ajustable, vista de detalle`.
+- Detalle conectividad: `Hub USB-C PrimOffice centralizando los cables del escritorio`.
+
+Reglas: describir lo que se ve y su función; no empezar con “imagen de”; mantener
+≤ 125 caracteres; si la foto es puramente decorativa, usar `alt=""`.

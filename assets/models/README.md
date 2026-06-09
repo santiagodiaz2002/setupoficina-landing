@@ -110,7 +110,7 @@ draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/li
 gltfLoader.setDRACOLoader(draco);
 ```
 
-(El import map de `index.html` ya resuelve `three/addons/`.)
+(El import map de `primoffice-landing.html` ya resuelve `three/addons/`.)
 
 ---
 
