@@ -1,0 +1,107 @@
+/* =====================================================================
+   PrimOffice · Integración técnica sobre la landing canónica
+   ---------------------------------------------------------------------
+   CSS SCOPED. Usa los tokens de la landing canónica (--accent, --cta,
+   --white, --text-muted, --border, --radius...). NO redefine selectores
+   globales (hero, navbar, combos, beneficios, CTA, footer): sólo agrega
+   clases propias .s3d-* (configurador 3D), .pq-* (teaser + captura de lead).
+   ===================================================================== */
+
+/* ---------- ESCENA 3D (reemplaza el preview 2D dentro del resultado) ---------- */
+.s3d-stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius-lg,20px);overflow:hidden;
+  background:radial-gradient(60% 45% at 80% 12%,rgba(56,189,248,.22),transparent 70%),linear-gradient(160deg,#0b1424,#13233d);
+  border:1px solid rgba(255,255,255,.08);margin-bottom:.75rem;isolation:isolate}
+.s3d-host{position:absolute;inset:0;z-index:1}
+.s3d-host canvas{display:block;width:100%!important;height:100%!important;touch-action:none;outline:none}
+.s3d-toolbar{position:absolute;top:10px;right:10px;z-index:3;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 20px)}
+.s3d-cam{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 10px;border-radius:9px;
+  font-family:inherit;font-size:.72rem;font-weight:700;color:#dcf3ff;background:rgba(11,22,38,.55);
+  border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:background .18s,border-color .18s,color .18s,transform .15s}
+.s3d-cam svg{width:14px;height:14px}
+.s3d-cam:hover{background:rgba(56,189,248,.28);border-color:rgba(56,189,248,.55);color:#fff}
+.s3d-cam:active{transform:translateY(1px)}
+.s3d-cam.is-active{background:linear-gradient(135deg,var(--accent,#38bdf8),var(--cta,#0369a1));border-color:transparent;color:#fff}
+.s3d-loader{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  color:rgba(230,246,253,.9);font-size:.85rem;font-weight:600}
+.s3d-spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(56,189,248,.22);border-top-color:var(--accent,#38bdf8);animation:s3dSpin .9s linear infinite}
+@keyframes s3dSpin{to{transform:rotate(360deg)}}
+.s3d-hint{position:absolute;left:10px;bottom:10px;z-index:3;margin:0;padding:6px 11px;border-radius:100px;
+  font-size:.68rem;font-weight:600;color:rgba(230,246,253,.82);background:rgba(11,22,38,.5);
+  border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);pointer-events:none}
+.s3d-cam:focus-visible{outline:3px solid rgba(56,189,248,.6);outline-offset:2px}
+@media(max-width:600px){.s3d-cam span{display:none}.s3d-cam{padding:0 9px}}
+
+/* ---------- PANELES (teaser / lead) dentro de la sección oscura del quiz ---------- */
+.pq-panel[hidden]{display:none}
+.pq-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg,20px);
+  padding:clamp(1.5rem,4vw,2.5rem);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  animation:pqIn .45s cubic-bezier(.16,1,.3,1)}
+@keyframes pqIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.pq-eyebrow{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent,#38bdf8);margin-bottom:.75rem}
+
+/* TEASER */
+.pq-teaser__grid{display:grid;grid-template-columns:1.15fr .85fr;gap:1.5rem;align-items:center}
+.pq-teaser__title{font-family:'Poppins',sans-serif;font-size:clamp(1.3rem,3vw,1.8rem);font-weight:700;color:var(--white,#fff);line-height:1.2;margin-bottom:.6rem}
+.pq-teaser__sub{font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:1.25rem}
+.pq-teaser__sub strong{color:#fff}
+.pq-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.25rem}
+.pq-metric{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.75rem .6rem;text-align:center}
+.pq-metric__k{display:block;font-size:.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.pq-metric__v{display:block;font-family:'Poppins',sans-serif;font-size:1.05rem;font-weight:700;color:#fff;margin-top:.2rem}
+.pq-locked{position:relative;border-radius:16px;overflow:hidden;min-height:180px;display:grid;place-items:center;
+  background:radial-gradient(60% 50% at 70% 20%,rgba(56,189,248,.25),transparent 70%),linear-gradient(160deg,#0b1424,#13233d);border:1px solid rgba(255,255,255,.08)}
+.pq-locked__blur{position:absolute;inset:0;filter:blur(8px);opacity:.6;background:
+  radial-gradient(circle at 50% 35%,rgba(233,238,244,.5) 0 14%,transparent 16%),
+  linear-gradient(transparent 62%,rgba(240,250,255,.18) 62% 66%,transparent 66%)}
+.pq-locked__lock{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.5rem;color:#eaf6fd;font-size:.78rem;font-weight:700;text-align:center;padding:1rem}
+.pq-locked__lock svg{width:28px;height:28px;color:var(--accent,#38bdf8)}
+.pq-locked__lock::before{content:"";position:absolute;inset:0;background:rgba(7,17,31,.4);border-radius:14px;z-index:-1}
+.pq-note{font-size:.78rem;color:rgba(255,255,255,.55);margin-top:.85rem}
+
+/* LEAD FORM */
+.pq-lead__title{font-family:'Poppins',sans-serif;font-size:clamp(1.25rem,3vw,1.6rem);font-weight:700;color:var(--white,#fff);margin-bottom:.4rem}
+.pq-lead__sub{font-size:.92rem;color:rgba(255,255,255,.65);line-height:1.6;margin-bottom:1.5rem}
+.pq-field{margin-bottom:1.1rem}
+.pq-field[hidden]{display:none}
+.pq-label{display:block;font-size:.8rem;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:.5rem}
+.pq-req{color:var(--accent,#38bdf8)}
+.pq-input{width:100%;min-height:48px;border:1.5px solid rgba(255,255,255,.14);border-radius:10px;padding:0 .9rem;
+  font:inherit;font-size:.95rem;background:rgba(255,255,255,.06);color:#fff;transition:border-color .15s,box-shadow .15s}
+.pq-input::placeholder{color:rgba(255,255,255,.4)}
+.pq-input:focus{outline:none;border-color:var(--accent,#38bdf8);box-shadow:0 0 0 4px rgba(56,189,248,.18);background:rgba(255,255,255,.09)}
+.pq-input[aria-invalid="true"]{border-color:var(--danger,#ef4444);box-shadow:0 0 0 4px rgba(239,68,68,.16)}
+.pq-channel{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.pq-channel__opt{display:flex;align-items:center;gap:.6rem;min-height:48px;padding:0 1rem;border:1.5px solid rgba(255,255,255,.14);
+  border-radius:10px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.85);font-weight:600;font-size:.92rem;cursor:pointer;transition:border-color .15s,background .15s}
+.pq-channel__opt:hover{border-color:rgba(56,189,248,.5);background:rgba(56,189,248,.08)}
+.pq-channel__opt:focus-within{outline:3px solid rgba(56,189,248,.55);outline-offset:2px}
+.pq-channel__opt input{width:18px;height:18px;accent-color:var(--accent,#38bdf8);flex-shrink:0}
+.pq-channel__opt:has(input:checked){border-color:var(--accent,#38bdf8);background:rgba(56,189,248,.12)}
+.pq-consent{display:flex;align-items:flex-start;gap:.65rem;font-size:.82rem;color:rgba(255,255,255,.75);line-height:1.5;cursor:pointer}
+.pq-consent input{margin-top:2px;width:18px;height:18px;accent-color:var(--accent,#38bdf8);flex-shrink:0}
+.pq-error{margin-top:.45rem;font-size:.78rem;font-weight:600;color:#fda4a4}
+.pq-error[hidden]{display:none}
+.pq-actions{margin-top:1.4rem}
+.pq-submit{width:100%;justify-content:center}
+.pq-back{display:inline-flex;margin-top:.85rem;font-size:.82rem;font-weight:600;color:rgba(255,255,255,.6);background:none}
+.pq-back:hover{color:#fff}
+.pq-spin{display:inline-block;width:16px;height:16px;vertical-align:-2px;border-radius:50%;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;animation:s3dSpin .8s linear infinite}
+.pq-card :focus-visible{outline:3px solid rgba(56,189,248,.6);outline-offset:2px}
+
+@media(max-width:680px){.pq-teaser__grid{grid-template-columns:1fr}.pq-locked{order:2;min-height:150px}.pq-metrics{grid-template-columns:1fr}.pq-channel{grid-template-columns:1fr}}
+
+/* =====================================================================
+   PULIDO VISUAL · Configurador protagonista (58/42) — sólo contenedor
+   ===================================================================== */
+@media (min-width: 901px){
+  /* El resultado rompe el ancho del wrapper (720px) para dar protagonismo al 3D */
+  #quiz-result{position:relative;left:50%;width:min(1100px, calc(100vw - 3rem));margin-left:calc(min(1100px, 100vw - 3rem) * -0.5)}
+  .result-layout{grid-template-columns:1.4fr 1fr;gap:1.75rem;align-items:start}
+  .desk-preview{top:88px}                 /* sticky ya viene del canónico */
+  .s3d-stage,.desk-scene{aspect-ratio:auto;height:clamp(520px, 54vh, 620px)}
+}
+@media (max-width: 900px){
+  .desk-preview{position:static;top:auto}  /* sin sticky en mobile */
+  .s3d-stage,.desk-scene{aspect-ratio:auto;height:clamp(360px, 52vh, 440px)}
+}

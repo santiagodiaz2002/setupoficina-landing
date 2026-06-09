@@ -198,6 +198,34 @@
 .c3d-toast.is-visible{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ----------------------------------------------------------------
+   CARRITO · precios de referencia, extras y total
+   ---------------------------------------------------------------- */
+.c3d-item-price{
+  margin-left:auto;align-self:flex-start;white-space:nowrap;
+  font-size:13px;font-weight:800;letter-spacing:-.01em;
+  color:var(--blue-dark);font-variant-numeric:tabular-nums;
+  background:var(--blue-soft);padding:3px 9px;border-radius:999px;
+}
+.c3d-checklist .config-item.active .c3d-item-price{background:rgba(23,174,230,.18)}
+.c3d-item-price-zero{color:var(--muted);background:rgba(100,116,139,.10)}
+
+/* Bloque de extras: reutiliza .config-item */
+.c3d-extras{display:grid;gap:10px;margin-top:2px}
+.c3d-extra .config-item-text b{font-size:14.5px}
+
+/* Total estimado (dentro del resumen navy) */
+.c3d-cart-total{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  margin:4px 0 6px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);
+}
+.c3d-cart-total .c3d-total-k{font-size:13px;font-weight:800;color:rgba(255,255,255,.78)}
+.c3d-cart-total .c3d-total-v{font-size:22px;font-weight:900;letter-spacing:-.03em;color:#fff;font-variant-numeric:tabular-nums}
+.c3d-total-note{
+  margin:0 0 14px;font-size:11.5px;line-height:1.45;color:rgba(255,255,255,.55);
+}
+.c3d-total-note b{color:#9fe3ff;font-weight:800}
+
+/* ----------------------------------------------------------------
    FOCUS VISIBLE GLOBAL DEL CONFIGURADOR
    ---------------------------------------------------------------- */
 .c3d-cam-btn:focus-visible,
