@@ -1,0 +1,165 @@
+/* ════════════════════════════════════════════════════════
+   COMPARACIÓN ANTES / DESPUÉS  ·  scoped .ba-*
+   Sección independiente: no toca test, 3D, radar ni carrito.
+   ════════════════════════════════════════════════════════ */
+
+.ba-section{
+  background:var(--bg-2,#F1F5F9);
+  padding:6rem 1.5rem;
+  overflow:hidden;
+}
+
+.ba-header{
+  max-width:560px;
+  margin:0 auto 3.5rem;
+  text-align:center;
+}
+.ba-header .section__sub{margin:0 auto;}
+
+/* ── Contenedor del comparador ── */
+.ba-compare{
+  --ba-pos:100%;               /* 100% = solo "antes" visible */
+  position:relative;
+  max-width:520px;
+  margin:0 auto;
+  aspect-ratio:3/4;            /* imágenes verticales */
+  border-radius:var(--radius-lg,20px);
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(15,23,42,.18), 0 4px 16px rgba(15,23,42,.08);
+  border:1px solid var(--border,#E2E8F0);
+  background:var(--dark,#0F172A);
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:pan-y;          /* permite scroll vertical en mobile */
+  cursor:ew-resize;
+}
+.ba-compare:focus-visible{
+  outline:3px solid var(--accent,#38BDF8);
+  outline-offset:3px;
+}
+
+.ba-compare img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  pointer-events:none;
+}
+
+/* Capa superior: "antes", recortada según --ba-pos */
+.ba-img--antes{
+  clip-path:inset(0 calc(100% - var(--ba-pos)) 0 0);
+  z-index:2;
+  filter:saturate(.82) contrast(.96);
+}
+.ba-img--despues{z-index:1;}
+
+/* ── Divisor ── */
+.ba-divider{
+  position:absolute;
+  top:0; bottom:0;
+  left:var(--ba-pos);
+  width:0;
+  z-index:3;
+  pointer-events:none;
+}
+.ba-divider::before{
+  content:'';
+  position:absolute;
+  top:0; bottom:0;
+  left:-1.5px;
+  width:3px;
+  background:linear-gradient(180deg,
+    rgba(255,255,255,.95),
+    rgba(56,189,248,.9) 50%,
+    rgba(255,255,255,.95));
+  box-shadow:0 0 14px rgba(56,189,248,.55);
+}
+
+/* Manija central */
+.ba-handle{
+  position:absolute;
+  top:50%; left:0;
+  transform:translate(-50%,-50%);
+  width:46px; height:46px;
+  border-radius:50%;
+  background:rgba(15,23,42,.78);
+  backdrop-filter:blur(8px);
+  border:2px solid rgba(255,255,255,.9);
+  box-shadow:0 6px 20px rgba(15,23,42,.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  color:var(--white,#FFF);
+  transition:transform 180ms ease, box-shadow 180ms ease;
+}
+.ba-compare:hover .ba-handle,
+.ba-compare.ba-dragging .ba-handle{
+  transform:translate(-50%,-50%) scale(1.08);
+  box-shadow:0 8px 26px rgba(56,189,248,.45);
+}
+.ba-handle svg{width:11px;height:11px;flex-shrink:0;}
+
+/* ── Labels ── */
+.ba-label{
+  position:absolute;
+  top:1rem;
+  z-index:4;
+  font-family:'Poppins',sans-serif;
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  padding:.38rem .95rem;
+  border-radius:100px;
+  backdrop-filter:blur(8px);
+  pointer-events:none;
+  transition:opacity 300ms ease;
+}
+.ba-label--antes{
+  left:1rem;
+  background:rgba(15,23,42,.72);
+  color:rgba(255,255,255,.92);
+  border:1px solid rgba(255,255,255,.18);
+}
+.ba-label--despues{
+  right:1rem;
+  background:rgba(56,189,248,.18);
+  color:#BAE6FD;
+  border:1px solid rgba(56,189,248,.45);
+  text-shadow:0 1px 3px rgba(15,23,42,.6);
+}
+/* El label se atenúa cuando su lado queda casi oculto */
+.ba-compare.ba-hide-antes .ba-label--antes,
+.ba-compare.ba-hide-despues .ba-label--despues{opacity:0;}
+
+/* ── Hint inferior ── */
+.ba-hint{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  margin-top:1.25rem;
+  font-size:.82rem;
+  color:var(--text-muted,#475569);
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity 450ms ease, transform 450ms ease;
+}
+.ba-hint svg{width:16px;height:16px;flex-shrink:0;color:var(--cta,#0369A1);}
+.ba-compare.ba-ready ~ .ba-hint{opacity:1;transform:translateY(0);}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .ba-section{padding:4.5rem 1.25rem;}
+  .ba-header{margin-bottom:2.5rem;}
+  .ba-compare{max-width:100%;}
+  .ba-handle{width:40px;height:40px;}
+}
+
+/* ── Reduced motion: estado final directo ── */
+@media(prefers-reduced-motion:reduce){
+  .ba-hint{transition:none;}
+}

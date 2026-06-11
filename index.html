@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Primoffice — Tu Setup Ideal para Trabajar Mejor</title>
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=1" />
-  <meta name="theme-color" content="#0F172A" />
   <meta name="description" content="Descubrí qué setup necesitás para trabajar sin dolores. Combos ergonómicos. Entrega 24hs CABA y GBA." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -230,6 +228,26 @@
     .desk-preview__count{text-align:center;margin-top:.75rem;font-size:.75rem;color:rgba(255,255,255,.4);}
     .desk-preview__count span{color:var(--accent);font-weight:700;}
 
+
+    /* ── RADAR DINÁMICO: ACTUAL VS CONFIGURACIÓN ACTIVA ── */
+    .radar-panel{margin:0 0 1.5rem;padding:1.35rem;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);background:linear-gradient(145deg,rgba(15,23,42,.97),rgba(22,32,53,.93));box-shadow:0 16px 36px rgba(0,0,0,.14);overflow:hidden;}
+    .radar-panel__head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:.7rem;}
+    .radar-panel__eyebrow{display:block;color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:1.35px;text-transform:uppercase;margin-bottom:.25rem;}
+    .radar-panel__title{font-family:'Poppins',sans-serif;color:var(--white);font-size:1.08rem;font-weight:700;line-height:1.3;}
+    .radar-panel__note{max-width:560px;color:rgba(255,255,255,.54);font-size:.73rem;line-height:1.55;margin-top:.32rem;}
+    .radar-legend{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;color:rgba(255,255,255,.76);font-size:.72rem;white-space:nowrap;}
+    .radar-legend__item{display:flex;align-items:center;gap:.38rem;}
+    .radar-legend__swatch{width:11px;height:11px;border-radius:3px;border:1px solid rgba(255,255,255,.28);}
+    .radar-legend__swatch--current{background:rgba(148,163,184,.44);}
+    .radar-legend__swatch--selected{background:rgba(56,189,248,.54);}
+    .radar-wrap{display:grid;grid-template-columns:minmax(0,1fr) 178px;gap:1rem;align-items:center;}
+    .radar-canvas{display:block;width:100%;height:385px;border-radius:12px;}
+    .radar-summary{display:flex;flex-direction:column;gap:.55rem;}
+    .radar-summary__item{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.56rem .68rem;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(255,255,255,.035);}
+    .radar-summary__name{color:rgba(255,255,255,.66);font-size:.73rem;font-weight:600;}
+    .radar-summary__value{color:var(--accent);font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:700;white-space:nowrap;}
+    @media(max-width:760px){.radar-panel{padding:1rem}.radar-wrap{grid-template-columns:1fr}.radar-canvas{height:335px}.radar-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.42rem}.radar-summary__item{display:block;padding:.48rem;text-align:center}.radar-summary__name{display:block;font-size:.64rem}.radar-summary__value{display:block;margin-top:.12rem;font-size:.71rem}}
+
     /* ── CART ── */
     .cart-wrapper{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
     .cart-header{padding:1.25rem 1.75rem;background:var(--bg-2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
@@ -250,7 +268,10 @@
     .cart-item__badge{font-size:.65rem;font-weight:700;padding:.2rem .55rem;border-radius:100px;flex-shrink:0;background:rgba(56,189,248,.1);color:var(--cta);}
     .cart-item__price{font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;color:var(--dark);flex-shrink:0;}
     .cart-item--disabled{opacity:.4;}
-    .cart-item--disabled .cart-item__name{text-decoration:line-through;}
+    .cart-item--disabled .cart-item__name{text-decoration:none;}
+    .cart-item__status{display:inline-block;margin-left:.35rem;font-size:.62rem;font-weight:700;letter-spacing:.45px;text-transform:uppercase;color:var(--cta);}
+    .cart-item--disabled .cart-item__status{color:var(--text-muted);}
+
     .cart-extra-section{padding:1rem 1.75rem;border-top:1px solid var(--border);}
     .cart-extra-title{font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem;}
     .cart-extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;}
@@ -323,6 +344,7 @@
   </style>
   <link rel="stylesheet" href="./css/integracion-canonica.css" />
   <link rel="stylesheet" href="./css/pulido-visual.css" />
+  <link rel="stylesheet" href="./css/comparacion-antes-despues.css" />
   <script type="importmap">
   {
     "imports": {
@@ -331,6 +353,132 @@
     }
   }
   </script>
+
+  <style>
+    /* Layout final del resultado:
+       izquierda = configurador + radar; derecha = carrito alto */
+    #quiz-result .result-layout{
+      display:grid;
+      grid-template-columns:minmax(0,1.35fr) minmax(340px,1fr);
+      grid-template-areas:
+        "preview cart"
+        "radar   cart";
+      gap:1.25rem 1.5rem;
+      align-items:start;
+    }
+    #quiz-result .desk-preview{
+      grid-area:preview;
+      position:static;
+      top:auto;
+      min-width:0;
+    }
+    #quiz-result .cart-wrapper{
+      grid-area:cart;
+      min-width:0;
+    }
+    #quiz-result .radar-panel{
+      grid-area:radar;
+      margin:0;
+      min-width:0;
+      padding:1rem;
+    }
+    #quiz-result .radar-panel__head{
+      gap:.65rem;
+      margin-bottom:.45rem;
+    }
+    #quiz-result .radar-panel__title{
+      font-size:.98rem;
+    }
+    #quiz-result .radar-panel__note{
+      font-size:.68rem;
+      line-height:1.45;
+    }
+    #quiz-result .radar-legend{
+      gap:.6rem;
+      font-size:.66rem;
+    }
+    #quiz-result .radar-wrap{
+      grid-template-columns:1fr;
+      gap:.65rem;
+    }
+    #quiz-result .radar-canvas{
+      height:300px;
+    }
+    #quiz-result .radar-summary{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:.4rem;
+    }
+    #quiz-result .radar-summary__item{
+      display:block;
+      padding:.45rem .4rem;
+      text-align:center;
+    }
+    #quiz-result .radar-summary__name{
+      display:block;
+      font-size:.63rem;
+    }
+    #quiz-result .radar-summary__value{
+      display:block;
+      margin-top:.1rem;
+      font-size:.7rem;
+    }
+    @media(max-width:900px){
+      #quiz-result .result-layout{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "preview"
+          "cart"
+          "radar";
+      }
+      #quiz-result .radar-canvas{
+        height:335px;
+      }
+    }
+  </style>
+
+<style>
+    /* Carrito curado y compacto: una sola alternativa premium por categoría */
+    #quiz-result .cart-items{padding:.25rem 0;}
+    #quiz-result .cart-item{
+      gap:.68rem;
+      padding:.68rem .92rem;
+    }
+    #quiz-result .cart-item__check{
+      width:19px;
+      height:19px;
+      border-radius:5px;
+    }
+    #quiz-result .cart-item__icon{
+      width:34px;
+      height:34px;
+      border-radius:9px;
+    }
+    #quiz-result .cart-item__icon svg{
+      width:17px;
+      height:17px;
+    }
+    #quiz-result .cart-item__name{
+      font-size:.79rem;
+      line-height:1.28;
+    }
+    #quiz-result .cart-item__category{
+      font-size:.66rem;
+    }
+    #quiz-result .cart-item__status{
+      margin-left:.26rem;
+      font-size:.53rem;
+      letter-spacing:.28px;
+    }
+    #quiz-result .cart-item__price{
+      font-size:.82rem;
+    }
+    #quiz-result .cart-item__badge{
+      font-size:.56rem;
+      padding:.16rem .38rem;
+    }
+
+  </style>
 </head>
 <body>
 
@@ -528,6 +676,7 @@
         <p class="result-header__sub" id="result-description">Excluimos lo que ya tenés. Tocá para agregar o quitar antes de hacer el pedido.</p>
       </div>
 
+
       <div class="result-layout">
         <!-- LEFT: desk preview -->
         <div class="desk-preview">
@@ -555,7 +704,7 @@
             <div class="ds-item ds-lightbar hidden-item" id="dsi-lightbar"></div>
 
             <!-- monitor or laptop -->
-            <div class="ds-item" id="dsi-monitor-arm" style="position:absolute;left:50%;bottom:36%;transform:translateX(-50%);width:3%;height:14%;background:#334155;border-radius:2px;display:none;"></div>
+            <div class="ds-item ds-monitor-arm hidden-item" id="dsi-monitor-arm"></div>
             <div class="ds-item ds-monitor hidden-item" id="dsi-monitor">
               <div class="ds-monitor-screen"></div>
             </div>
@@ -621,7 +770,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" stroke-linecap="round"/></svg>
               Tu carrito personalizado
             </div>
-            <span class="cart-header__note">Tildá o destildá según lo que ya tenés</span>
+            <span class="cart-header__note">Activamos una recomendación inicial. Mostramos una opción premium por categoría para que puedas personalizarla sin duplicados.</span>
           </div>
           <div class="cart-items" id="cart-items-list"></div>
           <div class="cart-extra-section" id="cart-extras-section">
@@ -639,8 +788,58 @@
             </button>
           </div>
         </div>
+
+      <!-- RADAR DINÁMICO: setup actual vs selección activa -->
+      <section class="radar-panel" id="radarPanel" aria-labelledby="radarTitle">
+        <div class="radar-panel__head">
+          <div>
+            <span class="radar-panel__eyebrow">Diagnóstico visual personalizado</span>
+            <h4 class="radar-panel__title" id="radarTitle">Tu setup actual vs. tu configuración PrimOffice</h4>
+            <p class="radar-panel__note">Visualización orientativa calculada con tus respuestas y los productos que mantenés seleccionados. No representa una evaluación médica.</p>
+          </div>
+          <div class="radar-legend" aria-label="Referencias del gráfico">
+            <span class="radar-legend__item"><i class="radar-legend__swatch radar-legend__swatch--current"></i> Setup actual</span>
+            <span class="radar-legend__item"><i class="radar-legend__swatch radar-legend__swatch--selected"></i> Selección activa</span>
+          </div>
+        </div>
+        <div class="radar-wrap">
+          <canvas class="radar-canvas" id="setupRadar" role="img" aria-label="Gráfico radar dinámico de ergonomía, comodidad, postura, orden, foco y energía"></canvas>
+          <div class="radar-summary" id="radarSummary" aria-live="polite"></div>
+        </div>
+      </section>
+
       </div><!-- /result-layout -->
+
     </div><!-- /quiz-result -->
+  </div>
+</section>
+
+<!-- COMPARACIÓN ANTES / DESPUÉS -->
+<section class="ba-section" id="comparacion" aria-labelledby="ba-title">
+  <div class="container">
+    <div class="ba-header">
+      <span class="section__label">La diferencia es real</span>
+      <h2 class="section__title" id="ba-title">El mismo escritorio.<br/>Otra forma de trabajar.</h2>
+      <p class="section__sub">Deslizá para comparar un puesto de trabajo improvisado con un setup Primoffice completo.</p>
+    </div>
+    <div class="ba-compare" id="ba-compare" role="slider" tabindex="0"
+         aria-label="Comparador antes y después del setup. Usá las flechas para mover el divisor."
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+      <img class="ba-img--despues" src="./assets/images/comparacion/setup-despues.jpg" alt="Setup después: escritorio ergonómico Primoffice completo" loading="lazy" decoding="async" draggable="false" />
+      <img class="ba-img--antes" src="./assets/images/comparacion/setup-antes.png" alt="Setup antes: escritorio improvisado sin ergonomía" loading="lazy" decoding="async" draggable="false" />
+      <span class="ba-label ba-label--antes">Antes</span>
+      <span class="ba-label ba-label--despues">Después</span>
+      <div class="ba-divider" aria-hidden="true">
+        <div class="ba-handle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+    <p class="ba-hint" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M4 12h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Arrastrá el divisor para comparar
+    </p>
   </div>
 </section>
 
@@ -764,22 +963,22 @@ document.addEventListener('click',function(e){if(!navbar.contains(e.target))navb
 var P={
   soporte_notebook: {name:'Soporte para notebook ajustable',   cat:'Ergonomía',    price:12000, icon:'laptop',  dsEl:'dsi-stand,dsi-stand-leg'},
   mouse_ergo:       {name:'Mouse ergonómico inalámbrico',       cat:'Periférico',   price:15000, icon:'mouse',   dsEl:'dsi-mouse'},
-  mousepad_xxl:     {name:'Mousepad XXL antideslizante',        cat:'Accesorio',    price:8000,  icon:'pad',     dsEl:'dsi-mousepad'},
-  organizador:      {name:'Organizador de escritorio',          cat:'Orden',        price:9000,  icon:'org',     dsEl:'dsi-organizer,dsi-pens'},
+  mousepad_xxl:     {name:'Pad XL de escritorio pMat',          cat:'Accesorio',    price:8000,  icon:'pad',     dsEl:'dsi-mousepad'},
+  organizador:      {name:'Bandeja organizadora de cables pBox', cat:'Orden',        price:16000, icon:'org',     dsEl:'dsi-organizer'},
   guia:             {name:'Guía de ergonomía digital',          cat:'Extra',        price:0,     icon:'book',    dsEl:''},
   monitor_24:       {name:'Monitor externo 24" Full HD',        cat:'Pantalla',     price:85000, icon:'monitor', dsEl:'dsi-monitor,dsi-monitor-stand', badge:'Nuevo'},
-  soporte_monitor:  {name:'Soporte articulado para monitor',    cat:'Ergonomía',    price:18000, icon:'arm',     dsEl:'dsi-monitor-arm'},
+  soporte_monitor:  {name:'Soporte para monitor brazo articulado pArm', cat:'Ergonomía', price:69000, icon:'arm', dsEl:'dsi-monitor-arm'},
   teclado:          {name:'Teclado inalámbrico compacto',       cat:'Periférico',   price:22000, icon:'kbd',     dsEl:'dsi-keyboard'},
   mouse_vertical:   {name:'Mouse ergonómico vertical',          cat:'Periférico',   price:19000, icon:'mouse',   dsEl:'dsi-mouse'},
   hub_usb:          {name:'Hub USB-C multipuerto',              cat:'Conectividad', price:14000, icon:'hub',     dsEl:'dsi-hub'},
   luz_led:          {name:'Barra de luz LED escritorio',        cat:'Iluminación',  price:11000, icon:'light',   dsEl:'dsi-lightbar'},
   silla:            {name:'Silla ergonómica con soporte lumbar',cat:'Mueble',       price:180000,icon:'chair',   dsEl:'dsi-chair'},
   monitor_27:       {name:'Monitor curvo 27" QHD',              cat:'Pantalla',     price:130000,icon:'monitor', dsEl:'dsi-monitor,dsi-monitor-stand', badge:'Elite'},
-  soporte_dual:     {name:'Soporte dual articulado',            cat:'Ergonomía',    price:28000, icon:'arm',     dsEl:'dsi-monitor-arm'},
+  soporte_dual:     {name:'Soporte ajustable de doble brazo articulado pArmPlus', cat:'Ergonomía', price:99000, icon:'arm', dsEl:'dsi-monitor-arm'},
   teclado_mec:      {name:'Teclado mecánico TKL',               cat:'Periférico',   price:38000, icon:'kbd',     dsEl:'dsi-keyboard'},
   mouse_trackball:  {name:'Mouse trackball ergonómico',         cat:'Periférico',   price:29000, icon:'mouse',   dsEl:'dsi-mouse'},
   hub_usb_pro:      {name:'Hub USB-C 10-en-1 con HDMI',         cat:'Conectividad', price:22000, icon:'hub',     dsEl:'dsi-hub'},
-  organizador_prem: {name:'Organizador de escritorio premium',  cat:'Orden',        price:16000, icon:'org',     dsEl:'dsi-organizer,dsi-pens'},
+  organizador_prem: {name:'Bandeja organizadora de cables pBox', cat:'Orden',        price:16000, icon:'org',     dsEl:'dsi-organizer'},
   asesoria:         {name:'Asesoría de setup personalizada',    cat:'Servicio',     price:12000, icon:'star',    dsEl:''},
   almohadilla:      {name:'Almohadilla lumbar para silla',      cat:'Ergonomía',    price:7500,  icon:'back',    dsEl:''},
   reposamuñecas:    {name:'Reposabrazos / reposamuñecas',       cat:'Ergonomía',    price:6500,  icon:'wrist',   dsEl:''},
@@ -894,6 +1093,78 @@ btnBack.addEventListener('click',function(){
 
 renderQ(0);
 
+
+// ── RADAR DINÁMICO: ACTUAL VS CONFIGURACIÓN ACTIVA ─────────────────
+var RADAR_AXES=['Ergonomía','Comodidad','Postura','Orden','Foco','Energía'];
+var radarDisplay=null,radarTarget=null,radarAnim=0,radarResizeBound=false;
+
+function radarClamp(v){return Math.max(8,Math.min(96,Math.round(v)));}
+function radarCurrentValues(){
+  var s=answers.map(function(a,i){return a===null?2:questions[i].opts[a].s;});
+  return [
+    radarClamp(100-((s[0]*.20+s[2]*.42+s[4]*.38)-1)*37),
+    radarClamp(100-((s[1]*.55+s[4]*.45)-1)*39),
+    radarClamp(100-((s[1]*.32+s[2]*.48+s[4]*.20)-1)*41),
+    radarClamp(100-(s[3]-1)*38),
+    radarClamp(100-((s[3]*.34+s[5]*.66)-1)*37),
+    radarClamp(100-((s[0]*.30+s[1]*.28+s[5]*.42)-1)*38)
+  ];
+}
+function radarActiveProducts(){
+  var a={};
+  Object.keys(cartState).forEach(function(id){if(cartState[id])a[id]=true;});
+  Object.keys(extrasState).forEach(function(id){if(extrasState[id])a[id]=true;});
+  return a;
+}
+function radarSelectedValues(){
+  var v=radarCurrentValues().slice(),a=radarActiveProducts();
+  function plus(i,n){v[i]+=n;}
+  if(a.silla){plus(0,16);plus(1,24);plus(2,20);plus(5,6);}
+  if(a.almohadilla){plus(1,10);plus(2,10);}
+  if(a.soporte_monitor||a.soporte_dual){plus(0,16);plus(2,21);plus(1,5);}
+  if(a.soporte_notebook){plus(0,13);plus(2,17);}
+  if(a.mouse_ergo||a.mouse_vertical||a.mouse_trackball){plus(0,7);plus(1,13);plus(4,4);}
+  if(a.teclado||a.teclado_mec){plus(1,9);plus(4,5);}
+  if(a.mousepad_xxl){plus(1,6);plus(3,7);plus(4,4);}
+  if(a.organizador||a.organizador_prem){plus(3,22);plus(4,9);}
+  if(a.hub_usb||a.hub_usb_pro){plus(3,11);plus(4,6);}
+  if(a.luz_led){plus(4,10);plus(5,16);}
+  if(a.standing_desk){plus(0,9);plus(1,8);plus(5,13);}
+  if(a.reposamuñecas){plus(1,7);}
+  if(a.asesoria){plus(0,5);plus(2,5);plus(3,5);plus(4,5);plus(5,5);}
+  return v.map(radarClamp);
+}
+function radarPoint(cx,cy,r,i,n){var a=-Math.PI/2+Math.PI*2*i/n;return{x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};}
+function radarPoly(ctx,vals,cx,cy,r,fill,stroke,width){ctx.beginPath();vals.forEach(function(v,i){var p=radarPoint(cx,cy,r*v/100,i,vals.length);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}
+function radarDots(ctx,vals,cx,cy,r,color,size){ctx.fillStyle=color;vals.forEach(function(v,i){var p=radarPoint(cx,cy,r*v/100,i,vals.length);ctx.beginPath();ctx.arc(p.x,p.y,size,0,Math.PI*2);ctx.fill();});}
+function radarDraw(){
+  var canvas=document.getElementById('setupRadar');if(!canvas)return;
+  var w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}
+  var ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  var cx=w/2,cy=h/2+3,r=Math.min(w*.30,h*.34,150),n=RADAR_AXES.length;
+  ctx.lineWidth=1;
+  [20,40,60,80,100].forEach(function(l){ctx.beginPath();for(var i=0;i<n;i++){var p=radarPoint(cx,cy,r*l/100,i,n);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);}ctx.closePath();ctx.strokeStyle='rgba(226,232,240,.15)';ctx.stroke();});
+  for(var i=0;i<n;i++){var p=radarPoint(cx,cy,r,i,n);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p.x,p.y);ctx.strokeStyle='rgba(226,232,240,.16)';ctx.stroke();}
+  var cur=radarDisplay?radarDisplay.current:radarCurrentValues();var sel=radarDisplay?radarDisplay.selected:radarSelectedValues();
+  radarPoly(ctx,cur,cx,cy,r,'rgba(148,163,184,.18)','rgba(203,213,225,.74)',2);
+  radarPoly(ctx,sel,cx,cy,r,'rgba(56,189,248,.22)','#38BDF8',2.4);
+  radarDots(ctx,cur,cx,cy,r,'#CBD5E1',3.2);radarDots(ctx,sel,cx,cy,r,'#38BDF8',4);
+  ctx.font='600 12px Open Sans, sans-serif';ctx.fillStyle='rgba(255,255,255,.78)';ctx.textBaseline='middle';
+  RADAR_AXES.forEach(function(label,i){var p=radarPoint(cx,cy,r+28,i,n);ctx.textAlign=Math.abs(p.x-cx)<8?'center':(p.x>cx?'left':'right');ctx.fillText(label,p.x,p.y);});
+}
+function radarSummary(cur,sel){var el=document.getElementById('radarSummary');if(!el)return;el.innerHTML=RADAR_AXES.map(function(label,i){var d=Math.max(0,sel[i]-cur[i]);return '<div class="radar-summary__item"><span class="radar-summary__name">'+label+'</span><strong class="radar-summary__value">+'+d+' pts</strong></div>';}).join('');}
+function updateRadarChart(){
+  if(!document.getElementById('radarPanel'))return;
+  var target={current:radarCurrentValues(),selected:radarSelectedValues()};radarSummary(target.current,target.selected);
+  if(!radarResizeBound&&'ResizeObserver' in window){var c=document.getElementById('setupRadar');if(c){new ResizeObserver(radarDraw).observe(c);radarResizeBound=true;}}
+  if(!radarDisplay){radarDisplay={current:target.current.slice(),selected:target.selected.slice()};radarDraw();return;}
+  var from={current:radarDisplay.current.slice(),selected:radarDisplay.selected.slice()};radarTarget=target;var t0=performance.now();if(radarAnim)cancelAnimationFrame(radarAnim);
+  function tick(now){var p=Math.min(1,(now-t0)/420),e=1-Math.pow(1-p,3);radarDisplay={current:from.current.map(function(v,i){return v+(target.current[i]-v)*e;}),selected:from.selected.map(function(v,i){return v+(target.selected[i]-v)*e;})};radarDraw();if(p<1)radarAnim=requestAnimationFrame(tick);else radarAnim=0;}
+  radarAnim=requestAnimationFrame(tick);
+}
+
 // ── CART + PREVIEW STATE ──────────────────────────────────
 var cartState={}, extrasState={};
 
@@ -921,6 +1192,10 @@ function updatePreview(){
     visible['dsi-laptop']=true;
   }
 
+  // Mantener coherencia entre fallback 2D y escena 3D.
+  if(visible['dsi-monitor-arm']) visible['dsi-monitor-stand']=false;
+  if(!visible['dsi-monitor']) visible['dsi-lightbar']=false;
+
   // Toggle elements
   ['dsi-lightbar','dsi-monitor','dsi-monitor-stand','dsi-monitor-arm',
    'dsi-laptop','dsi-stand','dsi-stand-leg','dsi-keyboard','dsi-mousepad',
@@ -935,6 +1210,7 @@ function updatePreview(){
   var cnt=Object.keys(active).filter(function(id){return P[id]&&P[id].price>0;}).length;
   document.getElementById('preview-count').textContent=cnt;
   if(window.Setup3D){window.Setup3D.setVisible(visible,{standing:!!visible['dsi-standing-badge']});}
+  updateRadarChart();
 }
 
 function updateTotal(){
@@ -964,75 +1240,138 @@ function buildCart(ans){
     if(chair>=1)extras.push('almohadilla');
     extras.push('webcam','auriculares','reposamuñecas','standing_desk');
     if(mon>0)extras.push('monitor_24');
+    if(mon===2)extras.push('soporte_monitor');
   } else {
     if(chair>=1)items.push('silla');
     if(mon===0)items.push('monitor_27');
-    if(mon<=1)items.push('soporte_dual');
-    items.push('teclado_mec','mouse_trackball','hub_usb_pro');
+    if(mon<=1)items.push('soporte_monitor');
+    items.push('teclado_mec','mouse_vertical','hub_usb_pro','mousepad_xxl');
     if(ans[3]>=1)items.push('organizador_prem');
     items.push('asesoria','standing_desk');
     if(mon>0)extras.push('monitor_27');
+    if(mon===2)extras.push('soporte_monitor');
     if(chair===0)extras.push('almohadilla');
     extras.push('webcam','auriculares','luz_led');
   }
   return{score:score,items:items,extras:extras};
 }
 
+/* Catálogo estable: las respuestas solo definen qué queda activado inicialmente.
+   Ningún producto aparece o desaparece después del test. */
+var FULL_CART_IDS=[
+  'silla',
+  'standing_desk',
+  'soporte_notebook',
+  'soporte_monitor',
+  'monitor_27',
+  'teclado_mec',
+  'mouse_vertical',
+  'mousepad_xxl',
+  'hub_usb_pro',
+  'organizador_prem',
+  'luz_led',
+  'webcam',
+  'auriculares',
+  'asesoria'
+];
+
+/* Catálogo curado: ya no se muestran variantes duplicadas en simultáneo. */
+var CART_EXCLUSIVE_GROUPS=[];
+
+function normalizeCartId(id){
+  /* La interfaz muestra una sola opción premium por categoría.
+     Las recomendaciones históricas se traducen a esa variante visible. */
+  if(id==='organizador')return'organizador_prem';
+  if(id==='monitor_24')return'monitor_27';
+  if(id==='teclado')return'teclado_mec';
+  if(id==='mouse_ergo'||id==='mouse_trackball')return'mouse_vertical';
+  if(id==='hub_usb')return'hub_usb_pro';
+  if(id==='soporte_dual')return'soporte_monitor';
+  return id;
+}
+
+function cartAlternativesOf(id){
+  for(var i=0;i<CART_EXCLUSIVE_GROUPS.length;i++){
+    if(CART_EXCLUSIVE_GROUPS[i].indexOf(id)!==-1)return CART_EXCLUSIVE_GROUPS[i];
+  }
+  return[];
+}
+
+function setCartRowState(id,on){
+  cartState[id]=!!on;
+  var row=document.querySelector('[data-cart-product="'+id+'"]');
+  if(!row)return;
+  var chk=row.querySelector('input');
+  if(chk)chk.checked=!!on;
+  row.classList.toggle('cart-item--disabled',!on);
+}
+
 function renderCart(items,extras){
-  cartState={}; extrasState={};
-  items.forEach(function(id){cartState[id]=true;});
+  cartState={};
+  extrasState={};
+
+  var recommended={};
+  items.forEach(function(rawId){
+    var id=normalizeCartId(rawId);
+    if(P[id])recommended[id]=true;
+  });
+
+  FULL_CART_IDS.forEach(function(id){
+    cartState[id]=!!recommended[id];
+  });
 
   var listEl=document.getElementById('cart-items-list');
   listEl.innerHTML='';
-  items.forEach(function(id){
+
+  FULL_CART_IDS.forEach(function(id){
     var p=P[id]; if(!p)return;
+    var isRecommended=!!recommended[id];
     var bg=(ICON_BG[p.cat]||['#F1F5F9','#64748B'])[0];
     var col=(ICON_BG[p.cat]||['#F1F5F9','#64748B'])[1];
     var row=document.createElement('label');
-    row.className='cart-item'; row.style.cursor='pointer';
+
+    row.className='cart-item'+(cartState[id]?'':' cart-item--disabled');
+    row.style.cursor='pointer';
+    row.setAttribute('data-cart-product',id);
+
     row.innerHTML=
-      '<input type="checkbox" class="cart-item__check" checked>'+
+      '<input type="checkbox" class="cart-item__check"'+(cartState[id]?' checked':'')+'>'+
       '<div class="cart-item__icon" style="background:'+bg+';color:'+col+'">'+svgIcon(p.icon)+'</div>'+
-      '<div class="cart-item__info"><div class="cart-item__name">'+p.name+'</div><div class="cart-item__category">'+p.cat+'</div></div>'+
+      '<div class="cart-item__info"><div class="cart-item__name">'+p.name+'</div><div class="cart-item__category">'+p.cat+(isRecommended?'<span class="cart-item__status">Recomendado</span>':'<span class="cart-item__status">Disponible</span>')+'</div></div>'+
       (p.badge?'<span class="cart-item__badge">'+p.badge+'</span>':'')+
       '<div class="cart-item__price">'+(p.price>0?'$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'Gratis')+'</div>';
+
     var chk=row.querySelector('input');
     chk.addEventListener('change',function(){
-      cartState[id]=this.checked;
-      row.classList.toggle('cart-item--disabled',!this.checked);
-      updateTotal(); updatePreview();
+      var on=this.checked;
+
+      if(on){
+        cartAlternativesOf(id).forEach(function(otherId){
+          if(otherId!==id)setCartRowState(otherId,false);
+        });
+      }
+
+      setCartRowState(id,on);
+      updateTotal();
+      updatePreview();
     });
+
     listEl.appendChild(row);
   });
 
+  /* Ya no existe un bloque dinámico de extras:
+     todo el catálogo permanece visible en una única lista estable. */
+  var extrasSection=document.getElementById('cart-extras-section');
   var extrasEl=document.getElementById('cart-extras-list');
-  extrasEl.innerHTML='';
-  if(!extras.length){document.getElementById('cart-extras-section').classList.add('hidden');return;}
-  document.getElementById('cart-extras-section').classList.remove('hidden');
-  extras.forEach(function(id){
-    var p=P[id]; if(!p)return;
-    extrasState[id]=false;
-    var cell=document.createElement('label');
-    cell.className='cart-extra-item';
-    cell.innerHTML=
-      '<input type="checkbox">'+
-      '<span class="cart-extra-item__label">'+p.name+(p.badge?' <small style="color:var(--cta);font-weight:700">'+p.badge+'</small>':'')+'</span>'+
-      '<span class="cart-extra-item__price">$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'</span>';
-    var chk=cell.querySelector('input');
-    chk.addEventListener('change',function(){
-      extrasState[id]=this.checked;
-      cell.classList.toggle('selected',this.checked);
-      updateTotal(); updatePreview();
-    });
-    extrasEl.appendChild(cell);
-  });
+  if(extrasEl)extrasEl.innerHTML='';
+  if(extrasSection)extrasSection.classList.add('hidden');
 }
 
 function showResult(){
   var r=buildCart(answers);
   var tier,title,desc;
   if(r.score<=8){tier='Setup Starter recomendado';title='¡Buen punto de partida!';desc='Tu setup tiene las bases. Con estos ajustes vas a notar una diferencia enorme en comodidad y foco.';}
-  else if(r.score<=13){tier='Setup Pro recomendado';title='Tu setup necesita una actualización';desc='Estás trabajando por debajo de tu potencial. Mirá lo que armamos para vos — excluimos lo que ya tenés.';}
+  else if(r.score<=13){tier='Setup Pro recomendado';title='Tu setup necesita una actualización';desc='Estás trabajando por debajo de tu potencial. Marcamos una recomendación inicial y dejamos todo el catálogo disponible para que lo personalices.';}
   else{tier='Setup Elite recomendado';title='Tu setup necesita atención urgente';desc='Estás acumulando desgaste físico todos los días. Este es el combo que te cambia la vida laboral.';}
 
   document.getElementById('result-tier').textContent=tier;
@@ -1059,7 +1398,7 @@ function showResult(){
     var qr=document.getElementById('quiz-result');
     qr.classList.remove('hidden');
     qr.style.opacity='0'; qr.style.transition='opacity 400ms';
-    requestAnimationFrame(function(){qr.style.opacity='1';});
+    requestAnimationFrame(function(){qr.style.opacity='1';updateRadarChart();});
   },260);
 }
 
@@ -1165,6 +1504,7 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
 })();
 </script>
 <script defer src="./js/pulido-visual.js"></script>
+<script defer src="./js/comparacion-antes-despues.js"></script>
 <script type="module" src="./js/config/app-config.js"></script>
 <script type="module" src="./js/services/leads-service.js"></script>
 <script type="module" src="./js/setup-3d.js"></script>
