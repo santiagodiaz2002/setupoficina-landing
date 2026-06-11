@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Primoffice — Tu Setup Ideal para Trabajar Mejor</title>
   <meta name="description" content="Descubrí qué setup necesitás para trabajar sin dolores. Combos ergonómicos. Entrega 24hs CABA y GBA." />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="shortcut icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -479,6 +481,62 @@
     }
 
   </style>
+<style>
+    /* Selector compacto de presets del configurador 3D */
+    #quiz-result .combo-preset{
+      margin-bottom:.85rem;
+      padding:.72rem;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:12px;
+      background:rgba(255,255,255,.035);
+    }
+    #quiz-result .combo-preset__head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.65rem;
+      margin-bottom:.55rem;
+    }
+    #quiz-result .combo-preset__label{
+      color:rgba(255,255,255,.72);
+      font-family:'Poppins',sans-serif;
+      font-size:.72rem;
+      font-weight:600;
+      letter-spacing:.35px;
+      text-transform:uppercase;
+    }
+    #quiz-result .combo-preset__hint{
+      color:rgba(255,255,255,.38);
+      font-size:.62rem;
+    }
+    #quiz-result .combo-preset__buttons{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:.42rem;
+    }
+    #quiz-result .combo-preset__btn{
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:8px;
+      padding:.56rem .45rem;
+      background:rgba(255,255,255,.045);
+      color:rgba(255,255,255,.76);
+      font-size:.73rem;
+      font-weight:700;
+      transition:background 180ms,border-color 180ms,color 180ms,transform 160ms,box-shadow 180ms;
+    }
+    #quiz-result .combo-preset__btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(56,189,248,.58);
+      color:#fff;
+    }
+    #quiz-result .combo-preset__btn.is-active{
+      border-color:var(--accent);
+      background:linear-gradient(135deg,rgba(3,105,161,.88),rgba(14,165,233,.72));
+      color:#fff;
+      box-shadow:0 5px 16px rgba(3,105,161,.28);
+    }
+
+  </style>
 </head>
 <body>
 
@@ -680,6 +738,18 @@
       <div class="result-layout">
         <!-- LEFT: desk preview -->
         <div class="desk-preview">
+
+          <div class="combo-preset" aria-label="Previsualizar combos en el configurador 3D">
+            <div class="combo-preset__head">
+              <span class="combo-preset__label">Ver combo en 3D</span>
+              <span class="combo-preset__hint">Aplicá un preset y ajustalo</span>
+            </div>
+            <div class="combo-preset__buttons" role="group" aria-label="Combos disponibles">
+              <button type="button" class="combo-preset__btn" data-combo-preset="starter" aria-pressed="false">Starter</button>
+              <button type="button" class="combo-preset__btn" data-combo-preset="pro" aria-pressed="false">Pro</button>
+              <button type="button" class="combo-preset__btn" data-combo-preset="elite" aria-pressed="false">Elite</button>
+            </div>
+          </div>
           <div class="desk-preview__title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87V15.13a1 1 0 01-1.447.9L15 14M3 8h12v8H3V8z" stroke-linecap="round"/></svg>
             Preview en tiempo real
@@ -1306,6 +1376,83 @@ function setCartRowState(id,on){
   row.classList.toggle('cart-item--disabled',!on);
 }
 
+
+/* Presets visuales rápidos para el configurador 3D.
+   Se apoyan en el catálogo premium visible y actualizan carrito, total y radar. */
+var COMBO_PRESETS={
+  starter:[
+    'soporte_notebook',
+    'mouse_vertical',
+    'mousepad_xxl',
+    'organizador_prem'
+  ],
+  pro:[
+    'soporte_notebook',
+    'soporte_monitor',
+    'monitor_27',
+    'teclado_mec',
+    'mouse_vertical',
+    'mousepad_xxl',
+    'hub_usb_pro',
+    'organizador_prem',
+    'luz_led'
+  ],
+  elite:[
+    'silla',
+    'standing_desk',
+    'soporte_monitor',
+    'monitor_27',
+    'teclado_mec',
+    'mouse_vertical',
+    'mousepad_xxl',
+    'hub_usb_pro',
+    'organizador_prem',
+    'luz_led',
+    'webcam',
+    'auriculares',
+    'asesoria'
+  ]
+};
+
+function presetMatches(name){
+  var ids=COMBO_PRESETS[name]||[];
+  return FULL_CART_IDS.every(function(id){
+    return !!cartState[id] === (ids.indexOf(id)!==-1);
+  });
+}
+
+function updatePresetButtons(activeName){
+  if(!activeName){
+    Object.keys(COMBO_PRESETS).some(function(name){
+      if(presetMatches(name)){activeName=name;return true;}
+      return false;
+    });
+  }
+  document.querySelectorAll('[data-combo-preset]').forEach(function(btn){
+    var on=btn.getAttribute('data-combo-preset')===activeName;
+    btn.classList.toggle('is-active',on);
+    btn.setAttribute('aria-pressed',on?'true':'false');
+  });
+}
+
+function applyComboPreset(name){
+  var ids=COMBO_PRESETS[name];
+  if(!ids)return;
+  FULL_CART_IDS.forEach(function(id){
+    setCartRowState(id,ids.indexOf(id)!==-1);
+  });
+  updateTotal();
+  updatePreview();
+  updatePresetButtons(name);
+}
+
+document.querySelectorAll('[data-combo-preset]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    applyComboPreset(this.getAttribute('data-combo-preset'));
+  });
+});
+
+
 function renderCart(items,extras){
   cartState={};
   extrasState={};
@@ -1354,6 +1501,7 @@ function renderCart(items,extras){
       setCartRowState(id,on);
       updateTotal();
       updatePreview();
+      updatePresetButtons();
     });
 
     listEl.appendChild(row);
@@ -1365,6 +1513,7 @@ function renderCart(items,extras){
   var extrasEl=document.getElementById('cart-extras-list');
   if(extrasEl)extrasEl.innerHTML='';
   if(extrasSection)extrasSection.classList.add('hidden');
+  updatePresetButtons();
 }
 
 function showResult(){
