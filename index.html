@@ -537,6 +537,29 @@
     }
 
   </style>
+
+  <style>
+    /* Hero: comparador animado antes/después en lugar del mockup */
+    .hero__visual--comparison{min-width:0;}
+    .hero-comparison{width:100%;max-width:520px;margin:0 auto;position:relative;}
+    .hero-comparison .ba-compare{
+      width:100%;
+      aspect-ratio:3/4;
+      min-height:0;
+      border-radius:var(--radius-lg);
+      box-shadow:0 20px 55px rgba(0,0,0,.26);
+      border:1px solid rgba(255,255,255,.14);
+      overflow:hidden;
+    }
+    .hero-comparison .ba-img--antes,
+    .hero-comparison .ba-img--despues{width:100%;height:100%;object-fit:cover;}
+    .hero-comparison__hint{display:none!important;}
+    @media(max-width:900px){
+      .hero__visual--comparison{display:flex;margin-top:.5rem;}
+      .hero-comparison{max-width:390px;}
+    }
+  </style>
+
 </head>
 <body>
 
@@ -594,19 +617,23 @@
         <div><div class="hero__stat-value"><span>24hs</span></div><div class="hero__stat-label">entrega CABA y GBA</div></div>
       </div>
     </div>
-    <div class="hero__visual" aria-hidden="true">
-      <div class="desk-mockup">
-        <div class="desk-card">
-          <div class="desk-card__header"><div class="dot dot--red"></div><div class="dot dot--yellow"></div><div class="dot dot--green"></div></div>
-          <div class="setup-items">
-            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(16,185,129,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4" stroke-linecap="round"/></svg></div><span class="setup-item__name">Monitor externo</span><span class="setup-item__tag tag--ok">OK</span></div>
-            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(245,158,11,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01" stroke-linecap="round"/></svg></div><span class="setup-item__name">Posición del cuello</span><span class="setup-item__tag tag--warn">Mejorar</span></div>
-            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(239,68,68,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div><span class="setup-item__name">Soporte lumbar</span><span class="setup-item__tag tag--bad">Urgente</span></div>
-            <div class="setup-item"><div class="setup-item__icon" style="background:rgba(239,68,68,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/></svg></div><span class="setup-item__name">Organización</span><span class="setup-item__tag tag--bad">Urgente</span></div>
-          </div>
+    <div class="hero__visual hero__visual--comparison">
+      <div class="hero-comparison" id="comparacion" aria-label="Comparación animada de setup antes y después">
+        <div class="ba-compare" id="ba-compare" role="slider" tabindex="0"
+         aria-label="Comparador antes y después del setup. Usá las flechas para mover el divisor."
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+      <img class="ba-img--despues" src="./assets/images/comparacion/setup-despues.jpg" alt="Setup después: escritorio ergonómico Primoffice completo" loading="lazy" decoding="async" draggable="false" />
+      <img class="ba-img--antes" src="./assets/images/comparacion/setup-antes.png" alt="Setup antes: escritorio improvisado sin ergonomía" loading="lazy" decoding="async" draggable="false" />
+      <span class="ba-label ba-label--antes">Antes</span>
+      <span class="ba-label ba-label--despues">Después</span>
+      <div class="ba-divider" aria-hidden="true">
+        <div class="ba-handle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div class="floating-badge floating-badge--1"><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div><div class="floating-badge__text">+37% productividad</div><div class="floating-badge__sub">promedio tras el setup</div></div></div>
-        <div class="floating-badge floating-badge--2"><svg viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="floating-badge__text">Entrega 24hs</div><div class="floating-badge__sub">CABA y GBA</div></div></div>
+      </div>
+    </div>
+        <p class="ba-hint hero-comparison__hint" aria-hidden="true" hidden>Arrastrá el divisor para comparar</p>
       </div>
     </div>
   </div>
@@ -881,35 +908,6 @@
       </div><!-- /result-layout -->
 
     </div><!-- /quiz-result -->
-  </div>
-</section>
-
-<!-- COMPARACIÓN ANTES / DESPUÉS -->
-<section class="ba-section" id="comparacion" aria-labelledby="ba-title">
-  <div class="container">
-    <div class="ba-header">
-      <span class="section__label">La diferencia es real</span>
-      <h2 class="section__title" id="ba-title">El mismo escritorio.<br/>Otra forma de trabajar.</h2>
-      <p class="section__sub">Deslizá para comparar un puesto de trabajo improvisado con un setup Primoffice completo.</p>
-    </div>
-    <div class="ba-compare" id="ba-compare" role="slider" tabindex="0"
-         aria-label="Comparador antes y después del setup. Usá las flechas para mover el divisor."
-         aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
-      <img class="ba-img--despues" src="./assets/images/comparacion/setup-despues.jpg" alt="Setup después: escritorio ergonómico Primoffice completo" loading="lazy" decoding="async" draggable="false" />
-      <img class="ba-img--antes" src="./assets/images/comparacion/setup-antes.png" alt="Setup antes: escritorio improvisado sin ergonomía" loading="lazy" decoding="async" draggable="false" />
-      <span class="ba-label ba-label--antes">Antes</span>
-      <span class="ba-label ba-label--despues">Después</span>
-      <div class="ba-divider" aria-hidden="true">
-        <div class="ba-handle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-      </div>
-    </div>
-    <p class="ba-hint" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M4 12h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Arrastrá el divisor para comparar
-    </p>
   </div>
 </section>
 
