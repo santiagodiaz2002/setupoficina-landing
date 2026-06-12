@@ -601,6 +601,33 @@
     @media(max-width:480px){.brand-logo--header{height:42px;max-width:162px;}}
   </style>
   <style>.noscript-notice{display:block;padding:1rem 1.5rem;background:#FEF3C7;color:#78350F;text-align:center;font-weight:600;}</style>
+
+  <style>
+    /* Conversión: pasos claros + contacto rápido */
+    .conversion-flow{padding:4.5rem 1.5rem;background:var(--white);border-bottom:1px solid var(--border);}
+    .conversion-flow__head{max-width:650px;margin-bottom:2rem;}
+    .conversion-flow__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;}
+    .conversion-step{position:relative;padding:1.45rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);}
+    .conversion-step__number{display:inline-block;margin-bottom:.75rem;color:var(--cta);font-family:'Poppins',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:1px;}
+    .conversion-step h3{margin-bottom:.38rem;color:var(--dark);font-family:'Poppins',sans-serif;font-size:1rem;line-height:1.35;}
+    .conversion-step p{color:var(--text-muted);font-size:.86rem;line-height:1.62;}
+    .wa-float{position:fixed;right:1.25rem;bottom:1.25rem;z-index:110;display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:999px;background:#25D366;color:#fff;box-shadow:0 10px 28px rgba(37,211,102,.33);transition:transform 180ms,box-shadow 180ms;}
+    .wa-float:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(37,211,102,.42);}
+    .wa-float svg{width:28px;height:28px;flex-shrink:0;}
+    .mobile-action-bar{display:none;}
+    @media(max-width:768px){
+      body{padding-bottom:70px;}
+      .conversion-flow{padding:3.5rem 1.25rem;}
+      .conversion-flow__grid{grid-template-columns:1fr;}
+      .wa-float{display:none;}
+      .mobile-action-bar{position:fixed;left:0;right:0;bottom:0;z-index:120;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.55rem;padding:.6rem .75rem calc(.6rem + env(safe-area-inset-bottom));background:rgba(15,23,42,.96);border-top:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px);}
+      .mobile-action-bar a{display:flex;align-items:center;justify-content:center;gap:.38rem;min-height:44px;border-radius:9px;font-size:.78rem;font-weight:800;text-align:center;}
+      .mobile-action-bar__primary{background:linear-gradient(135deg,var(--cta),var(--cta-hover));color:#fff;}
+      .mobile-action-bar__wa{background:#25D366;color:#fff;min-width:56px;padding:0 .95rem;}
+      .mobile-action-bar__wa svg{width:22px;height:22px;display:block;}
+    }
+  </style>
+
 </head>
 <body>
 
@@ -614,7 +641,7 @@
       <li><a href="#test">Test ergonómico</a></li>
       <li><a href="#combos">Combos</a></li>
       <li><a href="#beneficios">Beneficios</a></li>
-      <li><a href="#test" class="navbar__cta">Hacé el test</a></li>
+      <li><a href="#test" class="navbar__cta">Diagnóstico gratis</a></li>
     </ul>
     <button class="navbar__menu-btn" id="menu-btn" aria-expanded="false" aria-label="Abrir menú">
       <span></span><span></span><span></span>
@@ -630,21 +657,21 @@
     <div class="hero__content">
       <div class="hero__badge">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="#38BDF8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        Ergonomía profesional · CABA y GBA
+        Diagnóstico breve · Recomendación personalizada
       </div>
       <h1 class="hero__title">¿Tu setup te está<br/><em>robando productividad?</em></h1>
       <p class="hero__subtitle">Hacé nuestro test de 6 preguntas y recibí un combo personalizado según lo que ya tenés y lo que realmente necesitás.</p>
       <div class="hero__actions">
         <a href="#test" class="btn-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg>
-          Hacé el test gratuito
+          Hacé el diagnóstico gratis
         </a>
         <a href="#combos" class="btn-ghost">Ver combos</a>
       </div>
-      <div class="hero__stats">
-        <div><div class="hero__stat-value">+<span>2.000</span></div><div class="hero__stat-label">setups instalados</div></div>
-        <div><div class="hero__stat-value"><span>4.9</span>★</div><div class="hero__stat-label">calificación promedio</div></div>
-        <div><div class="hero__stat-value"><span>24 h</span></div><div class="hero__stat-label">entrega CABA y GBA</div></div>
+      <div class="hero__stats" aria-label="Características del diagnóstico">
+        <div><div class="hero__stat-value"><span>6</span></div><div class="hero__stat-label">preguntas simples</div></div>
+        <div><div class="hero__stat-value"><span>3</span></div><div class="hero__stat-label">niveles de setup</div></div>
+        <div><div class="hero__stat-value"><span>3D</span></div><div class="hero__stat-label">configuración ajustable</div></div>
       </div>
     </div>
     <div class="hero__visual hero__visual--comparison">
@@ -669,16 +696,31 @@
   </div>
 </section>
 
+<!-- CAMINO DE CONVERSIÓN -->
+<section class="conversion-flow" aria-labelledby="conversion-flow-title">
+  <div class="container">
+    <div class="conversion-flow__head">
+      <span class="section__label">Cómo funciona</span>
+      <h2 class="section__title" id="conversion-flow-title">De tu problema a una configuración concreta</h2>
+    </div>
+    <div class="conversion-flow__grid">
+      <article class="conversion-step"><span class="conversion-step__number">01</span><h3>Respondé 6 preguntas</h3><p>Contanos cómo trabajás hoy y qué puntos te generan más fricción.</p></article>
+      <article class="conversion-step"><span class="conversion-step__number">02</span><h3>Revisá tu setup recomendado</h3><p>Desbloqueá una propuesta inicial y ajustala en el configurador 3D.</p></article>
+      <article class="conversion-step"><span class="conversion-step__number">03</span><h3>Consultá con un asesor</h3><p>Enviá el carrito configurado para validar disponibilidad y opciones de entrega.</p></article>
+    </div>
+  </div>
+</section>
+
 <!-- PAIN POINTS -->
 <section class="section section--alt" aria-labelledby="pain-title">
   <div class="container">
     <div style="max-width:580px">
       <span class="section__label">El problema real</span>
       <h2 class="section__title" id="pain-title">Trabajar mal cuesta más de lo que creés</h2>
-      <p class="section__sub">La mayoría de los profesionales pierde entre 2 y 4 horas diarias por un setup mal armado. Y ni se dan cuenta.</p>
+      <p class="section__sub">Un setup incómodo o desordenado puede afectar tu postura, tu concentración y la forma en la que resolvés tareas todos los días.</p>
     </div>
     <div class="pain-grid">
-      <div class="pain-card"><div class="pain-card__icon" style="background:#FEF2F2"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01" stroke-linecap="round"/></svg></div><h3 class="pain-card__title">Dolores crónicos</h3><p class="pain-card__text">Cervical, lumbar, muñecas. El 78% de los trabajadores remotos sufre dolor crónico por mala postura frente a la pantalla.</p></div>
+      <div class="pain-card"><div class="pain-card__icon" style="background:#FEF2F2"><svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01" stroke-linecap="round"/></svg></div><h3 class="pain-card__title">Dolores crónicos</h3><p class="pain-card__text">Cuello, espalda y muñecas pueden resentirse cuando la pantalla, la silla o los periféricos no están bien ubicados.</p></div>
       <div class="pain-card"><div class="pain-card__icon" style="background:#FFFBEB"><svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg></div><h3 class="pain-card__title">Tiempo perdido</h3><p class="pain-card__text">Buscar cables, mover cosas, reubicar la notebook. El desorden visual genera distracción constante todos los días.</p></div>
       <div class="pain-card"><div class="pain-card__icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round"/></svg></div><h3 class="pain-card__title">Energía que se va</h3><p class="pain-card__text">Pantalla chica, mala iluminación, postura forzada. Al mediodía ya estás agotado y recién arrancaste.</p></div>
     </div>
@@ -911,7 +953,7 @@
             </div>
             <button class="btn-cart" onclick="sendWhatsApp()">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              Pedir por WhatsApp
+              Pedir ahora
             </button>
           </div>
         </div>
@@ -953,7 +995,7 @@
       <div class="combo-card">
         <div class="combo-card__tier">Combo 01</div><div class="combo-card__name">Setup Starter</div>
         <p class="combo-card__desc">Para quienes están dando sus primeros pasos en armar un espacio de trabajo decente.</p>
-        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>89.000</span><span class="combo-card__price-period">ARS · entrega 24 h CABA y GBA</span></div>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>89.000</span><span class="combo-card__price-period">ARS · consultá disponibilidad</span></div>
         <ul class="combo-card__items">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte para notebook (ajustable)</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mouse ergonómico inalámbrico</li>
@@ -961,13 +1003,13 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Organizador de escritorio</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Guía de ergonomía digital</li>
         </ul>
-        <a href="https://primoffice.com.ar" class="combo-btn combo-btn--outline" target="_blank" rel="noopener">Quiero este combo</a>
+        <a href="https://wa.me/5491139149688?text=Hola%2C%20PrimOffice.%20Me%20interesa%20consultar%20por%20el%20Setup%20Starter.%20%C2%BFMe%20pueden%20pasar%20disponibilidad%2C%20alternativas%20y%20opciones%20de%20entrega%3F" class="combo-btn combo-btn--outline" target="_blank" rel="noopener" data-wa-message="Hola, PrimOffice. Me interesa consultar por el Setup Starter. ¿Me pueden pasar disponibilidad, alternativas y opciones de entrega?">Consultar</a>
       </div>
       <div class="combo-card combo-card--featured">
         <div class="combo-badge">⭐ Más popular</div>
         <div class="combo-card__tier">Combo 02</div><div class="combo-card__name">Setup Pro</div>
         <p class="combo-card__desc">El equilibrio ideal: máxima ergonomía y productividad sin gastar de más. El más elegido.</p>
-        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>189.000</span><span class="combo-card__price-period">ARS · entrega 24 h CABA y GBA</span></div>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>189.000</span><span class="combo-card__price-period">ARS · consultá disponibilidad</span></div>
         <ul class="combo-card__items">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Monitor externo 24" Full HD</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte articulado para monitor</li>
@@ -977,12 +1019,12 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Barra de luz LED para escritorio</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte para notebook + mouse pad XXL</li>
         </ul>
-        <a href="https://primoffice.com.ar" class="combo-btn combo-btn--primary" target="_blank" rel="noopener">Quiero este combo</a>
+        <a href="https://wa.me/5491139149688?text=Hola%2C%20PrimOffice.%20Me%20interesa%20consultar%20por%20el%20Setup%20Pro.%20%C2%BFMe%20pueden%20pasar%20disponibilidad%2C%20alternativas%20y%20opciones%20de%20entrega%3F" class="combo-btn combo-btn--primary" target="_blank" rel="noopener" data-wa-message="Hola, PrimOffice. Me interesa consultar por el Setup Pro. ¿Me pueden pasar disponibilidad, alternativas y opciones de entrega?">Consultar</a>
       </div>
       <div class="combo-card">
         <div class="combo-card__tier">Combo 03</div><div class="combo-card__name">Setup Epic</div>
         <p class="combo-card__desc">Para el profesional que pasa 8+ horas al día trabajando y no tolera ningún compromiso.</p>
-        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>389.000</span><span class="combo-card__price-period">ARS · entrega 24 h CABA y GBA</span></div>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>389.000</span><span class="combo-card__price-period">ARS · consultá disponibilidad</span></div>
         <ul class="combo-card__items">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Silla ergonómica con soporte lumbar</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Monitor curvo 27" QHD</li>
@@ -993,7 +1035,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Standing desk eléctrico</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Asesoría de setup personalizada</li>
         </ul>
-        <a href="https://primoffice.com.ar" class="combo-btn combo-btn--outline" target="_blank" rel="noopener">Quiero este combo</a>
+        <a href="https://wa.me/5491139149688?text=Hola%2C%20PrimOffice.%20Me%20interesa%20consultar%20por%20el%20Setup%20Epic.%20%C2%BFMe%20pueden%20pasar%20disponibilidad%2C%20alternativas%20y%20opciones%20de%20entrega%3F" class="combo-btn combo-btn--outline" target="_blank" rel="noopener" data-wa-message="Hola, PrimOffice. Me interesa consultar por el Setup Epic. ¿Me pueden pasar disponibilidad, alternativas y opciones de entrega?">Consultar</a>
       </div>
     </div>
   </div>
@@ -1008,10 +1050,10 @@
       <p class="section__sub" style="margin:0 auto">Cualquiera puede comprar partes sueltas. Nosotros te damos un sistema que funciona en conjunto.</p>
     </div>
     <div class="benefits-grid">
-      <div class="benefit-card"><div class="benefit-card__icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Productos curados</h3><p class="benefit-card__text">Cada producto fue testeado por especialistas en ergonomía. Nada es al azar.</p></div>
-      <div class="benefit-card"><div class="benefit-card__icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Entrega 24 h</h3><p class="benefit-card__text">Todo junto, a tu puerta, en CABA y GBA. Sin coordinar múltiples proveedores.</p></div>
-      <div class="benefit-card"><div class="benefit-card__icon" style="background:#FFF7ED"><svg viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"><path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Soporte incluido</h3><p class="benefit-card__text">Te ayudamos por WhatsApp hasta que tu setup esté 100% perfecto.</p></div>
-      <div class="benefit-card"><div class="benefit-card__icon" style="background:#FDF4FF"><svg viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Garantía 30 días</h3><p class="benefit-card__text">Si en 30 días no notás la diferencia, te devolvemos el dinero. Sin letra chica.</p></div>
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#EFF6FF"><svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Selección guiada</h3><p class="benefit-card__text">El diagnóstico filtra alternativas según lo que ya tenés y las mejoras que querés priorizar.</p></div>
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#F0FDF4"><svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Consulta centralizada</h3><p class="benefit-card__text">Mandás una única configuración y consultás disponibilidad, alternativas y entrega desde el mismo lugar.</p></div>
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#FFF7ED"><svg viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"><path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Contacto directo</h3><p class="benefit-card__text">Después de personalizar el setup, enviás el carrito por WhatsApp para continuar la consulta.</p></div>
+      <div class="benefit-card"><div class="benefit-card__icon" style="background:#FDF4FF"><svg viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round"/></svg></div><h3 class="benefit-card__title">Configuración ajustable</h3><p class="benefit-card__text">La recomendación inicial no te encierra: podés activar o quitar productos antes de consultar.</p></div>
     </div>
   </div>
 </section>
@@ -1020,13 +1062,13 @@
 <section class="cta-section"><div class="container">
   <span class="section__label" style="color:var(--accent)">Empezá hoy</span>
   <h2 class="section__title">Tu mejor versión laboral<br/>empieza con el setup correcto</h2>
-  <p class="section__sub">Miles de profesionales ya transformaron su forma de trabajar.<br/>Hacé el test y recibí tu combo en 2 minutos. Entrega en 24 h.</p>
+  <p class="section__sub">Completá el diagnóstico, revisá la recomendación y enviá tu configuración por WhatsApp cuando estés conforme.</p>
   <div class="cta-actions">
     <a href="#test" class="btn-primary" style="font-size:1.05rem;padding:1rem 2.25rem">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round"/></svg>
-      Hacé el test gratis
+      Hacé el diagnóstico gratis
     </a>
-    <a href="https://primoffice.com.ar" class="btn-ghost" target="_blank" rel="noopener">Ir a la tienda</a>
+    <a href="https://wa.me/5491139149688?text=Hola%2C%20PrimOffice.%20Quiero%20consultar%20qu%C3%A9%20setup%20me%20conviene%20para%20mi%20espacio%20de%20trabajo." class="btn-ghost" target="_blank" rel="noopener" data-wa-message="Hola, PrimOffice. Quiero consultar qué setup me conviene para mi espacio de trabajo.">Consultar</a>
   </div>
 </div></section>
 
@@ -1039,7 +1081,7 @@
     <li><a href="#test">Test ergonómico</a></li>
     <li><a href="#combos">Combos</a></li>
   </ul>
-  <p class="footer__copy">© 2026 PrimOffice.com.ar · Entrega 24 h CABA y GBA</p>
+  <p class="footer__copy">© 2026 PrimOffice.com.ar · Soluciones para espacios de trabajo</p>
 </div></footer>
 
 <noscript class="noscript-notice"><p>Para completar el test y usar el configurador 3D, activá JavaScript. También podés consultar directamente por WhatsApp.</p></noscript>
@@ -1656,7 +1698,7 @@ window.sendWhatsApp=function(){
       total+=p.price;
     }
   });
-  lines.push('','*Total estimado: $'+total.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' ARS*','','¿Me podés confirmar disponibilidad y entrega en 24 h? ¡Gracias!');
+  lines.push('','*Total estimado: $'+total.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' ARS*','','¿Me podés confirmar disponibilidad, alternativas y opciones de entrega? ¡Gracias!');
   var __wa=(window.PrimOfficeConfig&&window.PrimOfficeConfig.WHATSAPP_NUMBER)||'5491139149688';
   window.open('https://wa.me/'+__wa+'?text='+encodeURIComponent(lines.join('\n')),'_blank');
 };
@@ -1680,5 +1722,27 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
 <script type="module" src="./js/config/app-config.js"></script>
 <script type="module" src="./js/services/leads-service.js"></script>
 <script type="module" src="./js/setup-3d.js"></script>
+
+<!-- TODO PRUEBA SOCIAL: insertar esta sección únicamente cuando PrimOffice entregue fotos, testimonios, logos o métricas verificables. -->
+<a class="wa-float" href="https://wa.me/5491139149688?text=Hola%2C%20PrimOffice.%20Quiero%20consultar%20qu%C3%A9%20setup%20me%20conviene%20para%20mi%20espacio%20de%20trabajo." target="_blank" rel="noopener" data-wa-message="Hola, PrimOffice. Quiero consultar qué setup me conviene para mi espacio de trabajo." aria-label="Consultar a PrimOffice por WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+<nav class="mobile-action-bar" aria-label="Acciones rápidas">
+  <a class="mobile-action-bar__primary" href="#test">Diagnóstico gratis</a>
+  <a class="mobile-action-bar__wa" href="https://wa.me/5491139149688?text=Hola%2C%20PrimOffice.%20Quiero%20consultar%20qu%C3%A9%20setup%20me%20conviene%20para%20mi%20espacio%20de%20trabajo." target="_blank" rel="noopener" data-wa-message="Hola, PrimOffice. Quiero consultar qué setup me conviene para mi espacio de trabajo." aria-label="Consultar por WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+</nav>
+<script>
+(function(){
+  'use strict';
+  function waNumber(){return (window.PrimOfficeConfig&&window.PrimOfficeConfig.WHATSAPP_NUMBER)||'5491139149688';}
+  function waHref(message){return 'https://wa.me/'+waNumber()+'?text='+encodeURIComponent(message);}
+  function refreshQuickWhatsApp(){document.querySelectorAll('[data-wa-message]').forEach(function(link){link.href=waHref(link.getAttribute('data-wa-message')||'Hola, PrimOffice. Quiero hacer una consulta.');});}
+  refreshQuickWhatsApp();
+  window.addEventListener('load',refreshQuickWhatsApp,{once:true});
+})();
+</script>
+
 </body>
 </html>
