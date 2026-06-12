@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://santiagodiaz2002.github.io/setupoficina-landing/sitemap.xml

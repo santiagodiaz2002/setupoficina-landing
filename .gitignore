@@ -1,1 +1,5 @@
-/_entrada-local/
+# Archivos locales de trabajo y backups
+_entrada-local/
+*_backup*/
+*.rar
+*.zip
