@@ -1,9 +1,9 @@
 {
-  "name": "PrimOffice — Elevate your work",
+  "name": "PrimOffice — Test ergonómico y configurador 3D",
   "short_name": "PrimOffice",
   "lang": "es-AR",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0F172A",
   "theme_color": "#0F172A",
@@ -18,5 +18,7 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "id": "/",
+  "description": "Test ergonómico gratuito, recomendación personalizada y visualización 3D para optimizar espacios de trabajo."
 }
