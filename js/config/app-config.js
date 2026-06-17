@@ -29,19 +29,13 @@ export const APP_CONFIG = {
      LEADS / PERSISTENCIA  (preparado para Odoo CRM)
      ================================================================== */
 
-  /* Modo demo explícito.
-     - true  → submitLead() persiste en localStorage y NO simula una
-               integración real (estado actual: sin endpoint).
-     - false → submitLead() hace POST a LEADS_API_URL (backend propio que
-               luego hablará con Odoo del lado servidor).
-     Si LEADS_API_URL está vacío, el modo demo se fuerza igual por
-     seguridad (nunca se queda “colgado” esperando un endpoint inexistente). */
+  /* Los leads ya no quedan solo en localStorage.
+     Ahora se mandan a un endpoint propio de Cloudflare.
+     Primero se guardan en D1 y más adelante desde ahí se conectan con Odoo,
+     sin poner credenciales visibles en el navegador. */
   DEMO_MODE: false,
 
-  /* URL del endpoint del BACKEND PROPIO (no Odoo directo) que recibirá los
-     leads por POST y los reenviará a Odoo CRM con credenciales del servidor.
-     Mientras esté vacío (''), rige el modo demo. Completar cuando PrimOffice
-     provea la URL.  Ver docs/INTEGRACION_ODOO_CRM.md */
+  /* Endpoint interno de la landing para recibir los registros del test. */
   LEADS_API_URL: '/api/leads',
 
   /* Token opcional para el endpoint propio. NO hardcodear secretos reales:

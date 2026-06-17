@@ -17,7 +17,7 @@
    en docs/INTEGRACION_ODOO_CRM.md.
    ===================================================================== */
 
-import { APP_CONFIG } from '../config/app-config.js';
+import { APP_CONFIG } from '../config/app-config.js?v=d1-leads-1';
 
 /* Lee la config vigente combinando defaults + overrides de runtime. */
 function cfg() {
