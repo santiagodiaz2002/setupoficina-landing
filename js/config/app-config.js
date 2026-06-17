@@ -36,13 +36,13 @@ export const APP_CONFIG = {
                luego hablará con Odoo del lado servidor).
      Si LEADS_API_URL está vacío, el modo demo se fuerza igual por
      seguridad (nunca se queda “colgado” esperando un endpoint inexistente). */
-  DEMO_MODE: true,
+  DEMO_MODE: false,
 
   /* URL del endpoint del BACKEND PROPIO (no Odoo directo) que recibirá los
      leads por POST y los reenviará a Odoo CRM con credenciales del servidor.
      Mientras esté vacío (''), rige el modo demo. Completar cuando PrimOffice
      provea la URL.  Ver docs/INTEGRACION_ODOO_CRM.md */
-  LEADS_API_URL: '',
+  LEADS_API_URL: '/api/leads',
 
   /* Token opcional para el endpoint propio. NO hardcodear secretos reales:
      dejar vacío y, si hace falta, inyectarlo en runtime desde un entorno
