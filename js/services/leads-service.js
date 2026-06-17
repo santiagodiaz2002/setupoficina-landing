@@ -76,8 +76,9 @@ async function enviarReal(url, payload, conf) {
 export async function submitLead(payload) {
   const conf = cfg();
   const url = (conf.LEADS_API_URL || '').trim();
-  /* Si falta endpoint o está activado el modo demo, no intenta enviar nada afuera. */
-  const esDemo = conf.DEMO_MODE === true || !url;
+  /* Si hay endpoint configurado, se usa modo real.
+    El modo demo queda solo como respaldo cuando no hay URL. */
+  const esDemo = !url;
 
   if (esDemo) {
     const guardado = guardarDemo(payload);
