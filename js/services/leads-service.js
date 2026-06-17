@@ -1,34 +1,30 @@
-/* =====================================================================
-   PrimOffice · Servicio de Leads (adaptador desacoplado)
-   ---------------------------------------------------------------------
-   Capa única responsable de "enviar" un lead. La landing no conoce el
-   backend: sólo llama a submitLead(payload) y reacciona al resultado.
+/* Servicio de leads.
+   La landing arma el payload y este archivo lo manda al endpoint real.
+   Si el endpoint no está configurado, queda el guardado local para pruebas. */
 
-   Estados:
-     · MODO REAL  -> si DEMO_MODE es false Y hay LEADS_API_URL, hace POST a
-                     un backend propio (que del lado servidor habla con
-                     Odoo CRM usando credenciales que NUNCA viajan al front).
-     · MODO DEMO  -> si DEMO_MODE es true o la URL está vacía: guarda en
-                     localStorage, registra en consola que la integración
-                     real está pendiente y resuelve con { mode: 'demo' }
-                     (sin simular una confirmación de persistencia real).
+import { APP_CONFIG } from '../config/app-config.js';
 
-   El contrato esperado del endpoint y el mapeo a Odoo están documentados
-   en docs/INTEGRACION_ODOO_CRM.md.
-   ===================================================================== */
-
-import { APP_CONFIG } from '../config/app-config.js?v=d1-leads-1';
-
-/* Lee la config vigente combinando defaults + overrides de runtime. */
+/* Toma la config del archivo como principal.
+   Si quedó una config vieja en window por caché, no pisa DEMO_MODE ni LEADS_API_URL. */
 function cfg() {
-  if (typeof window !== 'undefined' && window.PrimOfficeConfig) {
-    return Object.assign({}, APP_CONFIG, window.PrimOfficeConfig);
+  const runtime = (typeof window !== 'undefined' && window.PrimOfficeConfig) ? window.PrimOfficeConfig : {};
+  const conf = Object.assign({}, runtime, APP_CONFIG);
+
+  conf.INTEGRATION = Object.assign(
+    {},
+    runtime.INTEGRATION || {},
+    APP_CONFIG.INTEGRATION || {}
+  );
+
+  // Si algún día se inyecta un token seguro desde Cloudflare, se respeta.
+  if (runtime.LEADS_API_TOKEN && !APP_CONFIG.LEADS_API_TOKEN) {
+    conf.LEADS_API_TOKEN = runtime.LEADS_API_TOKEN;
   }
-  return APP_CONFIG;
+
+  return conf;
 }
 
-/* Guarda el lead en localStorage (modo demo). Tolerante a errores
-   (modo incógnito, almacenamiento lleno, etc.). */
+/* Guardado local para pruebas, por si el endpoint no está activo. */
 function guardarDemo(payload) {
   try {
     const key = cfg().LEADS_STORAGE_KEY || 'primoffice_leads_demo';
@@ -42,14 +38,13 @@ function guardarDemo(payload) {
   }
 }
 
-/* POST real con timeout (AbortController) y manejo de errores explícito. */
+/* Envío real al endpoint con timeout. */
 async function enviarReal(url, payload, conf) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), conf.LEADS_TIMEOUT_MS || 10000);
 
   const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
-  /* El token, si existe, se envía como Bearer. NO debe hardcodearse en el
-     repositorio: se inyecta en runtime desde un entorno seguro. */
+  /* El token no se escribe en el repo. Si existe, viene inyectado desde el entorno. */
   if (conf.LEADS_API_TOKEN) headers['Authorization'] = `Bearer ${conf.LEADS_API_TOKEN}`;
 
   try {
@@ -75,30 +70,20 @@ async function enviarReal(url, payload, conf) {
   }
 }
 
-/**
- * Envía un lead al backend (modo real) o lo persiste localmente (modo demo).
- *
- * @param {Object} payload  Lead completo (ver esquema en INTEGRACION_BASE_DATOS.md).
- * @returns {Promise<{ok:boolean, mode:'real'|'demo', status?:number, data?:any, error?:string, detalle?:string}>}
- *
- * Importante: en modo demo `ok` es true (el flujo puede continuar al
- * resultado) pero `mode` es 'demo' para que la UI sea honesta y NO muestre
- * una confirmación de persistencia real.
- */
+/* Punto de entrada que usa el formulario.
+   Real: POST a /api/leads.
+   Demo: localStorage para probar sin backend. */
 export async function submitLead(payload) {
   const conf = cfg();
   const url = (conf.LEADS_API_URL || '').trim();
-  /* Demo si está pedido explícitamente (DEMO_MODE) o si no hay endpoint.
-     Así nunca se intenta un POST contra una URL inexistente. */
+  /* Si falta endpoint o está activado el modo demo, no intenta enviar nada afuera. */
   const esDemo = conf.DEMO_MODE === true || !url;
 
   if (esDemo) {
     const guardado = guardarDemo(payload);
     console.warn(
-      '[leads-service] MODO DEMO activo: la integración real (backend propio → Odoo CRM) está PENDIENTE.\n' +
-      'El lead se guardó ' + (guardado ? 'en localStorage' : 'SÓLO en memoria (localStorage no disponible)') +
-      '. Para habilitar el envío real: DEMO_MODE:false + LEADS_API_URL completa.\n' +
-      'Contrato y mapeo a Odoo: docs/INTEGRACION_ODOO_CRM.md',
+      '[leads-service] Modo demo: no se envió al endpoint. ' +
+      'Guardado: ' + (guardado ? 'localStorage' : 'memoria') + '.',
       payload
     );
     return { ok: true, mode: 'demo', stored: guardado };
@@ -111,8 +96,7 @@ export async function submitLead(payload) {
   return resultado;
 }
 
-/* Utilidad de soporte: devuelve los leads acumulados en modo demo
-   (útil para depurar o exportar manualmente mientras no hay backend). */
+/* Para revisar rápido los leads guardados en modo demo. */
 export function getLeadsDemo() {
   try {
     const key = cfg().LEADS_STORAGE_KEY || 'primoffice_leads_demo';
@@ -122,7 +106,7 @@ export function getLeadsDemo() {
   }
 }
 
-/* Publicado también en window para consumidores no-módulo / depuración. */
+/* Lo dejo disponible en window para que el form inline pueda usarlo. */
 if (typeof window !== 'undefined') {
   window.PrimOfficeLeads = { submitLead, getLeadsDemo };
 }
