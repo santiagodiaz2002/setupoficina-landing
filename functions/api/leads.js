@@ -183,29 +183,75 @@ function compactObject(obj) {
   return out;
 }
 
+function formatProductName(productId) {
+  const productNames = {
+    silla: 'Silla ergonomica',
+    silla_ergonomica: 'Silla ergonomica',
+    monitor_27: 'Monitor 27 pulgadas',
+    soporte_monitor: 'Soporte para monitor',
+    teclado: 'Teclado mecanico',
+    teclado_mec: 'Teclado mecanico',
+    mouse_vertical: 'Mouse vertical ergonomico',
+    hub_usb: 'Hub USB',
+    hub_usb_pro: 'Hub USB Pro',
+    luz_led: 'Barra de luz LED',
+    mousepad_xxl: 'Mousepad XXL',
+    organizador_prem: 'Organizador premium',
+    asesoria: 'Asesoria ergonomica',
+    standing_desk: 'Escritorio regulable'
+  };
+  const cleanId = safeString(productId, 120);
+  if (!cleanId) return '';
+
+  return productNames[cleanId] || cleanId
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatProductList(items) {
+  if (!Array.isArray(items) || !items.length) return '-';
+
+  return items
+    .map(formatProductName)
+    .filter(Boolean)
+    .map((name) => `- ${name}`)
+    .join('\n');
+}
+
 function leadDescription(payload, requestInfo) {
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
   const products = pickProducts(payload);
 
+  const currency = safeString(configuration.currency, 10) || 'ARS';
+  const estimatedTotal = Number(configuration.estimatedTotal || 0);
+
   const lines = [
     'Lead generado desde setupoficina.com.ar',
     '',
+    'CONTACTO',
     `Nombre: ${safeString(contact.name, 120)}`,
     `Canal elegido: ${safeString(contact.preferredChannel, 30)}`,
     contact.email ? `Email: ${safeString(contact.email, 180)}` : '',
     contact.whatsapp ? `WhatsApp: ${safeString(contact.whatsapp, 80)}` : '',
     '',
+    'DIAGNOSTICO',
     `Resultado: ${safeString(diagnosis.recommendedTier, 80)}`,
     `Preset: ${safeString(diagnosis.recommendedPreset, 40)}`,
     `Puntaje: ${Number(diagnosis.totalScore || 0)}/18`,
-    `Total estimado: $${Number(configuration.estimatedTotal || 0).toLocaleString('es-AR')} ${safeString(configuration.currency, 10) || 'ARS'}`,
+    `Total estimado: $${estimatedTotal.toLocaleString('es-AR')} ${currency}`,
     '',
-    `Productos recomendados: ${products.recommended.join(', ') || '-'}`,
-    `Productos seleccionados: ${products.selected.join(', ') || '-'}`,
-    products.extras.length ? `Extras: ${products.extras.join(', ')}` : '',
+    'PRODUCTOS RECOMENDADOS',
+    formatProductList(products.recommended),
     '',
+    'PRODUCTOS SELECCIONADOS',
+    formatProductList(products.selected),
+    products.extras.length ? '' : '',
+    products.extras.length ? 'EXTRAS' : '',
+    products.extras.length ? formatProductList(products.extras) : '',
+    '',
+    'DATOS TECNICOS',
     `Lead ID: ${safeString(payload.leadId, 80)}`,
     `Fecha: ${safeString(payload.createdAt, 40)}`,
     `IP: ${requestInfo.ip || '-'}`,
