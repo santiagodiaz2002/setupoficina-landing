@@ -218,10 +218,13 @@ function leadDescription(payload, requestInfo) {
 function buildOdooLead(payload, requestInfo) {
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
+  const configuration = payload.configuration || {};
+
   const name = safeString(contact.name, 120);
   const tier = safeString(diagnosis.recommendedTier, 80) || 'Setup recomendado';
   const whatsapp = safeString(contact.whatsapp, 80);
   const email = safeString(contact.email, 180);
+  const estimatedRevenue = Number(configuration.estimatedTotal || 0);
 
   return compactObject({
     name: `${name} - ${tier}`.slice(0, 200),
@@ -229,6 +232,7 @@ function buildOdooLead(payload, requestInfo) {
     email_from: email,
     phone: whatsapp,
     mobile: whatsapp,
+    expected_revenue: Number.isFinite(estimatedRevenue) && estimatedRevenue > 0 ? estimatedRevenue : undefined,
     description: leadDescription(payload, requestInfo)
   });
 }
