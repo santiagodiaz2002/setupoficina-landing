@@ -37,6 +37,94 @@ function safeJson(value) {
   catch (_) { return 'null'; }
 }
 
+function htmlEscape(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeArgentinaPhone(value) {
+  const raw = safeString(value, 80);
+  if (!raw) return '';
+
+  let digits = raw.replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('00')) digits = digits.slice(2);
+
+  if (digits.startsWith('549') && digits.length === 13) {
+    return `+${digits}`;
+  }
+
+  if (digits.startsWith('54')) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.startsWith('0')) {
+    digits = digits.slice(1);
+  }
+
+  // Formato local frecuente en AMBA: 011 15 xxxx xxxx.
+  if (digits.startsWith('1115') && digits.length === 12) {
+    digits = `11${digits.slice(4)}`;
+  }
+
+  if (digits.startsWith('9') && digits.length === 11) {
+    return `+54${digits}`;
+  }
+
+  if (digits.length === 10) {
+    return `+549${digits}`;
+  }
+
+  // Fallback conservador: conserva números internacionales válidos.
+  if (digits.length >= 11 && digits.length <= 15) {
+    return `+${digits}`;
+  }
+
+  return raw;
+}
+
+function normalizePayloadContact(payload) {
+  const normalized = { ...(payload || {}) };
+  const contact = { ...((payload && payload.contact) || {}) };
+  contact.whatsapp = normalizeArgentinaPhone(contact.whatsapp);
+  normalized.contact = contact;
+  return normalized;
+}
+
+function getLeadSourceName(payload) {
+  const explicit = safeString(payload && payload.landingSource, 120);
+  if (explicit) return explicit;
+
+  const source = safeString(payload && payload.source, 120);
+  if (!source || source === 'landing-primoffice') {
+    return 'Landing PrimOffice · Test ergonómico';
+  }
+
+  return source
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function getLeadTagNames(payload) {
+  const contact = (payload && payload.contact) || {};
+  const diagnosis = (payload && payload.diagnosis) || {};
+  const tier = safeString(diagnosis.recommendedTier, 80);
+  const channel = safeString(contact.preferredChannel, 30).toLowerCase();
+
+  return [...new Set([
+    'Landing',
+    'Test ergonómico',
+    tier,
+    channel === 'whatsapp' ? 'Canal: WhatsApp' : (channel === 'email' ? 'Canal: Email' : '')
+  ].filter(Boolean))];
+}
+
 function pickProducts(payload) {
   const cfg = payload && payload.configuration ? payload.configuration : {};
   const selected = Array.isArray(cfg.selectedProducts) ? cfg.selectedProducts : [];
@@ -130,6 +218,18 @@ function getTag(xml, tag) {
 
 function parseXmlRpcValue(xml) {
   const valueXml = getTag(xml, 'value') || xml;
+  const arrayXml = getTag(valueXml, 'array');
+
+  if (arrayXml !== '') {
+    const dataXml = getTag(arrayXml, 'data');
+    const intValues = [...dataXml.matchAll(/<(?:int|i4)>(-?\d+)<\/(?:int|i4)>/gi)]
+      .map((match) => Number(match[1]));
+    if (intValues.length) return intValues;
+
+    return [...dataXml.matchAll(/<string>([\s\S]*?)<\/string>/gi)]
+      .map((match) => decodeXml(match[1]));
+  }
+
   const intValue = getTag(valueXml, 'int') || getTag(valueXml, 'i4');
   if (intValue !== '') return Number(intValue);
 
@@ -185,28 +285,36 @@ function compactObject(obj) {
 
 
 const PRODUCT_LABELS = {
-  silla: 'Silla ergonomica',
-  silla_ergonomica: 'Silla ergonomica',
-  teclado: 'Teclado',
-  teclado_mec: 'Teclado mecanico',
-  mouse_vertical: 'Mouse vertical ergonomico',
-  mousepad_xxl: 'Mousepad XXL',
-  hub_usb: 'Hub USB',
-  hub_usb_pro: 'Hub USB Pro',
-  organizador_prem: 'Organizador premium',
-  asesoria: 'Asesoria ergonomica',
-  standing_desk: 'Escritorio regulable / standing desk',
-  monitor_27: 'Monitor 27 pulgadas',
-  soporte_monitor: 'Soporte para monitor',
-  luz_led: 'Luz LED de escritorio',
-  notebook: 'Notebook',
+  silla: 'Silla ergonómica',
+  silla_ergonomica: 'Silla ergonómica',
   soporte_notebook: 'Soporte para notebook',
+  soporte_monitor: 'Soporte para monitor',
+  soporte_dual: 'Soporte dual para monitor',
+  monitor_24: 'Monitor 24 pulgadas',
+  monitor_27: 'Monitor 27 pulgadas',
+  teclado: 'Teclado inalámbrico',
+  teclado_mec: 'Teclado mecánico',
+  mouse_ergo: 'Mouse ergonómico',
+  mouse_vertical: 'Mouse vertical ergonómico',
+  mouse_trackball: 'Mouse trackball ergonómico',
+  mousepad_xxl: 'Mousepad XXL',
+  hub_usb: 'Hub USB-C',
+  hub_usb_pro: 'Hub USB-C Pro',
+  organizador: 'Organizador de cables',
+  organizador_prem: 'Organizador premium',
+  luz_led: 'Barra de luz LED',
+  webcam: 'Webcam HD',
+  auriculares: 'Auriculares con micrófono',
+  asesoria: 'Asesoría personalizada',
+  standing_desk: 'Escritorio regulable / standing desk',
+  almohadilla: 'Almohadilla lumbar',
+  reposamuñecas: 'Reposamuñecas',
+  guia: 'Guía de ergonomía digital',
+  notebook: 'Notebook',
   brazo_monitor: 'Brazo articulado para monitor',
   bandeja_teclado: 'Bandeja para teclado',
-  pad: 'Pad ergonomico',
-  webcam: 'Webcam',
-  auriculares: 'Auriculares',
-  cable_management: 'Organizacion de cables'
+  pad: 'Pad ergonómico',
+  cable_management: 'Organización de cables'
 };
 
 function formatProductName(value) {
@@ -226,12 +334,14 @@ function formatProductName(value) {
 }
 
 function formatProductList(items) {
-  if (!Array.isArray(items) || !items.length) return '-';
+  if (!Array.isArray(items) || !items.length) return [];
+  return [...new Set(items.map(formatProductName).filter(Boolean))];
+}
 
-  const unique = [...new Set(items.map(formatProductName).filter(Boolean))];
-  if (!unique.length) return '-';
-
-  return unique.map((item) => `- ${item}`).join('\n');
+function formatProductListHtml(items) {
+  const products = formatProductList(items);
+  if (!products.length) return '<p>Sin productos.</p>';
+  return `<ul>${products.map((item) => `<li>${htmlEscape(item)}</li>`).join('')}</ul>`;
 }
 
 function leadDescription(payload, requestInfo) {
@@ -239,65 +349,105 @@ function leadDescription(payload, requestInfo) {
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
   const products = pickProducts(payload);
+  const utm = payload.utm || {};
 
   const estimatedTotal = Number(configuration.estimatedTotal || 0);
   const currency = safeString(configuration.currency, 10) || 'ARS';
+  const sourceName = getLeadSourceName(payload);
+  const tags = getLeadTagNames(payload);
 
   const eventType = safeString(payload.eventType, 80);
   const eventLabel = eventType === 'whatsapp_click'
-    ? 'Seleccion final confirmada desde Pedir por WhatsApp'
-    : (eventType === 'cart_change' ? 'Seleccion actualizada desde el carrito' : 'Captura inicial del formulario');
+    ? 'Selección final confirmada desde Pedir por WhatsApp'
+    : (eventType === 'cart_change' ? 'Selección actualizada desde el carrito' : 'Captura inicial del formulario');
 
-  const lines = [
-    'Lead generado desde setupoficina.com.ar',
-    '',
-    'ESTADO',
-    `Etapa: ${eventLabel}`,
-    payload.updatedAt ? `Ultima actualizacion: ${safeString(payload.updatedAt, 40)}` : '',
-    '',
-    'CONTACTO',
-    `Nombre: ${safeString(contact.name, 120) || '-'}`,
-    `Canal elegido: ${safeString(contact.preferredChannel, 30) || '-'}`,
-    contact.email ? `Email: ${safeString(contact.email, 180)}` : '',
-    contact.whatsapp ? `WhatsApp: ${safeString(contact.whatsapp, 80)}` : '',
-    '',
-    'DIAGNOSTICO',
-    `Resultado: ${safeString(diagnosis.recommendedTier, 80) || '-'}`,
-    `Preset: ${safeString(diagnosis.recommendedPreset, 40) || '-'}`,
-    `Puntaje: ${Number(diagnosis.totalScore || 0)}/18`,
-    `Total estimado: $${Number.isFinite(estimatedTotal) ? estimatedTotal.toLocaleString('es-AR') : '0'} ${currency}`,
-    '',
-    'PRODUCTOS RECOMENDADOS',
-    formatProductList(products.recommended),
-    '',
-    'PRODUCTOS SELECCIONADOS',
-    formatProductList(products.selected),
-    products.extras.length ? '' : '',
-    products.extras.length ? 'EXTRAS' : '',
-    products.extras.length ? formatProductList(products.extras) : '',
-    '',
-    'DATOS TECNICOS',
-    `Lead ID: ${safeString(payload.leadId, 80) || '-'}`,
-    `Fecha: ${safeString(payload.createdAt, 40) || '-'}`,
-    `IP: ${requestInfo.ip || '-'}`,
-    `Pais: ${requestInfo.country || '-'}`
-  ];
+  const contactLines = [
+    `<strong>Nombre:</strong> ${htmlEscape(safeString(contact.name, 120) || '-')}`,
+    `<strong>Canal elegido:</strong> ${htmlEscape(safeString(contact.preferredChannel, 30) || '-')}`,
+    contact.email ? `<strong>Email:</strong> ${htmlEscape(safeString(contact.email, 180))}` : '',
+    contact.whatsapp ? `<strong>WhatsApp:</strong> ${htmlEscape(normalizeArgentinaPhone(contact.whatsapp))}` : ''
+  ].filter(Boolean).join('<br>');
 
-  return lines.filter(Boolean).join('\n').slice(0, 6000);
+  const utmLines = [
+    utm.utm_source ? `<strong>UTM source:</strong> ${htmlEscape(safeString(utm.utm_source, 120))}` : '',
+    utm.utm_medium ? `<strong>UTM medium:</strong> ${htmlEscape(safeString(utm.utm_medium, 120))}` : '',
+    utm.utm_campaign ? `<strong>UTM campaign:</strong> ${htmlEscape(safeString(utm.utm_campaign, 180))}` : ''
+  ].filter(Boolean).join('<br>');
+
+  return [
+    '<div>',
+    '<p><strong>Lead generado desde setupoficina.com.ar</strong></p>',
+    '<hr>',
+    '<h3>Estado</h3>',
+    `<p><strong>Etapa:</strong> ${htmlEscape(eventLabel)}${payload.updatedAt ? `<br><strong>Última actualización:</strong> ${htmlEscape(safeString(payload.updatedAt, 40))}` : ''}</p>`,
+    '<h3>Origen</h3>',
+    `<p><strong>Fuente:</strong> ${htmlEscape(sourceName)}<br><strong>Etiquetas:</strong> ${htmlEscape(tags.join(', ') || '-')}</p>`,
+    utmLines ? `<p>${utmLines}</p>` : '',
+    '<h3>Contacto</h3>',
+    `<p>${contactLines}</p>`,
+    '<h3>Diagnóstico</h3>',
+    `<p><strong>Resultado:</strong> ${htmlEscape(safeString(diagnosis.recommendedTier, 80) || '-')}<br>`,
+    `<strong>Preset:</strong> ${htmlEscape(safeString(diagnosis.recommendedPreset, 40) || '-')}<br>`,
+    `<strong>Puntaje:</strong> ${htmlEscape(String(Number(diagnosis.totalScore || 0)))}/18<br>`,
+    `<strong>Total estimado:</strong> $${htmlEscape(Number.isFinite(estimatedTotal) ? estimatedTotal.toLocaleString('es-AR') : '0')} ${htmlEscape(currency)}</p>`,
+    '<h3>Productos recomendados</h3>',
+    formatProductListHtml(products.recommended),
+    '<h3>Productos seleccionados</h3>',
+    formatProductListHtml(products.selected),
+    products.extras.length ? '<h3>Extras</h3>' : '',
+    products.extras.length ? formatProductListHtml(products.extras) : '',
+    '<h3>Datos técnicos</h3>',
+    `<p><strong>Lead ID:</strong> ${htmlEscape(safeString(payload.leadId, 80) || '-')}<br>`,
+    `<strong>Fecha:</strong> ${htmlEscape(safeString(payload.createdAt, 40) || '-')}<br>`,
+    `<strong>IP:</strong> ${htmlEscape(requestInfo.ip || '-')}<br>`,
+    `<strong>País:</strong> ${htmlEscape(requestInfo.country || '-')}</p>`,
+    '</div>'
+  ].filter(Boolean).join('');
 }
 
-function buildOdooLead(payload, requestInfo) {
+async function odooExecuteKw(session, model, method, args = [], kwargs = null) {
+  const params = [
+    session.db,
+    session.uid,
+    session.apiKey,
+    model,
+    method,
+    args
+  ];
+
+  if (kwargs && Object.keys(kwargs).length) params.push(kwargs);
+  return xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', params);
+}
+
+async function findOrCreateNamedRecord(session, model, name) {
+  const cleanName = safeString(name, 120);
+  if (!cleanName) return null;
+
+  const found = await odooExecuteKw(session, model, 'search', [[['name', '=', cleanName]]], { limit: 1 });
+  if (Array.isArray(found) && found.length) return Number(found[0]);
+
+  try {
+    const created = await odooExecuteKw(session, model, 'create', [{ name: cleanName }]);
+    return Number(created) || null;
+  } catch (error) {
+    const retry = await odooExecuteKw(session, model, 'search', [[['name', '=', cleanName]]], { limit: 1 });
+    if (Array.isArray(retry) && retry.length) return Number(retry[0]);
+    throw error;
+  }
+}
+
+async function buildOdooLead(payload, requestInfo, session) {
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
 
   const name = safeString(contact.name, 120);
   const tier = safeString(diagnosis.recommendedTier, 80) || 'Setup recomendado';
-  const whatsapp = safeString(contact.whatsapp, 80);
+  const whatsapp = normalizeArgentinaPhone(contact.whatsapp);
   const email = safeString(contact.email, 180);
   const estimatedRevenue = Number(configuration.estimatedTotal || 0);
 
-  return compactObject({
+  const fields = compactObject({
     name: `${name} - ${tier}`.slice(0, 200),
     contact_name: name,
     email_from: email,
@@ -306,6 +456,27 @@ function buildOdooLead(payload, requestInfo) {
     expected_revenue: Number.isFinite(estimatedRevenue) && estimatedRevenue > 0 ? estimatedRevenue : undefined,
     description: leadDescription(payload, requestInfo)
   });
+
+  // Etiquetas y origen se agregan como mejora comercial, pero nunca bloquean el lead.
+  try {
+    const tagIds = [];
+    for (const tagName of getLeadTagNames(payload)) {
+      const tagId = await findOrCreateNamedRecord(session, 'crm.tag', tagName);
+      if (tagId) tagIds.push(tagId);
+    }
+    if (tagIds.length) fields.tag_ids = [[6, 0, [...new Set(tagIds)]]];
+  } catch (error) {
+    console.warn('[PrimOffice Leads API] No se pudieron asignar etiquetas de Odoo:', error);
+  }
+
+  try {
+    const sourceId = await findOrCreateNamedRecord(session, 'utm.source', getLeadSourceName(payload));
+    if (sourceId) fields.source_id = sourceId;
+  } catch (error) {
+    console.warn('[PrimOffice Leads API] No se pudo asignar el origen de Odoo:', error);
+  }
+
+  return fields;
 }
 
 async function getOdooSession(env) {
@@ -327,7 +498,7 @@ async function sendToOdoo(payload, env, requestInfo) {
   const session = await getOdooSession(env);
   if (!session.ok) return session;
 
-  const fields = buildOdooLead(payload, requestInfo);
+  const fields = await buildOdooLead(payload, requestInfo, session);
   const odooLeadId = await xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', [
     session.db,
     session.uid,
@@ -348,7 +519,7 @@ async function updateOdooLead(payload, env, requestInfo, odooLeadId) {
   const session = await getOdooSession(env);
   if (!session.ok) return session;
 
-  const fields = buildOdooLead(payload, requestInfo);
+  const fields = await buildOdooLead(payload, requestInfo, session);
   const updated = await xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', [
     session.db,
     session.uid,
@@ -406,7 +577,7 @@ export async function onRequestPatch({ request, env }) {
   const parsed = await readValidatedPayload(request);
   if (parsed.error) return json({ ok: false, error: parsed.error }, parsed.status || 400, request);
 
-  const payload = parsed.payload;
+  const payload = normalizePayloadContact(parsed.payload);
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
@@ -526,6 +697,7 @@ export async function onRequestPost({ request, env }) {
   const error = validatePayload(payload);
   if (error) return json({ ok: false, error }, 400, request);
 
+  payload = normalizePayloadContact(payload);
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
