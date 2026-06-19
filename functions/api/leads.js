@@ -111,23 +111,20 @@ function getLeadSourceName(payload) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function getLeadTagDefinitions(payload) {
+function getLeadTagNames(payload) {
   const contact = (payload && payload.contact) || {};
   const diagnosis = (payload && payload.diagnosis) || {};
+
   const tier = safeString(diagnosis.recommendedTier, 80);
   const channel = safeString(contact.preferredChannel, 30).toLowerCase();
 
-  return [
-    { name: 'Test - Landing', color: 8 },
-    tier ? { name: tier, color: 3 } : null,
+  return [...new Set([
+    'Test - Landing',
+    tier,
     channel === 'whatsapp'
-      ? { name: 'WhatsApp', color: 4 }
-      : (channel === 'email' ? { name: 'Email', color: 6 } : null)
-  ].filter(Boolean);
-}
-
-function getLeadTagNames(payload) {
-  return getLeadTagDefinitions(payload).map((tag) => tag.name);
+      ? 'WhatsApp'
+      : (channel === 'email' ? 'Email' : '')
+  ].filter(Boolean))];
 }
 
 function pickProducts(payload) {
@@ -429,19 +426,45 @@ async function odooExecuteKw(session, model, method, args = [], kwargs = null) {
   return xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', params);
 }
 
-async function findOrCreateNamedRecord(session, model, name, extraValues = {}) {
+async function findOrCreateNamedRecord(session, model, name) {
   const cleanName = safeString(name, 120);
   if (!cleanName) return null;
 
-  const found = await odooExecuteKw(session, model, 'search', [[['name', '=', cleanName]]], { limit: 1 });
-  if (Array.isArray(found) && found.length) return Number(found[0]);
+  const found = await odooExecuteKw(
+    session,
+    model,
+    'search',
+    [[['name', '=', cleanName]]],
+    { limit: 1 }
+  );
+
+  if (Array.isArray(found) && found.length) {
+    return Number(found[0]);
+  }
 
   try {
-    const created = await odooExecuteKw(session, model, 'create', [{ name: cleanName, ...extraValues }]);
+    const created = await odooExecuteKw(
+      session,
+      model,
+      'create',
+      [{ name: cleanName }]
+    );
+
     return Number(created) || null;
   } catch (error) {
-    const retry = await odooExecuteKw(session, model, 'search', [[['name', '=', cleanName]]], { limit: 1 });
-    if (Array.isArray(retry) && retry.length) return Number(retry[0]);
+    // Puede haber sido creada por otra solicitud al mismo tiempo.
+    const retry = await odooExecuteKw(
+      session,
+      model,
+      'search',
+      [[['name', '=', cleanName]]],
+      { limit: 1 }
+    );
+
+    if (Array.isArray(retry) && retry.length) {
+      return Number(retry[0]);
+    }
+
     throw error;
   }
 }
@@ -468,23 +491,30 @@ async function buildOdooLead(payload, requestInfo, session) {
   });
 
   // Etiquetas y origen se agregan como mejora comercial, pero nunca bloquean el lead.
-  try {
-    const tagIds = [];
-    for (const tag of getLeadTagDefinitions(payload)) {
-      const tagId = await findOrCreateNamedRecord(session, 'crm.tag', tag.name, { color: tag.color });
-      if (tagId) tagIds.push(tagId);
-    }
-    if (tagIds.length) fields.tag_ids = [[6, 0, [...new Set(tagIds)]]];
-  } catch (error) {
-    console.warn('[PrimOffice Leads API] No se pudieron asignar etiquetas de Odoo:', error);
-  }
+const tagIds = [];
 
+for (const tagName of getLeadTagNames(payload)) {
   try {
-    const sourceId = await findOrCreateNamedRecord(session, 'utm.source', getLeadSourceName(payload));
-    if (sourceId) fields.source_id = sourceId;
+    const tagId = await findOrCreateNamedRecord(
+      session,
+      'crm.tag',
+      tagName
+    );
+
+    if (tagId) {
+      tagIds.push(tagId);
+    }
   } catch (error) {
-    console.warn('[PrimOffice Leads API] No se pudo asignar el origen de Odoo:', error);
+    console.warn(
+      `[PrimOffice Leads API] No se pudo resolver la etiqueta "${tagName}":`,
+      error
+    );
   }
+}
+
+if (tagIds.length) {
+  fields.tag_ids = [[6, 0, [...new Set(tagIds)]]];
+}
 
   return fields;
 }
