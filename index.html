@@ -1615,7 +1615,14 @@ function showResult(){
 
 // ── TEASER + CAPTURA DE LEAD (inyectado) ─────────────────
 var pqTeaser=document.getElementById('pqTeaser'),pqLead=document.getElementById('pqLead'),qContainer=document.getElementById('quiz-container');
-var pqLeadSession={basePayload:null,leadId:'',odooLeadId:null,cartUpdateTimer:0,lastUpdateAt:''};
+var pqLeadSession={
+  basePayload:null,
+  leadId:'',
+  odooLeadId:null,
+  cartUpdateTimer:0,
+  lastUpdateAt:'',
+  lastCartSignature:''
+};
 function pqShow(el){if(el)el.removeAttribute('hidden');}
 function pqHide(el){if(el)el.setAttribute('hidden','');}
 function pqScroll(){var s=document.getElementById('test');if(s){var t=s.getBoundingClientRect().top;if(t<0||t>window.innerHeight*0.5)s.scrollIntoView({behavior:'smooth',block:'start'});}}
@@ -1713,6 +1720,22 @@ function buildLeadUpdatePayload(eventType){
 
   return base;
 }
+function getCartUpdateSignature(payload){
+  var cfg=payload&&payload.configuration?payload.configuration:{};
+
+  function sorted(list){
+    return (Array.isArray(list)?list:[])
+      .map(String)
+      .slice()
+      .sort();
+  }
+
+  return JSON.stringify({
+    selectedProducts:sorted(cfg.selectedProducts),
+    selectedExtras:sorted(cfg.selectedExtras),
+    estimatedTotal:Number(cfg.estimatedTotal||0)
+  });
+}
 function submitLeadUpdate(eventType){
   if(!pqLeadSession.leadId)return Promise.resolve({ok:false,skipped:true,error:'Sin lead inicial.'});
   if(!(window.PrimOfficeLeads&&window.PrimOfficeLeads.updateLead)){
@@ -1721,8 +1744,18 @@ function submitLeadUpdate(eventType){
   }
 
   var payload=buildLeadUpdatePayload(eventType);
+  var signature=getCartUpdateSignature(payload);
+
+  if(eventType!=='whatsapp_click' && signature===pqLeadSession.lastCartSignature){
+    return Promise.resolve({ok:true,skipped:true,reason:'Sin cambios de carrito'});
+  }
+
   return window.PrimOfficeLeads.updateLead(payload).then(function(result){
-    if(result&&result.ok){storeLeadSession(payload,result);pqLeadSession.lastUpdateAt=payload.updatedAt;}
+    if(result&&result.ok){
+      storeLeadSession(payload,result);
+      pqLeadSession.lastUpdateAt=payload.updatedAt;
+      pqLeadSession.lastCartSignature=signature;
+    }
     return result;
   }).catch(function(err){
     console.warn('[lead] No se pudo actualizar la seleccion final del lead.',err);
@@ -1731,10 +1764,12 @@ function submitLeadUpdate(eventType){
 }
 function scheduleLeadCartUpdate(eventType){
   if(!pqLeadSession.leadId)return;
+
   clearTimeout(pqLeadSession.cartUpdateTimer);
+
   pqLeadSession.cartUpdateTimer=setTimeout(function(){
     submitLeadUpdate(eventType||'cart_change');
-  },900);
+  },1000);
 }
 function pqPayload(){
   var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Elite'),c=pqCanal();
@@ -1802,6 +1837,7 @@ window.sendWhatsApp=function(){
     }
   });
   lines.push('','*Total estimado: $'+total.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' ARS*','','¿Me podés confirmar disponibilidad y entrega en 24 h? ¡Gracias!');
+  clearTimeout(pqLeadSession.cartUpdateTimer);
   openWhatsAppMessage(lines.join('\n'));
   submitLeadUpdate('whatsapp_click');
 };
