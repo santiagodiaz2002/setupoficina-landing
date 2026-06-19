@@ -11,7 +11,7 @@ function corsHeaders(request) {
   const allowOrigin = ALLOWED_ORIGINS.has(origin) ? origin : 'https://setupoficina.com.ar';
   return {
     'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Vary': 'Origin'
   };
@@ -183,39 +183,55 @@ function compactObject(obj) {
   return out;
 }
 
-function formatProductName(productId) {
-  const productNames = {
-    silla: 'Silla ergonomica',
-    silla_ergonomica: 'Silla ergonomica',
-    monitor_27: 'Monitor 27 pulgadas',
-    soporte_monitor: 'Soporte para monitor',
-    teclado: 'Teclado mecanico',
-    teclado_mec: 'Teclado mecanico',
-    mouse_vertical: 'Mouse vertical ergonomico',
-    hub_usb: 'Hub USB',
-    hub_usb_pro: 'Hub USB Pro',
-    luz_led: 'Barra de luz LED',
-    mousepad_xxl: 'Mousepad XXL',
-    organizador_prem: 'Organizador premium',
-    asesoria: 'Asesoria ergonomica',
-    standing_desk: 'Escritorio regulable'
-  };
-  const cleanId = safeString(productId, 120);
-  if (!cleanId) return '';
 
-  return productNames[cleanId] || cleanId
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+const PRODUCT_LABELS = {
+  silla: 'Silla ergonomica',
+  silla_ergonomica: 'Silla ergonomica',
+  teclado: 'Teclado',
+  teclado_mec: 'Teclado mecanico',
+  mouse_vertical: 'Mouse vertical ergonomico',
+  mousepad_xxl: 'Mousepad XXL',
+  hub_usb: 'Hub USB',
+  hub_usb_pro: 'Hub USB Pro',
+  organizador_prem: 'Organizador premium',
+  asesoria: 'Asesoria ergonomica',
+  standing_desk: 'Escritorio regulable / standing desk',
+  monitor_27: 'Monitor 27 pulgadas',
+  soporte_monitor: 'Soporte para monitor',
+  luz_led: 'Luz LED de escritorio',
+  notebook: 'Notebook',
+  soporte_notebook: 'Soporte para notebook',
+  brazo_monitor: 'Brazo articulado para monitor',
+  bandeja_teclado: 'Bandeja para teclado',
+  pad: 'Pad ergonomico',
+  webcam: 'Webcam',
+  auriculares: 'Auriculares',
+  cable_management: 'Organizacion de cables'
+};
+
+function formatProductName(value) {
+  const raw = safeString(value, 120);
+  if (!raw) return '';
+
+  if (PRODUCT_LABELS[raw]) return PRODUCT_LABELS[raw];
+
+  return raw
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+    .replace(/\bUsb\b/g, 'USB')
+    .replace(/\bXxl\b/g, 'XXL')
+    .replace(/\bLed\b/g, 'LED');
 }
 
 function formatProductList(items) {
   if (!Array.isArray(items) || !items.length) return '-';
 
-  return items
-    .map(formatProductName)
-    .filter(Boolean)
-    .map((name) => `- ${name}`)
-    .join('\n');
+  const unique = [...new Set(items.map(formatProductName).filter(Boolean))];
+  if (!unique.length) return '-';
+
+  return unique.map((item) => `- ${item}`).join('\n');
 }
 
 function leadDescription(payload, requestInfo) {
@@ -224,23 +240,32 @@ function leadDescription(payload, requestInfo) {
   const configuration = payload.configuration || {};
   const products = pickProducts(payload);
 
-  const currency = safeString(configuration.currency, 10) || 'ARS';
   const estimatedTotal = Number(configuration.estimatedTotal || 0);
+  const currency = safeString(configuration.currency, 10) || 'ARS';
+
+  const eventType = safeString(payload.eventType, 80);
+  const eventLabel = eventType === 'whatsapp_click'
+    ? 'Seleccion final confirmada desde Pedir por WhatsApp'
+    : (eventType === 'cart_change' ? 'Seleccion actualizada desde el carrito' : 'Captura inicial del formulario');
 
   const lines = [
     'Lead generado desde setupoficina.com.ar',
     '',
+    'ESTADO',
+    `Etapa: ${eventLabel}`,
+    payload.updatedAt ? `Ultima actualizacion: ${safeString(payload.updatedAt, 40)}` : '',
+    '',
     'CONTACTO',
-    `Nombre: ${safeString(contact.name, 120)}`,
-    `Canal elegido: ${safeString(contact.preferredChannel, 30)}`,
+    `Nombre: ${safeString(contact.name, 120) || '-'}`,
+    `Canal elegido: ${safeString(contact.preferredChannel, 30) || '-'}`,
     contact.email ? `Email: ${safeString(contact.email, 180)}` : '',
     contact.whatsapp ? `WhatsApp: ${safeString(contact.whatsapp, 80)}` : '',
     '',
     'DIAGNOSTICO',
-    `Resultado: ${safeString(diagnosis.recommendedTier, 80)}`,
-    `Preset: ${safeString(diagnosis.recommendedPreset, 40)}`,
+    `Resultado: ${safeString(diagnosis.recommendedTier, 80) || '-'}`,
+    `Preset: ${safeString(diagnosis.recommendedPreset, 40) || '-'}`,
     `Puntaje: ${Number(diagnosis.totalScore || 0)}/18`,
-    `Total estimado: $${estimatedTotal.toLocaleString('es-AR')} ${currency}`,
+    `Total estimado: $${Number.isFinite(estimatedTotal) ? estimatedTotal.toLocaleString('es-AR') : '0'} ${currency}`,
     '',
     'PRODUCTOS RECOMENDADOS',
     formatProductList(products.recommended),
@@ -252,8 +277,8 @@ function leadDescription(payload, requestInfo) {
     products.extras.length ? formatProductList(products.extras) : '',
     '',
     'DATOS TECNICOS',
-    `Lead ID: ${safeString(payload.leadId, 80)}`,
-    `Fecha: ${safeString(payload.createdAt, 40)}`,
+    `Lead ID: ${safeString(payload.leadId, 80) || '-'}`,
+    `Fecha: ${safeString(payload.createdAt, 40) || '-'}`,
     `IP: ${requestInfo.ip || '-'}`,
     `Pais: ${requestInfo.country || '-'}`
   ];
@@ -283,7 +308,7 @@ function buildOdooLead(payload, requestInfo) {
   });
 }
 
-async function sendToOdoo(payload, env, requestInfo) {
+async function getOdooSession(env) {
   if (!odooEnabled(env)) return { ok: false, skipped: true, error: 'Odoo desactivado.' };
   if (!odooConfigured(env)) return { ok: false, skipped: true, error: 'Faltan variables de Odoo.' };
 
@@ -295,11 +320,18 @@ async function sendToOdoo(payload, env, requestInfo) {
   const uid = await xmlRpcCall(`${url}/xmlrpc/2/common`, 'authenticate', [db, username, apiKey, {}]);
   if (!uid || typeof uid !== 'number') throw new Error('Odoo no autentico el usuario. Revisar base, usuario o API key.');
 
+  return { ok: true, url, db, uid, apiKey };
+}
+
+async function sendToOdoo(payload, env, requestInfo) {
+  const session = await getOdooSession(env);
+  if (!session.ok) return session;
+
   const fields = buildOdooLead(payload, requestInfo);
-  const odooLeadId = await xmlRpcCall(`${url}/xmlrpc/2/object`, 'execute_kw', [
-    db,
-    uid,
-    apiKey,
+  const odooLeadId = await xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', [
+    session.db,
+    session.uid,
+    session.apiKey,
     'crm.lead',
     'create',
     [fields]
@@ -307,6 +339,27 @@ async function sendToOdoo(payload, env, requestInfo) {
 
   if (!odooLeadId || typeof odooLeadId !== 'number') throw new Error('Odoo no devolvio ID del lead creado.');
   return { ok: true, id: odooLeadId };
+}
+
+async function updateOdooLead(payload, env, requestInfo, odooLeadId) {
+  const id = Number(odooLeadId || payload.odooLeadId || 0);
+  if (!id || !Number.isFinite(id)) return { ok: false, skipped: true, error: 'No hay odooLeadId para actualizar.' };
+
+  const session = await getOdooSession(env);
+  if (!session.ok) return session;
+
+  const fields = buildOdooLead(payload, requestInfo);
+  const updated = await xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', [
+    session.db,
+    session.uid,
+    session.apiKey,
+    'crm.lead',
+    'write',
+    [[id], fields]
+  ]);
+
+  if (updated !== true) throw new Error('Odoo no confirmo la actualizacion del lead.');
+  return { ok: true, id, updated: true };
 }
 
 export async function onRequestOptions({ request }) {
@@ -318,10 +371,137 @@ export async function onRequestGet({ request, env }) {
     ok: true,
     service: 'PrimOffice Leads API',
     status: 'ready',
-    method: 'POST',
+    method: 'POST, PATCH',
     odoo: {
       enabled: odooEnabled(env),
       configured: odooConfigured(env)
+    }
+  }, 200, request);
+}
+
+async function readValidatedPayload(request) {
+  const contentLength = Number(request.headers.get('Content-Length') || 0);
+  if (contentLength > 100_000) {
+    return { error: 'Payload demasiado grande.', status: 413 };
+  }
+
+  let payload;
+  try {
+    payload = await request.json();
+  } catch (_) {
+    return { error: 'JSON invalido.', status: 400 };
+  }
+
+  const validationError = validatePayload(payload);
+  if (validationError) return { error: validationError, status: 400 };
+
+  return { payload };
+}
+
+export async function onRequestPatch({ request, env }) {
+  if (!env.LEADS_DB) {
+    return json({ ok: false, error: 'D1 binding LEADS_DB no configurado.' }, 500, request);
+  }
+
+  const parsed = await readValidatedPayload(request);
+  if (parsed.error) return json({ ok: false, error: parsed.error }, parsed.status || 400, request);
+
+  const payload = parsed.payload;
+  const contact = payload.contact || {};
+  const diagnosis = payload.diagnosis || {};
+  const configuration = payload.configuration || {};
+  const products = pickProducts(payload);
+
+  const leadId = safeString(payload.leadId, 80);
+  if (!leadId) return json({ ok: false, error: 'Falta leadId para actualizar.' }, 400, request);
+
+  const now = new Date().toISOString();
+  const updatedAt = safeString(payload.updatedAt, 40) || now;
+  const name = safeString(contact.name, 120);
+  const preferredChannel = safeString(contact.preferredChannel, 30);
+  const email = safeString(contact.email, 180);
+  const whatsapp = safeString(contact.whatsapp, 80);
+  const recommendedTier = safeString(diagnosis.recommendedTier, 80);
+  const recommendedPreset = safeString(diagnosis.recommendedPreset, 40);
+  const totalScore = Number(diagnosis.totalScore || 0);
+  const estimatedTotal = Number(configuration.estimatedTotal || 0);
+  const currency = safeString(configuration.currency, 10) || 'ARS';
+  const ip = safeString(request.headers.get('CF-Connecting-IP'), 80);
+  const country = safeString(request.cf && request.cf.country, 10);
+  const requestInfo = { ip, country };
+
+  let existing;
+  try {
+    existing = await env.LEADS_DB.prepare(`
+      SELECT odoo_lead_id
+      FROM leads
+      WHERE lead_id = ?
+      ORDER BY id DESC
+      LIMIT 1
+    `).bind(leadId).first();
+  } catch (err) {
+    console.error('[PrimOffice Leads API] Error buscando lead en D1:', err);
+    return json({ ok: false, error: 'No se pudo buscar el lead para actualizar.' }, 500, request);
+  }
+
+  if (!existing) {
+    return json({ ok: false, error: 'No existe un lead previo con ese leadId.' }, 404, request);
+  }
+
+  const odooLeadId = Number(payload.odooLeadId || existing.odoo_lead_id || 0);
+  let odooResult = { ok: false, skipped: true, error: 'No ejecutado.' };
+
+  try {
+    odooResult = await updateOdooLead({ ...payload, updatedAt }, env, requestInfo, odooLeadId);
+  } catch (err) {
+    const message = safeString(err && err.message ? err.message : err, 1000);
+    odooResult = { ok: false, error: message };
+    console.error('[PrimOffice Leads API] Error actualizando Odoo:', err);
+  }
+
+  try {
+    await env.LEADS_DB.prepare(`
+      UPDATE leads
+      SET name = ?, preferred_channel = ?, email = ?, whatsapp = ?,
+          recommended_tier = ?, recommended_preset = ?, total_score = ?,
+          estimated_total = ?, currency = ?, products_json = ?, payload_json = ?,
+          odoo_status = ?, odoo_lead_id = COALESCE(?, odoo_lead_id),
+          odoo_error = ?, odoo_synced_at = ?
+      WHERE lead_id = ?
+    `).bind(
+      name,
+      preferredChannel,
+      email,
+      whatsapp,
+      recommendedTier,
+      recommendedPreset,
+      Number.isFinite(totalScore) ? totalScore : 0,
+      Number.isFinite(estimatedTotal) ? estimatedTotal : 0,
+      currency,
+      safeJson(products),
+      safeJson({ ...payload, updatedAt }),
+      odooResult.ok ? 'synced' : (odooResult.skipped ? 'pending' : 'error'),
+      odooResult.id || null,
+      odooResult.ok ? null : safeString(odooResult.error, 1000),
+      odooResult.ok ? now : null,
+      leadId
+    ).run();
+  } catch (err) {
+    console.error('[PrimOffice Leads API] Error actualizando D1:', err);
+    return json({ ok: false, error: 'No se pudo actualizar el lead en D1.' }, 500, request);
+  }
+
+  return json({
+    ok: true,
+    mode: 'real',
+    stored: true,
+    updated: true,
+    leadId,
+    odoo: {
+      enabled: odooEnabled(env),
+      synced: !!odooResult.ok,
+      id: odooResult.id || odooLeadId || null,
+      error: odooResult.ok ? null : (odooResult.error || null)
     }
   }, 200, request);
 }

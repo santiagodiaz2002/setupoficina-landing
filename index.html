@@ -1503,6 +1503,7 @@ function applyComboPreset(name){
   updateTotal();
   updatePreview();
   updatePresetButtons(name);
+  scheduleLeadCartUpdate('cart_change');
 }
 
 document.querySelectorAll('[data-combo-preset]').forEach(function(btn){
@@ -1561,6 +1562,7 @@ function renderCart(items,extras){
       updateTotal();
       updatePreview();
       updatePresetButtons();
+      scheduleLeadCartUpdate('cart_change');
     });
 
     listEl.appendChild(row);
@@ -1613,6 +1615,7 @@ function showResult(){
 
 // ── TEASER + CAPTURA DE LEAD (inyectado) ─────────────────
 var pqTeaser=document.getElementById('pqTeaser'),pqLead=document.getElementById('pqLead'),qContainer=document.getElementById('quiz-container');
+var pqLeadSession={basePayload:null,leadId:'',odooLeadId:null,cartUpdateTimer:0,lastUpdateAt:''};
 function pqShow(el){if(el)el.removeAttribute('hidden');}
 function pqHide(el){if(el)el.setAttribute('hidden','');}
 function pqScroll(){var s=document.getElementById('test');if(s){var t=s.getBoundingClientRect().top;if(t<0||t>window.innerHeight*0.5)s.scrollIntoView({behavior:'smooth',block:'start'});}}
@@ -1643,25 +1646,122 @@ function pqValidate(){
   if(first){var f=document.getElementById(first);if(f){try{f.focus();}catch(e){}}return false;}
   return true;
 }
+function normalizeProductArray(list){
+  var out=[];
+  (Array.isArray(list)?list:[]).forEach(function(rawId){
+    var id=normalizeCartId(rawId);
+    if(P[id]&&out.indexOf(id)===-1)out.push(id);
+  });
+  return out;
+}
+function getCurrentCartConfiguration(){
+  var selectedProducts=[],selectedProductNames=[],selectedExtras=[],selectedExtraNames=[],total=0;
+
+  Object.keys(cartState).forEach(function(id){
+    if(cartState[id]&&P[id]){
+      selectedProducts.push(id);
+      selectedProductNames.push(P[id].name);
+      total+=Number(P[id].price||0);
+    }
+  });
+
+  Object.keys(extrasState).forEach(function(id){
+    if(extrasState[id]&&P[id]){
+      selectedExtras.push(id);
+      selectedExtraNames.push(P[id].name);
+      total+=Number(P[id].price||0);
+    }
+  });
+
+  return{
+    selectedProducts:selectedProducts,
+    selectedProductNames:selectedProductNames,
+    selectedExtras:selectedExtras,
+    selectedExtraNames:selectedExtraNames,
+    estimatedTotal:total,
+    currency:'ARS'
+  };
+}
+function clonePayload(payload){
+  try{return JSON.parse(JSON.stringify(payload||{}));}
+  catch(e){return Object.assign({},payload||{});}
+}
+function readOdooLeadId(result){
+  var data=result&&result.data?result.data:result;
+  return data&&data.odoo&&data.odoo.id?data.odoo.id:null;
+}
+function storeLeadSession(payload,result){
+  if(!payload)return;
+  pqLeadSession.basePayload=clonePayload(payload);
+  pqLeadSession.leadId=payload.leadId||pqLeadSession.leadId||'';
+  var id=readOdooLeadId(result);
+  if(id)pqLeadSession.odooLeadId=id;
+}
+function buildLeadUpdatePayload(eventType){
+  var base=pqLeadSession.basePayload?clonePayload(pqLeadSession.basePayload):pqPayload();
+  var cart=getCurrentCartConfiguration();
+  var updatedAt=new Date().toISOString();
+
+  base.leadId=base.leadId||pqLeadSession.leadId;
+  base.updatedAt=updatedAt;
+  base.eventType=eventType||'cart_change';
+  base.odooLeadId=pqLeadSession.odooLeadId||base.odooLeadId||null;
+  base.configuration=Object.assign({},base.configuration||{},cart,{
+    finalSelection:eventType==='whatsapp_click',
+    lastInteraction:eventType||'cart_change'
+  });
+
+  return base;
+}
+function submitLeadUpdate(eventType){
+  if(!pqLeadSession.leadId)return Promise.resolve({ok:false,skipped:true,error:'Sin lead inicial.'});
+  if(!(window.PrimOfficeLeads&&window.PrimOfficeLeads.updateLead)){
+    console.warn('[lead] No existe updateLead. No se actualiza Odoo para evitar duplicar leads.');
+    return Promise.resolve({ok:false,skipped:true,error:'updateLead no disponible'});
+  }
+
+  var payload=buildLeadUpdatePayload(eventType);
+  return window.PrimOfficeLeads.updateLead(payload).then(function(result){
+    if(result&&result.ok){storeLeadSession(payload,result);pqLeadSession.lastUpdateAt=payload.updatedAt;}
+    return result;
+  }).catch(function(err){
+    console.warn('[lead] No se pudo actualizar la seleccion final del lead.',err);
+    return{ok:false,error:String((err&&err.message)||err)};
+  });
+}
+function scheduleLeadCartUpdate(eventType){
+  if(!pqLeadSession.leadId)return;
+  clearTimeout(pqLeadSession.cartUpdateTimer);
+  pqLeadSession.cartUpdateTimer=setTimeout(function(){
+    submitLeadUpdate(eventType||'cart_change');
+  },900);
+}
 function pqPayload(){
-  var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Elite'),c=pqCanal(),total=0;
-  r.items.forEach(function(id){if(P[id])total+=P[id].price;});
+  var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Elite'),c=pqCanal();
+  var recommended=normalizeProductArray(r.items);
+  var total=0;
+  recommended.forEach(function(id){if(P[id])total+=Number(P[id].price||0);});
   var cfg=(window.PrimOfficeConfig||{});
   return {leadId:'lead_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),createdAt:new Date().toISOString(),
     source:cfg.LEAD_ORIGIN||'landing-primoffice',utm:pqUTM(),
     contact:{name:document.getElementById('pqNombre').value.trim(),preferredChannel:c||'email',
       email:c==='email'?document.getElementById('pqEmail').value.trim():'',whatsapp:c==='whatsapp'?document.getElementById('pqWa').value.trim():'',consent:!!document.getElementById('pqConsent').checked},
     diagnosis:{rawAnswers:answers.slice(),totalScore:r.score,recommendedTier:'Setup '+tier,recommendedPreset:tier==='Epic'?'elite':tier.toLowerCase()},
-    configuration:{recommendedProducts:r.items.slice(),selectedProducts:r.items.slice(),selectedExtras:[],estimatedTotal:total,currency:'ARS'}};
+    configuration:{recommendedProducts:recommended.slice(),selectedProducts:recommended.slice(),selectedExtras:[],estimatedTotal:total,currency:'ARS'}};
 }
 function pqSubmit(e){
   e.preventDefault();if(!pqValidate())return;
   var btn=document.querySelector('#pqLeadForm [type=submit]'),prev='';
   if(btn){prev=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="pq-spin" aria-hidden="true"></span> Procesando...';}
   var payload=pqPayload();
-  function done(){if(btn){btn.disabled=false;btn.innerHTML=prev;}pqHide(pqLead);showResult();}
+  function done(result){
+    storeLeadSession(payload,result);
+    if(btn){btn.disabled=false;btn.innerHTML=prev;}
+    pqHide(pqLead);
+    showResult();
+  }
   try{
-    if(window.PrimOfficeLeads&&window.PrimOfficeLeads.submitLead){window.PrimOfficeLeads.submitLead(payload).then(done).catch(done);}
+    if(window.PrimOfficeLeads&&window.PrimOfficeLeads.submitLead){window.PrimOfficeLeads.submitLead(payload).then(done).catch(function(){done();});}
     else{try{var k='primoffice_leads_demo',arr=JSON.parse(localStorage.getItem(k)||'[]');arr.push(payload);localStorage.setItem(k,JSON.stringify(arr));console.warn('[lead] MODO DEMO (sin modulo): guardado en localStorage.',payload);}catch(e){}done();}
   }catch(err){done();}
 }
@@ -1703,6 +1803,7 @@ window.sendWhatsApp=function(){
   });
   lines.push('','*Total estimado: $'+total.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' ARS*','','¿Me podés confirmar disponibilidad y entrega en 24 h? ¡Gracias!');
   openWhatsAppMessage(lines.join('\n'));
+  submitLeadUpdate('whatsapp_click');
 };
 
 // ── SCROLL REVEAL ─────────────────────────────────────────
@@ -1722,7 +1823,7 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
 <script defer src="./js/pulido-visual.js"></script>
 <script defer src="./js/comparacion-antes-despues.js"></script>
 <script type="module" src="./js/config/app-config.js?v=d1-leads-2"></script>
-<script type="module" src="./js/services/leads-service.js?v=d1-final-1"></script>
+<script type="module" src="./js/services/leads-service.js?v=d1-final-cart-1"></script>
 <script type="module" src="./js/setup-3d.js"></script>
 </body>
 </html>

@@ -45,7 +45,7 @@ function guardarDemo(payload) {
   }
 }
 
-async function enviarReal(url, payload, conf) {
+async function enviarReal(url, payload, conf, method = 'POST') {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), conf.LEADS_TIMEOUT_MS || 10000);
 
@@ -61,7 +61,7 @@ async function enviarReal(url, payload, conf) {
 
   try {
     const resp = await fetch(url, {
-      method: 'POST',
+      method,
       headers,
       body: JSON.stringify(payload),
       signal: controller.signal
@@ -125,6 +125,31 @@ export async function submitLead(payload) {
   return resultado;
 }
 
+export async function updateLead(payload) {
+  const conf = cfg();
+  const url = (conf.LEADS_API_URL || '').trim();
+
+  if (!url) {
+    const guardado = guardarDemo(Object.assign({}, payload, { updateOnly: true }));
+    console.warn(
+      '[leads-service] Sin endpoint configurado. Actualizacion guardada local:',
+      guardado ? 'localStorage' : 'memoria',
+      payload
+    );
+    return { ok: true, mode: 'demo', stored: guardado, updated: true };
+  }
+
+  const resultado = await enviarReal(url, payload, conf, 'PATCH');
+
+  if (!resultado.ok) {
+    console.error('[leads-service] Fallo la actualizacion real del lead.', resultado);
+  } else {
+    console.info('[leads-service] Lead actualizado en el endpoint.', resultado);
+  }
+
+  return resultado;
+}
+
 export function getLeadsDemo() {
   try {
     const key = cfg().LEADS_STORAGE_KEY || 'primoffice_leads_demo';
@@ -135,7 +160,7 @@ export function getLeadsDemo() {
 }
 
 if (typeof window !== 'undefined') {
-  window.PrimOfficeLeads = { submitLead, getLeadsDemo };
+  window.PrimOfficeLeads = { submitLead, updateLead, getLeadsDemo };
 }
 
-export default { submitLead, getLeadsDemo };
+export default { submitLead, updateLead, getLeadsDemo };
