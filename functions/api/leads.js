@@ -101,7 +101,7 @@ function getLeadSourceName(payload) {
 
   const source = safeString(payload && payload.source, 120);
   if (!source || source === 'landing-primoffice') {
-    return 'Landing PrimOffice · Test ergonómico';
+    return 'Test - Landing';
   }
 
   return source
@@ -111,18 +111,23 @@ function getLeadSourceName(payload) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function getLeadTagNames(payload) {
+function getLeadTagDefinitions(payload) {
   const contact = (payload && payload.contact) || {};
   const diagnosis = (payload && payload.diagnosis) || {};
   const tier = safeString(diagnosis.recommendedTier, 80);
   const channel = safeString(contact.preferredChannel, 30).toLowerCase();
 
-  return [...new Set([
-    'Landing',
-    'Test ergonómico',
-    tier,
-    channel === 'whatsapp' ? 'Canal: WhatsApp' : (channel === 'email' ? 'Canal: Email' : '')
-  ].filter(Boolean))];
+  return [
+    { name: 'Test - Landing', color: 8 },
+    tier ? { name: tier, color: 3 } : null,
+    channel === 'whatsapp'
+      ? { name: 'WhatsApp', color: 4 }
+      : (channel === 'email' ? { name: 'Email', color: 6 } : null)
+  ].filter(Boolean);
+}
+
+function getLeadTagNames(payload) {
+  return getLeadTagDefinitions(payload).map((tag) => tag.name);
 }
 
 function pickProducts(payload) {
@@ -344,50 +349,60 @@ function formatProductListHtml(items) {
   return `<ul>${products.map((item) => `<li>${htmlEscape(item)}</li>`).join('')}</ul>`;
 }
 
+function formatBusinessDate(value) {
+  const raw = safeString(value, 80);
+  if (!raw) return '';
+
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+
+  try {
+    return new Intl.DateTimeFormat('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).format(date);
+  } catch (_) {
+    return raw;
+  }
+}
+
 function leadDescription(payload, requestInfo) {
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
   const products = pickProducts(payload);
-  const utm = payload.utm || {};
 
   const estimatedTotal = Number(configuration.estimatedTotal || 0);
   const currency = safeString(configuration.currency, 10) || 'ARS';
-  const sourceName = getLeadSourceName(payload);
-  const tags = getLeadTagNames(payload);
 
   const eventType = safeString(payload.eventType, 80);
   const eventLabel = eventType === 'whatsapp_click'
-    ? 'Selección final confirmada desde Pedir por WhatsApp'
-    : (eventType === 'cart_change' ? 'Selección actualizada desde el carrito' : 'Captura inicial del formulario');
+    ? 'Selección final confirmada desde WhatsApp'
+    : (eventType === 'cart_change' ? 'Selección actualizada desde el carrito' : 'Diagnóstico recibido');
 
   const contactLines = [
     `<strong>Nombre:</strong> ${htmlEscape(safeString(contact.name, 120) || '-')}`,
-    `<strong>Canal elegido:</strong> ${htmlEscape(safeString(contact.preferredChannel, 30) || '-')}`,
     contact.email ? `<strong>Email:</strong> ${htmlEscape(safeString(contact.email, 180))}` : '',
     contact.whatsapp ? `<strong>WhatsApp:</strong> ${htmlEscape(normalizeArgentinaPhone(contact.whatsapp))}` : ''
   ].filter(Boolean).join('<br>');
 
-  const utmLines = [
-    utm.utm_source ? `<strong>UTM source:</strong> ${htmlEscape(safeString(utm.utm_source, 120))}` : '',
-    utm.utm_medium ? `<strong>UTM medium:</strong> ${htmlEscape(safeString(utm.utm_medium, 120))}` : '',
-    utm.utm_campaign ? `<strong>UTM campaign:</strong> ${htmlEscape(safeString(utm.utm_campaign, 180))}` : ''
-  ].filter(Boolean).join('<br>');
+  const updatedDate = formatBusinessDate(payload.updatedAt || payload.createdAt);
 
   return [
     '<div>',
-    '<p><strong>Lead generado desde setupoficina.com.ar</strong></p>',
+    '<p><strong>Resumen del test y configuración</strong></p>',
     '<hr>',
     '<h3>Estado</h3>',
-    `<p><strong>Etapa:</strong> ${htmlEscape(eventLabel)}${payload.updatedAt ? `<br><strong>Última actualización:</strong> ${htmlEscape(safeString(payload.updatedAt, 40))}` : ''}</p>`,
-    '<h3>Origen</h3>',
-    `<p><strong>Fuente:</strong> ${htmlEscape(sourceName)}<br><strong>Etiquetas:</strong> ${htmlEscape(tags.join(', ') || '-')}</p>`,
-    utmLines ? `<p>${utmLines}</p>` : '',
+    `<p><strong>${htmlEscape(eventLabel)}</strong>${updatedDate ? `<br><span>Actualizado: ${htmlEscape(updatedDate)} h</span>` : ''}</p>`,
     '<h3>Contacto</h3>',
     `<p>${contactLines}</p>`,
-    '<h3>Diagnóstico</h3>',
-    `<p><strong>Resultado:</strong> ${htmlEscape(safeString(diagnosis.recommendedTier, 80) || '-')}<br>`,
-    `<strong>Preset:</strong> ${htmlEscape(safeString(diagnosis.recommendedPreset, 40) || '-')}<br>`,
+    '<h3>Resultado</h3>',
+    `<p><strong>Recomendación:</strong> ${htmlEscape(safeString(diagnosis.recommendedTier, 80) || '-')}<br>`,
     `<strong>Puntaje:</strong> ${htmlEscape(String(Number(diagnosis.totalScore || 0)))}/18<br>`,
     `<strong>Total estimado:</strong> $${htmlEscape(Number.isFinite(estimatedTotal) ? estimatedTotal.toLocaleString('es-AR') : '0')} ${htmlEscape(currency)}</p>`,
     '<h3>Productos recomendados</h3>',
@@ -396,11 +411,6 @@ function leadDescription(payload, requestInfo) {
     formatProductListHtml(products.selected),
     products.extras.length ? '<h3>Extras</h3>' : '',
     products.extras.length ? formatProductListHtml(products.extras) : '',
-    '<h3>Datos técnicos</h3>',
-    `<p><strong>Lead ID:</strong> ${htmlEscape(safeString(payload.leadId, 80) || '-')}<br>`,
-    `<strong>Fecha:</strong> ${htmlEscape(safeString(payload.createdAt, 40) || '-')}<br>`,
-    `<strong>IP:</strong> ${htmlEscape(requestInfo.ip || '-')}<br>`,
-    `<strong>País:</strong> ${htmlEscape(requestInfo.country || '-')}</p>`,
     '</div>'
   ].filter(Boolean).join('');
 }
@@ -419,7 +429,7 @@ async function odooExecuteKw(session, model, method, args = [], kwargs = null) {
   return xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', params);
 }
 
-async function findOrCreateNamedRecord(session, model, name) {
+async function findOrCreateNamedRecord(session, model, name, extraValues = {}) {
   const cleanName = safeString(name, 120);
   if (!cleanName) return null;
 
@@ -427,7 +437,7 @@ async function findOrCreateNamedRecord(session, model, name) {
   if (Array.isArray(found) && found.length) return Number(found[0]);
 
   try {
-    const created = await odooExecuteKw(session, model, 'create', [{ name: cleanName }]);
+    const created = await odooExecuteKw(session, model, 'create', [{ name: cleanName, ...extraValues }]);
     return Number(created) || null;
   } catch (error) {
     const retry = await odooExecuteKw(session, model, 'search', [[['name', '=', cleanName]]], { limit: 1 });
@@ -460,8 +470,8 @@ async function buildOdooLead(payload, requestInfo, session) {
   // Etiquetas y origen se agregan como mejora comercial, pero nunca bloquean el lead.
   try {
     const tagIds = [];
-    for (const tagName of getLeadTagNames(payload)) {
-      const tagId = await findOrCreateNamedRecord(session, 'crm.tag', tagName);
+    for (const tag of getLeadTagDefinitions(payload)) {
+      const tagId = await findOrCreateNamedRecord(session, 'crm.tag', tag.name, { color: tag.color });
       if (tagId) tagIds.push(tagId);
     }
     if (tagIds.length) fields.tag_ids = [[6, 0, [...new Set(tagIds)]]];
