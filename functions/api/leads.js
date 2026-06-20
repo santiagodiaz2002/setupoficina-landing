@@ -95,22 +95,6 @@ function normalizePayloadContact(payload) {
   return normalized;
 }
 
-function getLeadSourceName(payload) {
-  const explicit = safeString(payload && payload.landingSource, 120);
-  if (explicit) return explicit;
-
-  const source = safeString(payload && payload.source, 120);
-  if (!source || source === 'landing-primoffice') {
-    return 'Test - Landing';
-  }
-
-  return source
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
 function getLeadTagNames(payload) {
   const contact = (payload && payload.contact) || {};
   const diagnosis = (payload && payload.diagnosis) || {};
@@ -379,9 +363,10 @@ function leadDescription(payload, requestInfo) {
 
   const eventType = safeString(payload.eventType, 80);
   const eventLabel = eventType === 'whatsapp_click'
-    ? 'Selección final confirmada desde WhatsApp'
-    : (eventType === 'cart_change' ? 'Selección actualizada desde el carrito' : 'Diagnóstico recibido');
-
+  ? 'Selección final confirmada'
+  : (eventType === 'cart_change'
+      ? 'Selección actualizada'
+      : 'Diagnóstico recibido');
   const contactLines = [
     `<strong>Nombre:</strong> ${htmlEscape(safeString(contact.name, 120) || '-')}`,
     contact.email ? `<strong>Email:</strong> ${htmlEscape(safeString(contact.email, 180))}` : '',
@@ -490,31 +475,31 @@ async function buildOdooLead(payload, requestInfo, session) {
     description: leadDescription(payload, requestInfo)
   });
 
-  // Etiquetas y origen se agregan como mejora comercial, pero nunca bloquean el lead.
-const tagIds = [];
+  // Etiquetas comerciales del lead.
+  const tagIds = [];
 
-for (const tagName of getLeadTagNames(payload)) {
-  try {
-    const tagId = await findOrCreateNamedRecord(
-      session,
-      'crm.tag',
-      tagName
-    );
+  for (const tagName of getLeadTagNames(payload)) {
+    try {
+      const tagId = await findOrCreateNamedRecord(
+        session,
+        'crm.tag',
+        tagName
+      );
 
-    if (tagId) {
-      tagIds.push(tagId);
+      if (tagId) {
+        tagIds.push(tagId);
+      }
+    } catch (error) {
+      console.warn(
+        `[PrimOffice Leads API] No se pudo resolver la etiqueta "${tagName}":`,
+        error
+      );
     }
-  } catch (error) {
-    console.warn(
-      `[PrimOffice Leads API] No se pudo resolver la etiqueta "${tagName}":`,
-      error
-    );
   }
-}
 
-if (tagIds.length) {
-  fields.tag_ids = [[6, 0, [...new Set(tagIds)]]];
-}
+  if (tagIds.length) {
+    fields.tag_ids = [...new Set(tagIds)].map((tagId) => [4, tagId, 0]);
+  }
 
   return fields;
 }
