@@ -498,7 +498,7 @@ async function buildOdooLead(payload, requestInfo, session) {
   }
 
   if (tagIds.length) {
-    fields.tag_ids = [...new Set(tagIds)].map((tagId) => [4, tagId, 0]);
+  fields.tag_ids = [[6, 0, [...new Set(tagIds)]]];
   }
 
   return fields;
