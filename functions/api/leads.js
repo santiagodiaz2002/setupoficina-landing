@@ -87,6 +87,77 @@ function normalizeArgentinaPhone(value) {
   return raw;
 }
 
+const PRIMOFFICE_ORIGIN_TAG = 'Test - Landing';
+const PRIMOFFICE_TIER_TAGS = Object.freeze(['Setup Starter', 'Setup Pro', 'Setup Epic']);
+const PRIMOFFICE_LEGACY_TIER_TAGS_TO_REMOVE = Object.freeze(['Setup Elite', 'Elite']);
+const PRIMOFFICE_CHANNEL_TAGS = Object.freeze(['WhatsApp', 'Email']);
+const PRIMOFFICE_MANAGED_TAG_NAMES = Object.freeze([
+  PRIMOFFICE_ORIGIN_TAG,
+  ...PRIMOFFICE_TIER_TAGS,
+  ...PRIMOFFICE_LEGACY_TIER_TAGS_TO_REMOVE,
+  ...PRIMOFFICE_CHANNEL_TAGS
+]);
+
+function normalizeTierKey(value) {
+  return safeString(value, 80)
+    .replace(/\s+/g, ' ')
+    .replace(/^setup\s+/i, '')
+    .trim()
+    .toLowerCase();
+}
+
+function tierFromScore(score) {
+  const totalScore = Number(score);
+  if (!Number.isFinite(totalScore)) return '';
+  if (totalScore <= 8) return 'Setup Starter';
+  if (totalScore <= 13) return 'Setup Pro';
+  return 'Setup Epic';
+}
+
+function normalizeRecommendedTierValue(value, totalScore) {
+  const raw = safeString(value, 80);
+  const key = normalizeTierKey(raw);
+
+  if (!key) return { value: tierFromScore(totalScore) };
+  if (key === 'starter') return { value: 'Setup Starter' };
+  if (key === 'pro') return { value: 'Setup Pro' };
+  if (key === 'epic' || key === 'elite') return { value: 'Setup Epic' };
+
+  return { error: `Nivel recomendado invalido: ${raw}.` };
+}
+
+function normalizeRecommendedTier(value, totalScore) {
+  const result = normalizeRecommendedTierValue(value, totalScore);
+  return result.error ? '' : result.value;
+}
+
+function presetFromTier(tier) {
+  const key = normalizeTierKey(tier);
+  if (key === 'starter') return 'starter';
+  if (key === 'pro') return 'pro';
+  if (key === 'epic' || key === 'elite') return 'epic';
+  return '';
+}
+
+function normalizeRecommendedPresetValue(value, tier) {
+  const raw = safeString(value, 40);
+  const key = normalizeTierKey(raw);
+
+  if (!key) return { value: presetFromTier(tier) };
+  if (key === 'starter') return { value: 'starter' };
+  if (key === 'pro') return { value: 'pro' };
+  if (key === 'epic' || key === 'elite') return { value: 'epic' };
+
+  return { error: `Preset recomendado invalido: ${raw}.` };
+}
+
+function channelTag(value) {
+  const channel = safeString(value, 30).toLowerCase();
+  if (channel === 'whatsapp') return 'WhatsApp';
+  if (channel === 'email') return 'Email';
+  return '';
+}
+
 function normalizePayloadContact(payload) {
   const normalized = { ...(payload || {}) };
   const contact = { ...((payload && payload.contact) || {}) };
@@ -95,19 +166,42 @@ function normalizePayloadContact(payload) {
   return normalized;
 }
 
+function normalizeLeadPayload(payload) {
+  const normalized = normalizePayloadContact(payload);
+  const diagnosis = { ...((normalized && normalized.diagnosis) || {}) };
+  const tierResult = normalizeRecommendedTierValue(diagnosis.recommendedTier, diagnosis.totalScore);
+  if (tierResult.error) return { error: tierResult.error, status: 400 };
+
+  const tier = tierResult.value;
+  const presetResult = normalizeRecommendedPresetValue(diagnosis.recommendedPreset, tier);
+  if (presetResult.error) return { error: presetResult.error, status: 400 };
+
+  const preset = presetResult.value;
+  const expectedPreset = presetFromTier(tier);
+  if (preset && expectedPreset && preset !== expectedPreset) {
+    return {
+      error: `Preset recomendado incompatible con el nivel normalizado: ${preset}.`,
+      status: 400
+    };
+  }
+
+  if (tier) diagnosis.recommendedTier = tier;
+  if (preset) diagnosis.recommendedPreset = preset;
+
+  normalized.diagnosis = diagnosis;
+  return { payload: normalized };
+}
+
 function getLeadTagNames(payload) {
   const contact = (payload && payload.contact) || {};
   const diagnosis = (payload && payload.diagnosis) || {};
 
-  const tier = safeString(diagnosis.recommendedTier, 80);
-  const channel = safeString(contact.preferredChannel, 30).toLowerCase();
+  const tier = normalizeRecommendedTier(diagnosis.recommendedTier, diagnosis.totalScore);
 
   return [...new Set([
-    'Test - Landing',
+    PRIMOFFICE_ORIGIN_TAG,
     tier,
-    channel === 'whatsapp'
-      ? 'WhatsApp'
-      : (channel === 'email' ? 'Email' : '')
+    channelTag(contact.preferredChannel)
   ].filter(Boolean))];
 }
 
@@ -202,35 +296,103 @@ function getTag(xml, tag) {
   return match ? match[1] : '';
 }
 
-function parseXmlRpcValue(xml) {
-  const valueXml = getTag(xml, 'value') || xml;
-  const arrayXml = getTag(valueXml, 'array');
+function findXmlElement(xml, tag, fromIndex = 0) {
+  const source = String(xml || '');
+  const pattern = new RegExp(`<\\/?${tag}(?:\\s[^>]*)?>`, 'ig');
+  pattern.lastIndex = fromIndex;
 
-  if (arrayXml !== '') {
-    const dataXml = getTag(arrayXml, 'data');
-    const intValues = [...dataXml.matchAll(/<(?:int|i4)>(-?\d+)<\/(?:int|i4)>/gi)]
-      .map((match) => Number(match[1]));
-    if (intValues.length) return intValues;
+  let match;
+  while ((match = pattern.exec(source))) {
+    if (match[0][1] === '/') continue;
 
-    return [...dataXml.matchAll(/<string>([\s\S]*?)<\/string>/gi)]
-      .map((match) => decodeXml(match[1]));
+    const start = match.index;
+    const openEnd = pattern.lastIndex;
+    let depth = 1;
+
+    while ((match = pattern.exec(source))) {
+      depth += match[0][1] === '/' ? -1 : 1;
+
+      if (depth === 0) {
+        return {
+          start,
+          end: pattern.lastIndex,
+          inner: source.slice(openEnd, match.index),
+          whole: source.slice(start, pattern.lastIndex)
+        };
+      }
+    }
+
+    return null;
   }
 
-  const intValue = getTag(valueXml, 'int') || getTag(valueXml, 'i4');
-  if (intValue !== '') return Number(intValue);
+  return null;
+}
 
-  const doubleValue = getTag(valueXml, 'double');
-  if (doubleValue !== '') return Number(doubleValue);
+function getXmlElements(xml, tag) {
+  const elements = [];
+  let cursor = 0;
+  let element;
 
-  const boolValue = getTag(valueXml, 'boolean');
-  if (boolValue !== '') return boolValue === '1';
+  while ((element = findXmlElement(xml, tag, cursor))) {
+    elements.push(element);
+    cursor = element.end;
+  }
 
-  const stringValue = getTag(valueXml, 'string');
-  if (stringValue !== '') return decodeXml(stringValue);
+  return elements;
+}
 
-  const raw = valueXml.replace(/<[^>]+>/g, '').trim();
+function isWholeXmlElement(element, xml) {
+  return Boolean(element && element.whole.trim() === String(xml || '').trim());
+}
+
+function parseXmlRpcTypedValue(xml) {
+  const trimmed = String(xml || '').trim();
+  const valueElement = findXmlElement(trimmed, 'value');
+  if (isWholeXmlElement(valueElement, trimmed)) return parseXmlRpcTypedValue(valueElement.inner);
+
+  const arrayElement = findXmlElement(trimmed, 'array');
+  if (isWholeXmlElement(arrayElement, trimmed)) {
+    const dataElement = findXmlElement(arrayElement.inner, 'data');
+    const dataXml = dataElement ? dataElement.inner : arrayElement.inner;
+    return getXmlElements(dataXml, 'value').map((item) => parseXmlRpcTypedValue(item.whole));
+  }
+
+  const structElement = findXmlElement(trimmed, 'struct');
+  if (isWholeXmlElement(structElement, trimmed)) {
+    const out = {};
+
+    getXmlElements(structElement.inner, 'member').forEach((member) => {
+      const nameElement = findXmlElement(member.inner, 'name');
+      const memberValue = findXmlElement(member.inner, 'value');
+      if (!nameElement) return;
+      out[decodeXml(nameElement.inner)] = memberValue ? parseXmlRpcTypedValue(memberValue.whole) : '';
+    });
+
+    return out;
+  }
+
+  const intElement = findXmlElement(trimmed, 'int') || findXmlElement(trimmed, 'i4');
+  if (isWholeXmlElement(intElement, trimmed)) return Number(intElement.inner);
+
+  const doubleElement = findXmlElement(trimmed, 'double');
+  if (isWholeXmlElement(doubleElement, trimmed)) return Number(doubleElement.inner);
+
+  const boolElement = findXmlElement(trimmed, 'boolean');
+  if (isWholeXmlElement(boolElement, trimmed)) return boolElement.inner === '1';
+
+  const stringElement = findXmlElement(trimmed, 'string');
+  if (isWholeXmlElement(stringElement, trimmed)) return decodeXml(stringElement.inner);
+
+  if (/^<nil\s*\/>$/i.test(trimmed)) return null;
+
+  const raw = trimmed.replace(/<[^>]+>/g, '').trim();
   if (/^-?\d+$/.test(raw)) return Number(raw);
   return decodeXml(raw);
+}
+
+function parseXmlRpcValue(xml) {
+  const valueElement = findXmlElement(xml, 'value');
+  return parseXmlRpcTypedValue(valueElement ? valueElement.whole : xml);
 }
 
 async function xmlRpcCall(endpoint, methodName, params, timeoutMs = 15000) {
@@ -357,6 +519,7 @@ function leadDescription(payload, requestInfo) {
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
   const products = pickProducts(payload);
+  const tier = normalizeRecommendedTier(diagnosis.recommendedTier, diagnosis.totalScore);
 
   const estimatedTotal = Number(configuration.estimatedTotal || 0);
   const currency = safeString(configuration.currency, 10) || 'ARS';
@@ -384,7 +547,7 @@ function leadDescription(payload, requestInfo) {
     '<h3>Contacto</h3>',
     `<p>${contactLines}</p>`,
     '<h3>Resultado</h3>',
-    `<p><strong>Recomendación:</strong> ${htmlEscape(safeString(diagnosis.recommendedTier, 80) || '-')}<br>`,
+    `<p><strong>Recomendación:</strong> ${htmlEscape(tier || '-')}<br>`,
     `<strong>Puntaje:</strong> ${htmlEscape(String(Number(diagnosis.totalScore || 0)))}/18<br>`,
     `<strong>Total estimado:</strong> $${htmlEscape(Number.isFinite(estimatedTotal) ? estimatedTotal.toLocaleString('es-AR') : '0')} ${htmlEscape(currency)}</p>`,
     '<h3>Productos recomendados</h3>',
@@ -411,7 +574,13 @@ async function odooExecuteKw(session, model, method, args = [], kwargs = null) {
   return xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', params);
 }
 
-async function findOrCreateNamedRecord(session, model, name) {
+function uniqueNumberIds(ids) {
+  return [...new Set((ids || [])
+    .map((id) => Number(id))
+    .filter((id) => Number.isFinite(id) && id > 0))];
+}
+
+async function findNamedRecordId(session, model, name) {
   const cleanName = safeString(name, 120);
   if (!cleanName) return null;
 
@@ -424,8 +593,18 @@ async function findOrCreateNamedRecord(session, model, name) {
   );
 
   if (Array.isArray(found) && found.length) {
-    return Number(found[0]);
+    return Number(found[0]) || null;
   }
+
+  return null;
+}
+
+async function findOrCreateNamedRecord(session, model, name) {
+  const cleanName = safeString(name, 120);
+  if (!cleanName) return null;
+
+  const found = await findNamedRecordId(session, model, cleanName);
+  if (found) return found;
 
   try {
     const created = await odooExecuteKw(
@@ -447,20 +626,111 @@ async function findOrCreateNamedRecord(session, model, name) {
     );
 
     if (Array.isArray(retry) && retry.length) {
-      return Number(retry[0]);
+      return Number(retry[0]) || null;
     }
 
     throw error;
   }
 }
 
-async function buildOdooLead(payload, requestInfo, session) {
+async function resolveRequiredLeadTags(session, payload) {
+  const tagNames = getLeadTagNames(payload);
+
+  if (tagNames.length !== 3) {
+    throw new Error(`No se pudieron determinar las tres etiquetas requeridas del lead: ${tagNames.join(', ') || 'sin etiquetas'}.`);
+  }
+
+  const tagIdsByName = {};
+
+  for (const tagName of tagNames) {
+    let tagId;
+
+    try {
+      tagId = await findOrCreateNamedRecord(session, 'crm.tag', tagName);
+    } catch (error) {
+      const detail = safeString(error && error.message ? error.message : error, 300);
+      throw new Error(`No se pudo resolver la etiqueta de Odoo "${tagName}": ${detail || 'error desconocido'}.`);
+    }
+
+    if (!tagId) {
+      throw new Error(`No se pudo resolver la etiqueta de Odoo "${tagName}".`);
+    }
+
+    tagIdsByName[tagName] = tagId;
+  }
+
+  const tagIds = uniqueNumberIds(Object.values(tagIdsByName));
+  if (tagIds.length !== tagNames.length) {
+    throw new Error(`No se pudieron resolver las tres etiquetas requeridas del lead: ${tagNames.join(', ')}.`);
+  }
+
+  return {
+    tagNames,
+    tagIdsByName,
+    tagIds
+  };
+}
+
+async function resolveManagedLeadTagIds(session, knownTagIdsByName = {}) {
+  const tagIdsByName = { ...knownTagIdsByName };
+
+  for (const tagName of PRIMOFFICE_MANAGED_TAG_NAMES) {
+    if (tagIdsByName[tagName]) continue;
+
+    try {
+      const tagId = await findNamedRecordId(session, 'crm.tag', tagName);
+      if (tagId) tagIdsByName[tagName] = tagId;
+    } catch (error) {
+      const detail = safeString(error && error.message ? error.message : error, 300);
+      throw new Error(`No se pudo revisar la etiqueta administrada de Odoo "${tagName}": ${detail || 'error desconocido'}.`);
+    }
+  }
+
+  return uniqueNumberIds(Object.values(tagIdsByName));
+}
+
+async function readOdooLeadTagIds(session, odooLeadId) {
+  const id = Number(odooLeadId || 0);
+  if (!id || !Number.isFinite(id)) return [];
+
+  const records = await odooExecuteKw(
+    session,
+    'crm.lead',
+    'read',
+    [[id]],
+    { fields: ['tag_ids'] }
+  );
+
+  const record = Array.isArray(records) ? records[0] : null;
+  if (!record || typeof record !== 'object') {
+    throw new Error(`No se pudieron leer las etiquetas actuales del lead Odoo ${id}.`);
+  }
+
+  return uniqueNumberIds(record.tag_ids);
+}
+
+async function buildOdooTagCommand(payload, session, odooLeadId = null) {
+  const required = await resolveRequiredLeadTags(session, payload);
+
+  if (!odooLeadId) {
+    return [[6, 0, required.tagIds]];
+  }
+
+  const currentTagIds = await readOdooLeadTagIds(session, odooLeadId);
+  const managedTagIds = new Set(await resolveManagedLeadTagIds(session, required.tagIdsByName));
+  const externalTagIds = currentTagIds.filter((id) => !managedTagIds.has(id));
+  const finalTagIds = uniqueNumberIds([...externalTagIds, ...required.tagIds]);
+
+  return [[6, 0, finalTagIds]];
+}
+
+async function buildOdooLead(payload, requestInfo, session, options = {}) {
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
 
   const name = safeString(contact.name, 120);
-  const tier = safeString(diagnosis.recommendedTier, 80) || 'Setup recomendado';
+  const tier = normalizeRecommendedTier(diagnosis.recommendedTier, diagnosis.totalScore) || 'Setup recomendado';
   const whatsapp = normalizeArgentinaPhone(contact.whatsapp);
   const email = safeString(contact.email, 180);
   const estimatedRevenue = Number(configuration.estimatedTotal || 0);
@@ -475,33 +745,38 @@ async function buildOdooLead(payload, requestInfo, session) {
     description: leadDescription(payload, requestInfo)
   });
 
-  // Etiquetas comerciales del lead.
-  const tagIds = [];
-
-  for (const tagName of getLeadTagNames(payload)) {
-    try {
-      const tagId = await findOrCreateNamedRecord(
-        session,
-        'crm.tag',
-        tagName
-      );
-
-      if (tagId) {
-        tagIds.push(tagId);
-      }
-    } catch (error) {
-      console.warn(
-        `[PrimOffice Leads API] No se pudo resolver la etiqueta "${tagName}":`,
-        error
-      );
-    }
-  }
-
-  if (tagIds.length) {
-  fields.tag_ids = [[6, 0, [...new Set(tagIds)]]];
-  }
+  fields.tag_ids = await buildOdooTagCommand(payload, session, options.odooLeadId);
 
   return fields;
+}
+
+function odooD1State(odooResult, fallbackOdooLeadId = null, syncedAt = '') {
+  const result = odooResult || {};
+
+  if (result.ok) {
+    return {
+      status: 'synced',
+      id: result.id || fallbackOdooLeadId || null,
+      error: null,
+      syncedAt: syncedAt || new Date().toISOString()
+    };
+  }
+
+  if (result.skipped) {
+    return {
+      status: 'pending',
+      id: null,
+      error: safeString(result.error || 'Sincronizacion con Odoo omitida.', 1000),
+      syncedAt: null
+    };
+  }
+
+  return {
+    status: 'error',
+    id: result.id || fallbackOdooLeadId || null,
+    error: safeString(result.error || 'Error sincronizando con Odoo.', 1000),
+    syncedAt: null
+  };
 }
 
 async function getOdooSession(env) {
@@ -544,7 +819,7 @@ async function updateOdooLead(payload, env, requestInfo, odooLeadId) {
   const session = await getOdooSession(env);
   if (!session.ok) return session;
 
-  const fields = await buildOdooLead(payload, requestInfo, session);
+  const fields = await buildOdooLead(payload, requestInfo, session, { odooLeadId: id });
   const updated = await xmlRpcCall(`${session.url}/xmlrpc/2/object`, 'execute_kw', [
     session.db,
     session.uid,
@@ -591,7 +866,10 @@ async function readValidatedPayload(request) {
   const validationError = validatePayload(payload);
   if (validationError) return { error: validationError, status: 400 };
 
-  return { payload };
+  const normalized = normalizeLeadPayload(payload);
+  if (normalized.error) return normalized;
+
+  return normalized;
 }
 
 export async function onRequestPatch({ request, env }) {
@@ -602,7 +880,7 @@ export async function onRequestPatch({ request, env }) {
   const parsed = await readValidatedPayload(request);
   if (parsed.error) return json({ ok: false, error: parsed.error }, parsed.status || 400, request);
 
-  const payload = normalizePayloadContact(parsed.payload);
+  const payload = parsed.payload;
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
@@ -655,13 +933,15 @@ export async function onRequestPatch({ request, env }) {
     console.error('[PrimOffice Leads API] Error actualizando Odoo:', err);
   }
 
+  const odooState = odooD1State(odooResult, odooLeadId, now);
+
   try {
     await env.LEADS_DB.prepare(`
       UPDATE leads
       SET name = ?, preferred_channel = ?, email = ?, whatsapp = ?,
           recommended_tier = ?, recommended_preset = ?, total_score = ?,
           estimated_total = ?, currency = ?, products_json = ?, payload_json = ?,
-          odoo_status = ?, odoo_lead_id = COALESCE(?, odoo_lead_id),
+          odoo_status = ?, odoo_lead_id = ?,
           odoo_error = ?, odoo_synced_at = ?
       WHERE lead_id = ?
     `).bind(
@@ -676,10 +956,10 @@ export async function onRequestPatch({ request, env }) {
       currency,
       safeJson(products),
       safeJson({ ...payload, updatedAt }),
-      odooResult.ok ? 'synced' : (odooResult.skipped ? 'pending' : 'error'),
-      odooResult.id || null,
-      odooResult.ok ? null : safeString(odooResult.error, 1000),
-      odooResult.ok ? now : null,
+      odooState.status,
+      odooState.id,
+      odooState.error,
+      odooState.syncedAt,
       leadId
     ).run();
   } catch (err) {
@@ -696,8 +976,8 @@ export async function onRequestPatch({ request, env }) {
     odoo: {
       enabled: odooEnabled(env),
       synced: !!odooResult.ok,
-      id: odooResult.id || odooLeadId || null,
-      error: odooResult.ok ? null : (odooResult.error || null)
+      id: odooState.id,
+      error: odooState.error
     }
   }, 200, request);
 }
@@ -722,7 +1002,10 @@ export async function onRequestPost({ request, env }) {
   const error = validatePayload(payload);
   if (error) return json({ ok: false, error }, 400, request);
 
-  payload = normalizePayloadContact(payload);
+  const normalized = normalizeLeadPayload(payload);
+  if (normalized.error) return json({ ok: false, error: normalized.error }, normalized.status || 400, request);
+
+  payload = normalized.payload;
   const contact = payload.contact || {};
   const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
@@ -789,30 +1072,38 @@ export async function onRequestPost({ request, env }) {
   try {
     odooResult = await sendToOdoo({ ...payload, leadId, createdAt }, env, requestInfo);
 
-    if (odooResult.ok) {
-      await env.LEADS_DB.prepare(`
-        UPDATE leads
-        SET odoo_status = ?, odoo_lead_id = ?, odoo_error = NULL, odoo_synced_at = ?
-        WHERE lead_id = ?
-      `).bind('synced', odooResult.id, new Date().toISOString(), leadId).run();
-    } else if (!odooResult.skipped) {
-      await env.LEADS_DB.prepare(`
-        UPDATE leads
-        SET odoo_status = ?, odoo_error = ?
-        WHERE lead_id = ?
-      `).bind('error', safeString(odooResult.error, 1000), leadId).run();
-    }
+    const odooState = odooD1State(odooResult, null, new Date().toISOString());
+    await env.LEADS_DB.prepare(`
+      UPDATE leads
+      SET odoo_status = ?, odoo_lead_id = ?, odoo_error = ?, odoo_synced_at = ?
+      WHERE lead_id = ?
+    `).bind(
+      odooState.status,
+      odooState.id,
+      odooState.error,
+      odooState.syncedAt,
+      leadId
+    ).run();
   } catch (err) {
     const message = safeString(err && err.message ? err.message : err, 1000);
     odooResult = { ok: false, error: message };
+    const odooState = odooD1State(odooResult, null, null);
 
     console.error('[PrimOffice Leads API] Error enviando a Odoo:', err);
     await env.LEADS_DB.prepare(`
       UPDATE leads
-      SET odoo_status = ?, odoo_error = ?
+      SET odoo_status = ?, odoo_lead_id = ?, odoo_error = ?, odoo_synced_at = ?
       WHERE lead_id = ?
-    `).bind('error', message, leadId).run();
+    `).bind(
+      odooState.status,
+      odooState.id,
+      odooState.error,
+      odooState.syncedAt,
+      leadId
+    ).run();
   }
+
+  const responseOdooState = odooD1State(odooResult, null, null);
 
   return json({
     ok: true,
@@ -822,8 +1113,8 @@ export async function onRequestPost({ request, env }) {
     odoo: {
       enabled: odooEnabled(env),
       synced: !!odooResult.ok,
-      id: odooResult.id || null,
-      error: odooResult.ok ? null : (odooResult.error || null)
+      id: responseOdooState.id,
+      error: responseOdooState.error
     }
   }, 201, request);
 }

@@ -836,7 +836,7 @@
             <div class="combo-preset__buttons" role="group" aria-label="Combos disponibles">
               <button type="button" class="combo-preset__btn" data-combo-preset="starter" aria-pressed="false">Starter</button>
               <button type="button" class="combo-preset__btn" data-combo-preset="pro" aria-pressed="false">Pro</button>
-              <button type="button" class="combo-preset__btn" data-combo-preset="elite" aria-pressed="false">Epic</button>
+              <button type="button" class="combo-preset__btn" data-combo-preset="epic" aria-pressed="false">Epic</button>
             </div>
           </div>
           <div class="desk-preview__title">
@@ -1456,7 +1456,7 @@ var COMBO_PRESETS={
     'organizador_prem',
     'luz_led'
   ],
-  elite:[
+  epic:[
     'silla',
     'standing_desk',
     'soporte_monitor',
@@ -1772,7 +1772,7 @@ function scheduleLeadCartUpdate(eventType){
   },1000);
 }
 function pqPayload(){
-  var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Elite'),c=pqCanal();
+  var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Epic'),c=pqCanal();
   var recommended=normalizeProductArray(r.items);
   var total=0;
   recommended.forEach(function(id){if(P[id])total+=Number(P[id].price||0);});
@@ -1781,7 +1781,7 @@ function pqPayload(){
     source:cfg.LEAD_ORIGIN||'landing-primoffice',utm:pqUTM(),
     contact:{name:document.getElementById('pqNombre').value.trim(),preferredChannel:c||'email',
       email:c==='email'?document.getElementById('pqEmail').value.trim():'',whatsapp:c==='whatsapp'?document.getElementById('pqWa').value.trim():'',consent:!!document.getElementById('pqConsent').checked},
-    diagnosis:{rawAnswers:answers.slice(),totalScore:r.score,recommendedTier:'Setup '+tier,recommendedPreset:tier==='Epic'?'elite':tier.toLowerCase()},
+    diagnosis:{rawAnswers:answers.slice(),totalScore:r.score,recommendedTier:'Setup '+tier,recommendedPreset:tier.toLowerCase()},
     configuration:{recommendedProducts:recommended.slice(),selectedProducts:recommended.slice(),selectedExtras:[],estimatedTotal:total,currency:'ARS'}};
 }
 function pqSubmit(e){
