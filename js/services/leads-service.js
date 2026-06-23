@@ -103,11 +103,11 @@ export async function submitLead(payload) {
   const conf = cfg();
   const url = (conf.LEADS_API_URL || '').trim();
 
-  // Con URL configurada se manda al endpoint. El localStorage queda solo como respaldo sin backend.
-  if (!url) {
+  // En DEMO_MODE, o sin URL, no se toca el endpoint real.
+  if (conf.DEMO_MODE === true || !url) {
     const guardado = guardarDemo(payload);
     console.warn(
-      '[leads-service] Sin endpoint configurado. Guardado local:',
+      '[leads-service] Modo demo o sin endpoint. Guardado local:',
       guardado ? 'localStorage' : 'memoria',
       payload
     );
@@ -129,10 +129,10 @@ export async function updateLead(payload) {
   const conf = cfg();
   const url = (conf.LEADS_API_URL || '').trim();
 
-  if (!url) {
+  if (conf.DEMO_MODE === true || !url) {
     const guardado = guardarDemo(Object.assign({}, payload, { updateOnly: true }));
     console.warn(
-      '[leads-service] Sin endpoint configurado. Actualizacion guardada local:',
+      '[leads-service] Modo demo o sin endpoint. Actualizacion guardada local:',
       guardado ? 'localStorage' : 'memoria',
       payload
     );

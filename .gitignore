@@ -3,3 +3,29 @@ _entrada-local/
 *_backup*/
 *.rar
 *.zip
+
+# Secretos y configuracion local
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+wrangler.toml.local
+
+# Dependencias, caches y salidas locales
+node_modules/
+.wrangler/
+.cache/
+coverage/
+dist/
+build/
+
+# Logs y archivos del sistema/editor
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

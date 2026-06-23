@@ -89,12 +89,10 @@ function normalizeArgentinaPhone(value) {
 
 const PRIMOFFICE_ORIGIN_TAG = 'Test - Landing';
 const PRIMOFFICE_TIER_TAGS = Object.freeze(['Setup Starter', 'Setup Pro', 'Setup Epic']);
-const PRIMOFFICE_LEGACY_TIER_TAGS_TO_REMOVE = Object.freeze(['Setup Elite', 'Elite']);
 const PRIMOFFICE_CHANNEL_TAGS = Object.freeze(['WhatsApp', 'Email']);
 const PRIMOFFICE_MANAGED_TAG_NAMES = Object.freeze([
   PRIMOFFICE_ORIGIN_TAG,
   ...PRIMOFFICE_TIER_TAGS,
-  ...PRIMOFFICE_LEGACY_TIER_TAGS_TO_REMOVE,
   ...PRIMOFFICE_CHANNEL_TAGS
 ]);
 
@@ -121,7 +119,7 @@ function normalizeRecommendedTierValue(value, totalScore) {
   if (!key) return { value: tierFromScore(totalScore) };
   if (key === 'starter') return { value: 'Setup Starter' };
   if (key === 'pro') return { value: 'Setup Pro' };
-  if (key === 'epic' || key === 'elite') return { value: 'Setup Epic' };
+  if (key === 'epic') return { value: 'Setup Epic' };
 
   return { error: `Nivel recomendado invalido: ${raw}.` };
 }
@@ -135,7 +133,7 @@ function presetFromTier(tier) {
   const key = normalizeTierKey(tier);
   if (key === 'starter') return 'starter';
   if (key === 'pro') return 'pro';
-  if (key === 'epic' || key === 'elite') return 'epic';
+  if (key === 'epic') return 'epic';
   return '';
 }
 
@@ -146,7 +144,7 @@ function normalizeRecommendedPresetValue(value, tier) {
   if (!key) return { value: presetFromTier(tier) };
   if (key === 'starter') return { value: 'starter' };
   if (key === 'pro') return { value: 'pro' };
-  if (key === 'epic' || key === 'elite') return { value: 'epic' };
+  if (key === 'epic') return { value: 'epic' };
 
   return { error: `Preset recomendado invalido: ${raw}.` };
 }
@@ -765,7 +763,7 @@ function odooD1State(odooResult, fallbackOdooLeadId = null, syncedAt = '') {
   if (result.skipped) {
     return {
       status: 'pending',
-      id: null,
+      id: fallbackOdooLeadId || null,
       error: safeString(result.error || 'Sincronizacion con Odoo omitida.', 1000),
       syncedAt: null
     };
@@ -813,7 +811,7 @@ async function sendToOdoo(payload, env, requestInfo) {
 }
 
 async function updateOdooLead(payload, env, requestInfo, odooLeadId) {
-  const id = Number(odooLeadId || payload.odooLeadId || 0);
+  const id = Number(odooLeadId || 0);
   if (!id || !Number.isFinite(id)) return { ok: false, skipped: true, error: 'No hay odooLeadId para actualizar.' };
 
   const session = await getOdooSession(env);
@@ -922,7 +920,7 @@ export async function onRequestPatch({ request, env }) {
     return json({ ok: false, error: 'No existe un lead previo con ese leadId.' }, 404, request);
   }
 
-  const odooLeadId = Number(payload.odooLeadId || existing.odoo_lead_id || 0);
+  const odooLeadId = Number(existing.odoo_lead_id || 0);
   let odooResult = { ok: false, skipped: true, error: 'No ejecutado.' };
 
   try {

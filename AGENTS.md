@@ -57,15 +57,15 @@ Un fallo de Odoo nunca debe provocar la pérdida del lead en D1.
 
 ## Nomenclatura comercial
 
-Los niveles oficiales son:
+Los únicos niveles oficiales y admitidos son:
 
 * Starter
 * Pro
 * Epic
 
-`Epic` es el nombre actual y oficial del nivel superior.
-`Elite` es únicamente un valor legacy de entrada y debe normalizarse hacia `Epic`.
-No crear, mostrar, guardar ni asignar nuevamente `Elite`.
+`Epic` es el único nombre válido para el nivel superior.
+
+No crear, mostrar, guardar, asignar ni aceptar ningún nombre alternativo para los niveles. Cualquier valor de nivel o preset fuera del conjunto canónico debe rechazarse de forma explícita y segura.
 
 Las etiquetas conceptuales de Odoo deben mantenerse separadas:
 
@@ -86,6 +86,18 @@ No:
 * romper la relación con test, carrito o resultado.
 
 Priorizar carga diferida, rendimiento móvil, limpieza de recursos WebGL y compatibilidad con el preview 2D.
+
+## Invariante crítica: carrito, configurador 3D y Odoo
+
+Después de la creación exitosa de un lead:
+
+1. cada cambio de producto o preset debe actualizar inmediatamente el carrito, el total, el radar y la escena 3D;
+2. después del debounce vigente de 1000 ms debe ejecutarse `PATCH /api/leads`;
+3. el PATCH debe actualizar el mismo registro de D1 y el mismo lead de Odoo;
+4. debe conservarse `odoo_lead_id`;
+5. deben conservarse las etiquetas externas agregadas manualmente en Odoo;
+6. un fallo de red o backend no debe crear una sesión falsa ni mostrar el envío como exitoso;
+7. la implementación interna puede cambiar, pero este comportamiento observable debe conservarse y verificarse mediante pruebas.
 
 ## Backend y Odoo
 
@@ -136,12 +148,6 @@ No ejecutar sin autorización:
 * cambios de variables Cloudflare;
 * eliminación de registros;
 * comandos destructivos.
-
-## Dependencias
-
-No agregar React, Vue, Angular, Next.js, Vite, frameworks, bundlers o dependencias nuevas sin autorización explícita.
-
-No instalar paquetes para resolver tareas que puedan solucionarse con la arquitectura actual.
 
 ## Forma de trabajo
 

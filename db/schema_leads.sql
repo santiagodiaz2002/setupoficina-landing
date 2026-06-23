@@ -18,10 +18,18 @@ CREATE TABLE IF NOT EXISTS leads (
   payload_json TEXT NOT NULL,
   user_agent TEXT,
   ip TEXT,
-  country TEXT
+  country TEXT,
+
+  -- Columnas usadas por la sincronizacion con Odoo.
+  -- Este CREATE TABLE documenta bases nuevas; no migra bases D1 existentes.
+  odoo_status TEXT DEFAULT 'pending',
+  odoo_lead_id INTEGER,
+  odoo_error TEXT,
+  odoo_synced_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_leads_lead_id ON leads(lead_id);
 CREATE INDEX IF NOT EXISTS idx_leads_contact_email ON leads(email);
 CREATE INDEX IF NOT EXISTS idx_leads_contact_whatsapp ON leads(whatsapp);
+CREATE INDEX IF NOT EXISTS idx_leads_odoo_lead_id ON leads(odoo_lead_id);

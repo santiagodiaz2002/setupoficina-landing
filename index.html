@@ -803,6 +803,7 @@
             <label class="pq-consent" for="pqConsent"><input type="checkbox" id="pqConsent" required><span>Acepto que PrimOffice utilice mis datos para contactarme por el canal seleccionado.</span></label>
             <p class="pq-error" id="pqConsentError" role="alert" hidden></p>
           </div>
+          <p class="pq-error" id="pqSubmitError" role="alert" aria-live="assertive" tabindex="-1" hidden></p>
           <div class="pq-actions">
             <button type="submit" class="btn-primary pq-submit">Ver mi setup recomendado</button>
             <button type="button" class="pq-back" id="pqBack">&larr; Volver al adelanto</button>
@@ -1640,6 +1641,9 @@ function pqToggle(w,i,on){var W=document.getElementById(w),X=document.getElement
 function pqUpdateCanal(){var c=pqCanal();pqToggle('pqEmailField','pqEmail',c==='email');pqToggle('pqWaField','pqWa',c==='whatsapp');}
 function pqErr(id,msg,eid){var x=document.getElementById(id),e=document.getElementById(eid||id+'Error');if(e){e.textContent=msg;e.removeAttribute('hidden');}if(x)x.setAttribute('aria-invalid','true');}
 function pqClearErr(id,eid){var x=document.getElementById(id),e=document.getElementById(eid||id+'Error');if(e){e.textContent='';e.setAttribute('hidden','');}if(x)x.removeAttribute('aria-invalid');}
+function pqClearSubmitErr(){var e=document.getElementById('pqSubmitError');if(e){e.textContent='';e.setAttribute('hidden','');}}
+function pqSubmitErr(msg){var e=document.getElementById('pqSubmitError');if(e){e.textContent=msg||'No pudimos guardar tu diagnostico. Revisa tu conexion e intenta nuevamente.';e.removeAttribute('hidden');try{e.focus();}catch(_){}}}
+function pqLeadSubmitError(result){var msg=result&&(result.error||result.message)?String(result.error||result.message):'';return msg?'No pudimos guardar tu diagnostico: '+msg+'. Intenta nuevamente.':'No pudimos guardar tu diagnostico. Revisa tu conexion e intenta nuevamente.';}
 function pqUTM(){var u={};try{var p=new URLSearchParams(location.search);['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function(k){var v=p.get(k);if(v)u[k]=v;});}catch(e){}return u;}
 function pqValidate(){
   var first=null;function bad(id,msg,eid){pqErr(id,msg,eid);if(!first)first=id;}
@@ -1785,20 +1789,28 @@ function pqPayload(){
     configuration:{recommendedProducts:recommended.slice(),selectedProducts:recommended.slice(),selectedExtras:[],estimatedTotal:total,currency:'ARS'}};
 }
 function pqSubmit(e){
-  e.preventDefault();if(!pqValidate())return;
+  e.preventDefault();pqClearSubmitErr();if(!pqValidate())return;
   var btn=document.querySelector('#pqLeadForm [type=submit]'),prev='';
   if(btn){prev=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="pq-spin" aria-hidden="true"></span> Procesando...';}
   var payload=pqPayload();
-  function done(result){
-    storeLeadSession(payload,result);
+  function restore(){
     if(btn){btn.disabled=false;btn.innerHTML=prev;}
+  }
+  function fail(result){
+    restore();
+    pqSubmitErr(pqLeadSubmitError(result));
+  }
+  function done(result){
+    if(!(result&&result.ok===true)){fail(result);return;}
+    storeLeadSession(payload,result);
+    restore();
     pqHide(pqLead);
     showResult();
   }
   try{
-    if(window.PrimOfficeLeads&&window.PrimOfficeLeads.submitLead){window.PrimOfficeLeads.submitLead(payload).then(done).catch(function(){done();});}
-    else{try{var k='primoffice_leads_demo',arr=JSON.parse(localStorage.getItem(k)||'[]');arr.push(payload);localStorage.setItem(k,JSON.stringify(arr));console.warn('[lead] MODO DEMO (sin modulo): guardado en localStorage.',payload);}catch(e){}done();}
-  }catch(err){done();}
+    if(window.PrimOfficeLeads&&window.PrimOfficeLeads.submitLead){window.PrimOfficeLeads.submitLead(payload).then(done).catch(fail);}
+    else{try{var k='primoffice_leads_demo',arr=JSON.parse(localStorage.getItem(k)||'[]');arr.push(payload);localStorage.setItem(k,JSON.stringify(arr));console.warn('[lead] MODO DEMO (sin modulo): guardado en localStorage.',payload);done({ok:true,mode:'demo',stored:true});}catch(e){fail(e);}}
+  }catch(err){fail(err);}
 }
 if(pqTeaser){var pqCta=document.getElementById('pqTeaserCta');if(pqCta)pqCta.addEventListener('click',function(){pqHide(pqTeaser);pqShow(pqLead);var n=document.getElementById('pqNombre');if(n){try{n.focus();}catch(e){}}});}
 var pqForm=document.getElementById('pqLeadForm');
