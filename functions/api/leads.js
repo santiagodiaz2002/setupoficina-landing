@@ -595,22 +595,23 @@ async function applyLeadTags(session, odooLeadId, tagsResult) {
 
 function buildOdooLead(payload, requestInfo) {
   const contact = payload.contact || {};
-  const diagnosis = payload.diagnosis || {};
   const configuration = payload.configuration || {};
 
   const name = safeString(contact.name, 120);
-  const tier = safeString(diagnosis.recommendedTier, 80) || 'Setup recomendado';
   const whatsapp = normalizeArgentinaPhone(contact.whatsapp);
   const email = safeString(contact.email, 180);
   const estimatedRevenue = Number(configuration.estimatedTotal || 0);
 
   return compactObject({
-    name: `${name} - ${tier}`.slice(0, 200),
+    name: name.slice(0, 200),
     contact_name: name,
     email_from: email,
     phone: whatsapp,
     mobile: whatsapp,
-    expected_revenue: Number.isFinite(estimatedRevenue) && estimatedRevenue > 0 ? estimatedRevenue : undefined,
+    expected_revenue:
+      Number.isFinite(estimatedRevenue) && estimatedRevenue > 0
+        ? estimatedRevenue
+        : undefined,
     description: leadDescription(payload, requestInfo)
   });
 }
