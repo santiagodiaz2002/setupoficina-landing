@@ -32,6 +32,16 @@ function cfg() {
   return conf;
 }
 
+function esEntornoLocal() {
+  if (typeof window === 'undefined' || !window.location) return false;
+  const host = String(window.location.hostname || '').toLowerCase();
+  return host === '127.0.0.1' || host === 'localhost' || host === '0.0.0.0';
+}
+
+function usarModoDemo(conf, url) {
+  return conf.DEMO_MODE === true || !url || esEntornoLocal();
+}
+
 function guardarDemo(payload) {
   try {
     const key = cfg().LEADS_STORAGE_KEY || 'primoffice_leads_demo';
@@ -103,11 +113,11 @@ export async function submitLead(payload) {
   const conf = cfg();
   const url = (conf.LEADS_API_URL || '').trim();
 
-  // En DEMO_MODE, o sin URL, no se toca el endpoint real.
-  if (conf.DEMO_MODE === true || !url) {
+  // En Live Server/local, DEMO_MODE o sin URL, no se toca Cloudflare.
+  if (usarModoDemo(conf, url)) {
     const guardado = guardarDemo(payload);
     console.warn(
-      '[leads-service] Modo demo o sin endpoint. Guardado local:',
+      '[leads-service] Modo local/demo. Guardado local:',
       guardado ? 'localStorage' : 'memoria',
       payload
     );
@@ -129,10 +139,10 @@ export async function updateLead(payload) {
   const conf = cfg();
   const url = (conf.LEADS_API_URL || '').trim();
 
-  if (conf.DEMO_MODE === true || !url) {
+  if (usarModoDemo(conf, url)) {
     const guardado = guardarDemo(Object.assign({}, payload, { updateOnly: true }));
     console.warn(
-      '[leads-service] Modo demo o sin endpoint. Actualizacion guardada local:',
+      '[leads-service] Modo local/demo. Actualizacion guardada local:',
       guardado ? 'localStorage' : 'memoria',
       payload
     );

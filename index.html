@@ -304,15 +304,19 @@
     .cart-item__status{display:inline-block;margin-left:.35rem;font-size:.62rem;font-weight:700;letter-spacing:.45px;text-transform:uppercase;color:var(--cta);}
     .cart-item--disabled .cart-item__status{color:var(--text-muted);}
 
-    .cart-extra-section{padding:1rem 1.75rem;border-top:1px solid var(--border);}
+    .cart-product-section{border-top:1px solid var(--border);}
+    .cart-product-title{padding:1rem 1.75rem .35rem;margin:0;}
+    .cart-extra-section{padding:1rem 1.75rem;border-top:1px solid var(--border);background:#F8FAFC;}
     .cart-extra-title{font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem;}
-    .cart-extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;}
-    .cart-extra-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:border-color 200ms,background 200ms;background:var(--bg);}
+    .cart-extras{display:flex;flex-direction:column;gap:.6rem;}
+    .cart-extra-item{display:flex;align-items:center;gap:.7rem;padding:.72rem .8rem;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:border-color 200ms,background 200ms,opacity 200ms;background:var(--white);}
     .cart-extra-item:hover{border-color:var(--cta);background:rgba(3,105,161,.04);}
     .cart-extra-item.selected{border-color:var(--cta);background:rgba(3,105,161,.06);}
-    .cart-extra-item input{width:16px;height:16px;accent-color:var(--cta);cursor:pointer;flex-shrink:0;}
-    .cart-extra-item__label{flex:1;font-size:.8rem;font-weight:500;color:var(--dark);}
-    .cart-extra-item__price{font-size:.8rem;font-weight:700;color:var(--text-muted);}
+    .cart-extra-item:not(.selected){opacity:.55;}
+    .cart-extra-item input{width:17px;height:17px;accent-color:var(--cta);cursor:pointer;flex-shrink:0;}
+    .cart-extra-item__info{flex:1;min-width:0;}
+    .cart-extra-item__label{font-size:.79rem;font-weight:600;color:var(--dark);line-height:1.28;}
+    .cart-extra-item__price{font-size:.8rem;font-weight:700;color:var(--dark);white-space:nowrap;}
     .cart-footer{padding:1.25rem 1.75rem;border-top:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;background:var(--bg-2);}
     .cart-total{font-family:'Poppins',sans-serif;}
     .cart-total__label{font-size:.8rem;color:var(--text-muted);margin-bottom:.1rem;}
@@ -930,11 +934,14 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" stroke-linecap="round"/></svg>
               Tu carrito personalizado
             </div>
-            <span class="cart-header__note">Activamos una recomendación inicial. Mostramos una opción premium por categoría para que puedas personalizarla sin duplicados.</span>
+            <span class="cart-header__note">Primero aparecen los productos que ya podés visualizar en 3D. Debajo están los productos adicionales incluidos en cada setup.</span>
           </div>
-          <div class="cart-items" id="cart-items-list"></div>
+          <div class="cart-product-section">
+            <div class="cart-extra-title cart-product-title">Productos del configurador 3D</div>
+            <div class="cart-items" id="cart-items-list"></div>
+          </div>
           <div class="cart-extra-section" id="cart-extras-section">
-            <div class="cart-extra-title">Extras opcionales</div>
+            <div class="cart-extra-title">Productos adicionales</div>
             <div class="cart-extras" id="cart-extras-list"></div>
           </div>
           <div class="cart-footer">
@@ -986,13 +993,12 @@
       <div class="combo-card">
         <div class="combo-card__tier">Combo 01</div><div class="combo-card__name">Setup Starter</div>
         <p class="combo-card__desc">Para quienes están dando sus primeros pasos en armar un espacio de trabajo decente.</p>
-        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>89.000</span><span class="combo-card__price-period">ARS · entrega 24 h CABA y GBA</span></div>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>137.928</span><span class="combo-card__price-period">ARS · entrega 24hs CABA y GBA</span></div>
         <ul class="combo-card__items">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte para notebook (ajustable)</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mouse ergonómico inalámbrico</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mousepad XXL antideslizante</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Organizador de escritorio</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Guía de ergonomía digital</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pNotebook · Soporte para notebook</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMouseProV · Mouse vertical ergonómico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMat · Pad XL de escritorio</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pEase · Reposamuñecas ergonómico</li>
         </ul>
         <a href="https://primoffice.com.ar" class="combo-btn combo-btn--outline" target="_blank" rel="noopener">Quiero este combo</a>
       </div>
@@ -1000,31 +1006,37 @@
         <div class="combo-badge">⭐ Más popular</div>
         <div class="combo-card__tier">Combo 02</div><div class="combo-card__name">Setup Pro</div>
         <p class="combo-card__desc">El equilibrio ideal: máxima ergonomía y productividad sin gastar de más. El más elegido.</p>
-        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>189.000</span><span class="combo-card__price-period">ARS · entrega 24 h CABA y GBA</span></div>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>381.737</span><span class="combo-card__price-period">ARS · entrega 24hs CABA y GBA</span></div>
         <ul class="combo-card__items">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Monitor externo 24" Full HD</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte articulado para monitor</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Teclado inalámbrico compacto</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mouse ergonómico vertical</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Hub USB-C multipuerto</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Barra de luz LED para escritorio</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte para notebook + mouse pad XXL</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pNotebook · Soporte para notebook</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMouseProV · Mouse vertical ergonómico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMat · Pad XL de escritorio</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pEase · Reposamuñecas ergonómico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pArm · Brazo articulado para monitor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMechanic · Teclado mecánico RGB</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pHub · Hub USB-C 7 en 1</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pBox · Organizador de cables</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pGlow · Barra de luz para monitor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pLumbar · Soporte lumbar</li>
         </ul>
         <a href="https://primoffice.com.ar" class="combo-btn combo-btn--primary" target="_blank" rel="noopener">Quiero este combo</a>
       </div>
       <div class="combo-card">
         <div class="combo-card__tier">Combo 03</div><div class="combo-card__name">Setup Epic</div>
         <p class="combo-card__desc">Para el profesional que pasa 8+ horas al día trabajando y no tolera ningún compromiso.</p>
-        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>389.000</span><span class="combo-card__price-period">ARS · entrega 24 h CABA y GBA</span></div>
+        <div class="combo-card__price"><span class="combo-card__price-value"><span class="combo-card__price-currency">$</span>825.724</span><span class="combo-card__price-period">ARS · entrega 24hs CABA y GBA</span></div>
         <ul class="combo-card__items">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Silla ergonómica con soporte lumbar</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Monitor curvo 27" QHD</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Soporte dual articulado</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Teclado mecánico TKL</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Mouse trackball ergonómico</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Hub USB-C 10 en 1 con HDMI</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Standing desk eléctrico</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>Asesoría de setup personalizada</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pNotebook · Soporte para notebook</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMouseProV · Mouse vertical ergonómico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMat · Pad XL de escritorio</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pEase · Reposamuñecas ergonómico</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pArm · Brazo articulado para monitor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMechanic · Teclado mecánico RGB</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pHub · Hub USB-C 7 en 1</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pBox · Organizador de cables</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pGlow · Barra de luz para monitor</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pLumbar · Soporte lumbar</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pStanding · Escritorio eléctrico regulable</li>
         </ul>
         <a href="https://primoffice.com.ar" class="combo-btn combo-btn--outline" target="_blank" rel="noopener">Quiero este combo</a>
       </div>
@@ -1091,31 +1103,19 @@ document.addEventListener('click',function(e){if(!navbar.contains(e.target))navb
 
 // ── PRODUCT CATALOGUE ────────────────────────────────────
 var P={
-  soporte_notebook: {name:'Soporte para notebook ajustable',   cat:'Ergonomía',    price:12000, icon:'laptop',  dsEl:'dsi-stand,dsi-stand-leg'},
-  mouse_ergo:       {name:'Mouse ergonómico inalámbrico',       cat:'Periférico',   price:15000, icon:'mouse',   dsEl:'dsi-mouse'},
-  mousepad_xxl:     {name:'Pad XL de escritorio pMat',          cat:'Accesorio',    price:8000,  icon:'pad',     dsEl:'dsi-mousepad'},
-  organizador:      {name:'Bandeja organizadora de cables pBox', cat:'Orden',        price:16000, icon:'org',     dsEl:'dsi-organizer'},
-  guia:             {name:'Guía de ergonomía digital',          cat:'Extra',        price:0,     icon:'book',    dsEl:''},
-  monitor_24:       {name:'Monitor externo 24" Full HD',        cat:'Pantalla',     price:85000, icon:'monitor', dsEl:'dsi-monitor,dsi-monitor-stand', badge:'Nuevo'},
-  soporte_monitor:  {name:'Soporte para monitor brazo articulado pArm', cat:'Ergonomía', price:69000, icon:'arm', dsEl:'dsi-monitor-arm'},
-  teclado:          {name:'Teclado inalámbrico compacto',       cat:'Periférico',   price:22000, icon:'kbd',     dsEl:'dsi-keyboard'},
-  mouse_vertical:   {name:'Mouse ergonómico vertical',          cat:'Periférico',   price:19000, icon:'mouse',   dsEl:'dsi-mouse'},
-  hub_usb:          {name:'Hub USB-C multipuerto',              cat:'Conectividad', price:14000, icon:'hub',     dsEl:'dsi-hub'},
-  luz_led:          {name:'Barra de luz LED para escritorio',        cat:'Iluminación',  price:11000, icon:'light',   dsEl:'dsi-lightbar'},
-  silla:            {name:'Silla ergonómica con soporte lumbar',cat:'Mueble',       price:180000,icon:'chair',   dsEl:'dsi-chair'},
-  monitor_27:       {name:'Monitor curvo 27" QHD',              cat:'Pantalla',     price:130000,icon:'monitor', dsEl:'dsi-monitor,dsi-monitor-stand', badge:'Epic'},
-  soporte_dual:     {name:'Soporte ajustable de doble brazo articulado pArmPlus', cat:'Ergonomía', price:99000, icon:'arm', dsEl:'dsi-monitor-arm'},
-  teclado_mec:      {name:'Teclado mecánico TKL',               cat:'Periférico',   price:38000, icon:'kbd',     dsEl:'dsi-keyboard'},
-  mouse_trackball:  {name:'Mouse trackball ergonómico',         cat:'Periférico',   price:29000, icon:'mouse',   dsEl:'dsi-mouse'},
-  hub_usb_pro:      {name:'Hub USB-C 10 en 1 con HDMI',         cat:'Conectividad', price:22000, icon:'hub',     dsEl:'dsi-hub'},
-  organizador_prem: {name:'Bandeja organizadora de cables pBox', cat:'Orden',        price:16000, icon:'org',     dsEl:'dsi-organizer'},
-  asesoria:         {name:'Asesoría de setup personalizada',    cat:'Servicio',     price:12000, icon:'star',    dsEl:''},
-  almohadilla:      {name:'Almohadilla lumbar para silla',      cat:'Ergonomía',    price:7500,  icon:'back',    dsEl:''},
-  reposamuñecas:    {name:'Reposabrazos / reposamuñecas',       cat:'Ergonomía',    price:6500,  icon:'wrist',   dsEl:''},
-  webcam:           {name:'Webcam HD para videollamadas',       cat:'Periférico',   price:26000, icon:'cam',     dsEl:''},
-  auriculares:      {name:'Auriculares con micrófono',          cat:'Audio',        price:31000, icon:'head',    dsEl:''},
-  standing_desk:    {name:'Standing desk eléctrico',            cat:'Mueble',       price:95000, icon:'stand',   dsEl:'dsi-standing-badge', badge:'Pausas activas'},
-  laptop_base:      {name:'Notebook en escritorio (sin soporte)',cat:'Base',        price:0,     icon:'laptop',  dsEl:'dsi-laptop'},
+  /* Precios publicados por PrimOffice al 25/06/2026.
+     Los productos sin stock se mantienen porque PrimOffice los comercializa. */
+  soporte_notebook:{name:'pNotebook · Soporte para notebook',cat:'Ergonomía',price:51191,icon:'laptop',dsEl:'dsi-stand,dsi-stand-leg,dsi-laptop'},
+  soporte_monitor:{name:'pArm · Brazo articulado para monitor',cat:'Ergonomía',price:68418,icon:'arm',dsEl:'dsi-monitor-arm,dsi-monitor'},
+  teclado_mec:{name:'pMechanic · Teclado mecánico RGB',cat:'Periférico',price:29399,icon:'kbd',dsEl:'dsi-keyboard'},
+  mouse_vertical:{name:'pMouseProV · Mouse vertical ergonómico',cat:'Periférico',price:39239,icon:'mouse',dsEl:'dsi-mouse'},
+  mousepad_xxl:{name:'pMat · Pad XL de escritorio',cat:'Accesorio',price:27549,icon:'pad',dsEl:'dsi-mousepad'},
+  hub_usb:{name:'pHub · Hub USB-C 7 en 1',cat:'Conectividad',price:26690,icon:'hub',dsEl:'dsi-hub'},
+  organizador_prem:{name:'pBox · Organizador de cables',cat:'Orden',price:42839,icon:'org',dsEl:'dsi-organizer',stock:false,badge:'Sin stock'},
+  luz_led:{name:'pGlow · Barra de luz para monitor',cat:'Iluminación',price:62999,icon:'light',dsEl:'dsi-lightbar,dsi-monitor',stock:false,badge:'Sin stock'},
+  reposamuñecas:{name:'pEase · Reposamuñecas ergonómico',cat:'Ergonomía',price:19949,icon:'wrist',dsEl:''},
+  almohadilla:{name:'pLumbar · Soporte lumbar',cat:'Ergonomía',price:13464,icon:'back',dsEl:'',stock:false,badge:'Sin stock'},
+  standing_desk:{name:'pStanding · Escritorio eléctrico regulable',cat:'Mueble',price:443987,icon:'stand',dsEl:'dsi-standing-badge',stock:false,badge:'Sin stock'}
 };
 
 var ICON_BG={
@@ -1316,11 +1316,10 @@ function updatePreview(){
     getDsIds(id).forEach(function(el){visible[el]=true;});
   });
 
-  // Show laptop base if no monitor and has keyboard/mouse
-  var hasMonitor=active['monitor_24']||active['monitor_27'];
-  if(!hasMonitor&&(active['teclado']||active['teclado_mec']||active['mouse_ergo']||active['mouse_vertical']||active['mouse_trackball'])){
-    visible['dsi-laptop']=true;
-  }
+  // Notebook y monitor son elementos contextuales: ayudan a visualizar
+  // los productos PrimOffice, pero no aparecen como productos del carrito.
+  if(active['soporte_notebook']) visible['dsi-laptop']=true;
+  if(active['soporte_monitor']||active['luz_led']) visible['dsi-monitor']=true;
 
   // Mantener coherencia entre fallback 2D y escena 3D.
   if(visible['dsi-monitor-arm']) visible['dsi-monitor-stand']=false;
@@ -1337,7 +1336,7 @@ function updatePreview(){
   });
 
   // Count
-  var cnt=Object.keys(active).filter(function(id){return P[id]&&P[id].price>0;}).length;
+  var cnt=CONFIGURATOR_PRODUCT_IDS.filter(function(id){return !!cartState[id];}).length;
   document.getElementById('preview-count').textContent=cnt;
   if(window.Setup3D){window.Setup3D.setVisible(visible,{standing:!!visible['dsi-standing-badge']});}
   updateRadarChart();
@@ -1352,70 +1351,44 @@ function updateTotal(){
 
 function buildCart(ans){
   var score=ans.reduce(function(s,a,qi){return s+(a!==null?questions[qi].opts[a].s:0);},0);
-  var mon=ans[2]; // 0=no mon,1=has mon no arm,2=all good
-  var chair=ans[4]; // 0=good,1=basic,2=none
-  var items=[],extras=[];
+  var preset=score<=8?'starter':(score<=13?'pro':'epic');
+  var items=(COMBO_PRESETS[preset]||[]).slice();
+  var mon=ans[2],desk=ans[3],chair=ans[4];
+  function remove(id){var i=items.indexOf(id);if(i!==-1)items.splice(i,1);}
 
-  if(score<=8){
-    items=['soporte_notebook','mouse_ergo','mousepad_xxl'];
-    if(ans[3]>=1)items.push('organizador');
-    items.push('guia');
-    extras=['reposamuñecas','luz_led','hub_usb','teclado','standing_desk'];
-  } else if(score<=13){
-    if(mon===0)items.push('monitor_24');
-    if(mon<=1)items.push('soporte_monitor');
-    items.push('teclado','mouse_vertical','hub_usb','luz_led','mousepad_xxl');
-    if(mon===0)items.push('soporte_notebook');
-    if(ans[3]>=1)items.push('organizador');
-    if(chair>=1)extras.push('almohadilla');
-    extras.push('webcam','auriculares','reposamuñecas','standing_desk');
-    if(mon>0)extras.push('monitor_24');
-    if(mon===2)extras.push('soporte_monitor');
-  } else {
-    if(chair>=1)items.push('silla');
-    if(mon===0)items.push('monitor_27');
-    if(mon<=1)items.push('soporte_monitor');
-    items.push('teclado_mec','mouse_vertical','hub_usb_pro','mousepad_xxl');
-    if(ans[3]>=1)items.push('organizador_prem');
-    items.push('asesoria','standing_desk');
-    if(mon>0)extras.push('monitor_27');
-    if(mon===2)extras.push('soporte_monitor');
-    if(chair===0)extras.push('almohadilla');
-    extras.push('webcam','auriculares','luz_led');
-  }
-  return{score:score,items:items,extras:extras};
+  // Excluimos únicamente las áreas que la persona ya tiene resueltas.
+  if(mon===0){remove('soporte_monitor');remove('luz_led');}
+  else if(mon===1){remove('soporte_notebook');}
+  else if(mon===2){remove('soporte_notebook');remove('soporte_monitor');}
+  if(desk===0)remove('organizador_prem');
+  if(chair===0)remove('almohadilla');
+
+  return{score:score,items:items,extras:[]};
 }
 
-/* Catálogo estable: las respuestas solo definen qué queda activado inicialmente.
-   Ningún producto aparece o desaparece después del test. */
-var FULL_CART_IDS=[
-  'silla',
-  'standing_desk',
-  'soporte_notebook',
-  'soporte_monitor',
-  'monitor_27',
-  'teclado_mec',
-  'mouse_vertical',
-  'mousepad_xxl',
-  'hub_usb_pro',
-  'organizador_prem',
-  'luz_led',
-  'webcam',
-  'auriculares',
-  'asesoria'
+/* Orden del checklist:
+   1) productos que hoy tienen representación en el configurador 3D;
+   2) productos reales de los setups que todavía no se visualizan. */
+var CONFIGURATOR_PRODUCT_IDS=[
+  'soporte_notebook','mouse_vertical','mousepad_xxl',
+  'soporte_monitor','teclado_mec','hub_usb','organizador_prem','luz_led',
+  'standing_desk'
 ];
 
-/* Catálogo curado: ya no se muestran variantes duplicadas en simultáneo. */
+var ADDITIONAL_PRODUCT_IDS=[
+  'reposamuñecas',
+  'almohadilla'
+];
+
+var FULL_CART_IDS=CONFIGURATOR_PRODUCT_IDS.concat(ADDITIONAL_PRODUCT_IDS);
+
 var CART_EXCLUSIVE_GROUPS=[];
 
 function normalizeCartId(id){
-  /* La interfaz muestra una sola opción premium por categoría.
-     Las recomendaciones históricas se traducen a esa variante visible. */
   if(id==='organizador')return'organizador_prem';
-  if(id==='monitor_24')return'monitor_27';
   if(id==='teclado')return'teclado_mec';
   if(id==='mouse_ergo'||id==='mouse_trackball')return'mouse_vertical';
-  if(id==='hub_usb')return'hub_usb_pro';
+  if(id==='hub_usb_pro')return'hub_usb';
   if(id==='soporte_dual')return'soporte_monitor';
   return id;
 }
@@ -1427,57 +1400,41 @@ function cartAlternativesOf(id){
   return[];
 }
 
-function setCartRowState(id,on){
-  cartState[id]=!!on;
-  var row=document.querySelector('[data-cart-product="'+id+'"]');
-  if(!row)return;
-  var chk=row.querySelector('input');
-  if(chk)chk.checked=!!on;
-  row.classList.toggle('cart-item--disabled',!on);
+function isAdditionalProduct(id){
+  return ADDITIONAL_PRODUCT_IDS.indexOf(id)!==-1;
 }
 
+function isProductSelected(id){
+  return isAdditionalProduct(id)?!!extrasState[id]:!!cartState[id];
+}
 
-/* Presets visuales rápidos para el configurador 3D.
-   Se apoyan en el catálogo premium visible y actualizan carrito, total y radar. */
+function setCartRowState(id,on){
+  var additional=isAdditionalProduct(id);
+  if(additional)extrasState[id]=!!on;
+  else cartState[id]=!!on;
+
+  var selector=additional?'[data-extra-product="'+id+'"]':'[data-cart-product="'+id+'"]';
+  var row=document.querySelector(selector);
+  if(!row)return;
+
+  var chk=row.querySelector('input');
+  if(chk)chk.checked=!!on;
+
+  if(additional)row.classList.toggle('selected',!!on);
+  else row.classList.toggle('cart-item--disabled',!on);
+}
+
+/* Presets formados exclusivamente por productos comercializados por PrimOffice. */
 var COMBO_PRESETS={
-  starter:[
-    'soporte_notebook',
-    'mouse_vertical',
-    'mousepad_xxl',
-    'organizador_prem'
-  ],
-  pro:[
-    'soporte_notebook',
-    'soporte_monitor',
-    'monitor_27',
-    'teclado_mec',
-    'mouse_vertical',
-    'mousepad_xxl',
-    'hub_usb_pro',
-    'organizador_prem',
-    'luz_led'
-  ],
-  epic:[
-    'silla',
-    'standing_desk',
-    'soporte_monitor',
-    'monitor_27',
-    'teclado_mec',
-    'mouse_vertical',
-    'mousepad_xxl',
-    'hub_usb_pro',
-    'organizador_prem',
-    'luz_led',
-    'webcam',
-    'auriculares',
-    'asesoria'
-  ]
+  starter:['soporte_notebook','mouse_vertical','mousepad_xxl','reposamuñecas'],
+  pro:['soporte_notebook','soporte_monitor','teclado_mec','mouse_vertical','mousepad_xxl','hub_usb','organizador_prem','luz_led','reposamuñecas','almohadilla'],
+  epic:['standing_desk','soporte_notebook','soporte_monitor','teclado_mec','mouse_vertical','mousepad_xxl','hub_usb','organizador_prem','luz_led','reposamuñecas','almohadilla']
 };
 
 function presetMatches(name){
   var ids=COMBO_PRESETS[name]||[];
   return FULL_CART_IDS.every(function(id){
-    return !!cartState[id] === (ids.indexOf(id)!==-1);
+    return isProductSelected(id)===(ids.indexOf(id)!==-1);
   });
 }
 
@@ -1524,14 +1481,20 @@ function renderCart(items,extras){
     if(P[id])recommended[id]=true;
   });
 
-  FULL_CART_IDS.forEach(function(id){
+  CONFIGURATOR_PRODUCT_IDS.forEach(function(id){
     cartState[id]=!!recommended[id];
+  });
+  ADDITIONAL_PRODUCT_IDS.forEach(function(id){
+    extrasState[id]=!!recommended[id];
   });
 
   var listEl=document.getElementById('cart-items-list');
+  var extrasSection=document.getElementById('cart-extras-section');
+  var extrasEl=document.getElementById('cart-extras-list');
   listEl.innerHTML='';
+  extrasEl.innerHTML='';
 
-  FULL_CART_IDS.forEach(function(id){
+  CONFIGURATOR_PRODUCT_IDS.forEach(function(id){
     var p=P[id]; if(!p)return;
     var isRecommended=!!recommended[id];
     var bg=(ICON_BG[p.cat]||['#F1F5F9','#64748B'])[0];
@@ -1542,24 +1505,16 @@ function renderCart(items,extras){
     row.style.cursor='pointer';
     row.setAttribute('data-cart-product',id);
 
+    var statusText=p.stock===false?'Sin stock':(isRecommended?'Recomendado':'Disponible');
     row.innerHTML=
       '<input type="checkbox" class="cart-item__check"'+(cartState[id]?' checked':'')+'>'+
       '<div class="cart-item__icon" style="background:'+bg+';color:'+col+'">'+svgIcon(p.icon)+'</div>'+
-      '<div class="cart-item__info"><div class="cart-item__name">'+p.name+'</div><div class="cart-item__category">'+p.cat+(isRecommended?'<span class="cart-item__status">Recomendado</span>':'<span class="cart-item__status">Disponible</span>')+'</div></div>'+
+      '<div class="cart-item__info"><div class="cart-item__name">'+p.name+'</div><div class="cart-item__category">'+p.cat+'<span class="cart-item__status">'+statusText+'</span></div></div>'+
       (p.badge?'<span class="cart-item__badge">'+p.badge+'</span>':'')+
       '<div class="cart-item__price">'+(p.price>0?'$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'Gratis')+'</div>';
 
-    var chk=row.querySelector('input');
-    chk.addEventListener('change',function(){
-      var on=this.checked;
-
-      if(on){
-        cartAlternativesOf(id).forEach(function(otherId){
-          if(otherId!==id)setCartRowState(otherId,false);
-        });
-      }
-
-      setCartRowState(id,on);
+    row.querySelector('input').addEventListener('change',function(){
+      setCartRowState(id,this.checked);
       updateTotal();
       updatePreview();
       updatePresetButtons();
@@ -1569,15 +1524,38 @@ function renderCart(items,extras){
     listEl.appendChild(row);
   });
 
-  /* Ya no existe un bloque dinámico de extras:
-     todo el catálogo permanece visible en una única lista estable. */
-  var extrasSection=document.getElementById('cart-extras-section');
-  var extrasEl=document.getElementById('cart-extras-list');
-  if(extrasEl)extrasEl.innerHTML='';
-  if(extrasSection)extrasSection.classList.add('hidden');
+  ADDITIONAL_PRODUCT_IDS.forEach(function(id){
+    var p=P[id]; if(!p)return;
+    var isRecommended=!!recommended[id];
+    var bg=(ICON_BG[p.cat]||['#F1F5F9','#64748B'])[0];
+    var col=(ICON_BG[p.cat]||['#F1F5F9','#64748B'])[1];
+    var row=document.createElement('label');
+
+    row.className='cart-extra-item'+(extrasState[id]?' selected':'');
+    row.setAttribute('data-extra-product',id);
+
+    var statusText=p.stock===false?'Sin stock':(isRecommended?'Recomendado':'Disponible');
+    row.innerHTML=
+      '<input type="checkbox"'+(extrasState[id]?' checked':'')+'>'+
+      '<div class="cart-item__icon" style="background:'+bg+';color:'+col+'">'+svgIcon(p.icon)+'</div>'+
+      '<div class="cart-extra-item__info"><div class="cart-extra-item__label">'+p.name+'</div><div class="cart-item__category">'+p.cat+'<span class="cart-item__status">'+statusText+'</span></div></div>'+
+      (p.badge?'<span class="cart-item__badge">'+p.badge+'</span>':'')+
+      '<div class="cart-extra-item__price">$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'</div>';
+
+    row.querySelector('input').addEventListener('change',function(){
+      setCartRowState(id,this.checked);
+      updateTotal();
+      updatePreview();
+      updatePresetButtons();
+      scheduleLeadCartUpdate('cart_change');
+    });
+
+    extrasEl.appendChild(row);
+  });
+
+  extrasSection.classList.toggle('hidden',ADDITIONAL_PRODUCT_IDS.length===0);
   updatePresetButtons();
 }
-
 function showResult(){
   var r=buildCart(answers);
   var tier,title,desc;
@@ -1778,6 +1756,8 @@ function scheduleLeadCartUpdate(eventType){
 function pqPayload(){
   var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Epic'),c=pqCanal();
   var recommended=normalizeProductArray(r.items);
+  var recommended3D=recommended.filter(function(id){return !isAdditionalProduct(id);});
+  var recommendedAdditional=recommended.filter(function(id){return isAdditionalProduct(id);});
   var total=0;
   recommended.forEach(function(id){if(P[id])total+=Number(P[id].price||0);});
   var cfg=(window.PrimOfficeConfig||{});
@@ -1786,7 +1766,7 @@ function pqPayload(){
     contact:{name:document.getElementById('pqNombre').value.trim(),preferredChannel:c||'email',
       email:c==='email'?document.getElementById('pqEmail').value.trim():'',whatsapp:c==='whatsapp'?document.getElementById('pqWa').value.trim():'',consent:!!document.getElementById('pqConsent').checked},
     diagnosis:{rawAnswers:answers.slice(),totalScore:r.score,recommendedTier:'Setup '+tier,recommendedPreset:tier.toLowerCase()},
-    configuration:{recommendedProducts:recommended.slice(),selectedProducts:recommended.slice(),selectedExtras:[],estimatedTotal:total,currency:'ARS'}};
+    configuration:{recommendedProducts:recommended.slice(),selectedProducts:recommended3D,selectedExtras:recommendedAdditional,estimatedTotal:total,currency:'ARS'}};
 }
 function pqSubmit(e){
   e.preventDefault();pqClearSubmitErr();if(!pqValidate())return;
@@ -1842,7 +1822,7 @@ window.sendWhatsApp=function(){
   var hasE=false;
   Object.keys(extrasState).forEach(function(id){
     if(extrasState[id]&&P[id]){
-      if(!hasE){lines.push('','*Extras agregados:*');hasE=true;}
+      if(!hasE){lines.push('','*Productos adicionales:*');hasE=true;}
       var p=P[id];
       lines.push('  ➕ '+p.name+' — $'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'));
       total+=p.price;
@@ -1871,7 +1851,7 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
 <script defer src="./js/pulido-visual.js"></script>
 <script defer src="./js/comparacion-antes-despues.js"></script>
 <script type="module" src="./js/config/app-config.js?v=d1-leads-2"></script>
-<script type="module" src="./js/services/leads-service.js?v=d1-final-cart-1"></script>
+<script type="module" src="./js/services/leads-service.js?v=productos-separados-1"></script>
 <script type="module" src="./js/setup-3d.js"></script>
 </body>
 </html>
