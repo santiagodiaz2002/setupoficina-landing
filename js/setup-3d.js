@@ -32,7 +32,8 @@
   var THREE, OrbitControls, RoundedBox, RoomEnv;
   var renderer, scene, camera, controls, host, toolbar, loaderEl, deskScene2D, stageEl, hintEl;
   var ready = false, initStarted = false, running = false, camFly = false;
-  var objects = {}, deskTop, surfaceAnchor, legL, legR, roomFloor, roomWall, roomBaseboard;
+  var objects = {}, deskTop, deskEdge, deskBeam, deskControl, standingFrame, surfaceAnchor, legL, legR, roomFloor, roomWall, roomBaseboard;
+  var deskButtons = [], deskModeStanding = false;
   var DESK_SIT = 0.73, DESK_STAND = 1.08, curTopY = DESK_SIT;
   var DSI = ['dsi-chair','dsi-monitor','dsi-monitor-stand','dsi-monitor-arm','dsi-laptop','dsi-stand','dsi-keyboard','dsi-mousepad','dsi-mouse','dsi-hub','dsi-organizer','dsi-lightbar'];
 
@@ -79,6 +80,8 @@
   var COL={
     surface:0xeceff3, edge:0xc7cfd9,
     frame:0x39424e, frameDark:0x232a32,
+    pWood:0xc9975d, pWoodEdge:0x9a6338,
+    pStandBlack:0x151719, pStandGun:0x252a2d, pStandRail:0x3a3f42,
     steel:0x2a3038, steelDark:0x1b2026, alu:0x9aa6b4, aluDark:0x6f7c8c,
     dark:0x222a34, accent:0x38bdf8, white:0xeef3f8, fabric:0x2c3744,
     mat:0x232d39, matEdge:0x161d26,
@@ -134,89 +137,320 @@
      hasta el monitor (y ~ 0.44, z local ~ 0). Así NUNCA flota detrás del escritorio. */
   function bMonArm(){
     var g=new THREE.Group();
-    var blk=mat(COL.armBlk,{m:0.55,r:0.42});
-    var steel=mat(COL.steel,{m:0.62,r:0.34});
+    var blk=mat(0x111315,{m:0.58,r:0.38});
+    var shell=mat(0x1b1f22,{m:0.44,r:0.44});
+    var screwM=mat(0xb6c0c8,{m:0.72,r:0.28});
+    var rubber=mat(0x090a0b,{m:0.35,r:0.55});
 
-    /* El holder vive en z=-0.18. El borde trasero real de la mesa queda
-       en z local=-0.18. Se desplaza el poste a la derecha para que el
-       recorrido articulado sea visible y termine en la placa VESA. */
-    var clampX=0.24, rearZ=-0.18, elbowZ=-0.05, vesaZ=-0.012;
+    var clampX=0.24, rearZ=-0.18, vesaZ=-0.014;
 
-    function barBetweenXZ(x1,z1,x2,z2,y){
-      var dx=x2-x1, dz=z2-z1;
-      var len=Math.sqrt(dx*dx+dz*dz);
-      var b=mesh(rbox(0.042,0.032,len,0.010),blk);
-      b.position.set((x1+x2)/2,y,(z1+z2)/2);
-      b.rotation.y=Math.atan2(dx,dz);
-      return b;
+    function bar3(a,b,w,d,material){
+      var dir=new THREE.Vector3().subVectors(b,a);
+      var len=dir.length();
+      var n=dir.clone().normalize();
+      var part=mesh(rbox(w,len,d,0.014),material);
+      part.position.copy(a).add(b).multiplyScalar(0.5);
+      part.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),n);
+      return part;
+    }
+    function cyl3(a,b,r,material){
+      var dir=new THREE.Vector3().subVectors(b,a);
+      var len=dir.length();
+      var n=dir.clone().normalize();
+      var part=mesh(new THREE.CylinderGeometry(r,r,len,16),material);
+      part.position.copy(a).add(b).multiplyScalar(0.5);
+      part.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),n);
+      return part;
     }
 
-    var clamp=mesh(rbox(0.080,0.060,0.090,0.010),blk);
-    clamp.position.set(clampX,0.030,rearZ);
-    g.add(clamp);
+    var clampTop=mesh(rbox(0.135,0.034,0.105,0.012),blk);
+    clampTop.position.set(clampX,0.017,rearZ);
+    g.add(clampTop);
 
-    var jaw=mesh(rbox(0.080,0.016,0.066,0.005),blk);
-    jaw.position.set(clampX,-0.014,rearZ);
-    g.add(jaw);
+    var clampBack=mesh(rbox(0.050,0.150,0.034,0.008),blk);
+    clampBack.position.set(clampX,-0.050,rearZ-0.047);
+    g.add(clampBack);
 
-    var knob=mesh(new THREE.CylinderGeometry(0.014,0.014,0.034,14),steel);
-    knob.position.set(clampX,-0.034,rearZ+0.020);
+    var clampFoot=mesh(rbox(0.086,0.018,0.058,0.006),rubber);
+    clampFoot.position.set(clampX,-0.128,rearZ);
+    g.add(clampFoot);
+
+    var screw=mesh(new THREE.CylinderGeometry(0.008,0.008,0.128,16),screwM);
+    screw.position.set(clampX,-0.073,rearZ);
+    g.add(screw);
+
+    var knob=mesh(rbox(0.045,0.024,0.030,0.008),rubber);
+    knob.position.set(clampX,-0.151,rearZ);
     g.add(knob);
 
-    var pole=mesh(new THREE.CylinderGeometry(0.018,0.021,0.440,16),steel);
-    pole.position.set(clampX,0.250,rearZ);
-    g.add(pole);
+    var post=mesh(new THREE.CylinderGeometry(0.024,0.026,0.142,18),blk);
+    post.position.set(clampX,0.100,rearZ);
+    g.add(post);
 
-    g.add(joint(clampX,0.450,rearZ,0.027,blk));
-    g.add(barBetweenXZ(clampX,rearZ,clampX,elbowZ,0.452));
-    g.add(joint(clampX,0.452,elbowZ,0.024,blk));
-    g.add(barBetweenXZ(clampX,elbowZ,0,vesaZ,0.452));
-    g.add(joint(0,0.452,vesaZ,0.022,blk));
+    var p0=new THREE.Vector3(clampX,0.166,rearZ);
+    var p1=new THREE.Vector3(0.180,0.305,-0.092);
+    var p2=new THREE.Vector3(0.020,0.448,vesaZ);
 
-    var tilt=mesh(rbox(0.050,0.034,0.040,0.008),blk);
-    tilt.position.set(0,0.450,vesaZ);
+    g.add(joint(p0.x,p0.y,p0.z,0.031,blk));
+    g.add(bar3(p0,p1,0.050,0.038,shell));
+    g.add(cyl3(p0.clone().add(new THREE.Vector3(0,-0.014,0.020)),p1.clone().add(new THREE.Vector3(0,-0.014,0.020)),0.012,blk));
+    g.add(joint(p1.x,p1.y,p1.z,0.033,blk));
+    g.add(bar3(p1,p2,0.052,0.040,shell));
+    g.add(cyl3(p1.clone().add(new THREE.Vector3(0,-0.015,0.018)),p2.clone().add(new THREE.Vector3(0,-0.015,0.018)),0.012,blk));
+    g.add(joint(p2.x,p2.y,p2.z,0.026,blk));
+
+    var tilt=mesh(new THREE.CylinderGeometry(0.019,0.019,0.060,16),blk);
+    tilt.rotation.z=Math.PI/2;
+    tilt.position.set(0.000,0.444,vesaZ);
     g.add(tilt);
 
-    var vesa=mesh(rbox(0.105,0.115,0.022,0.008),blk);
-    vesa.position.set(0,0.440,vesaZ);
+    var vesa=mesh(rbox(0.112,0.102,0.014,0.010),blk);
+    vesa.position.set(0,0.438,vesaZ-0.010);
     g.add(vesa);
+
+    var vesaDisk=mesh(new THREE.CylinderGeometry(0.030,0.030,0.010,20),shell);
+    vesaDisk.rotation.x=Math.PI/2;
+    vesaDisk.position.set(0,0.438,vesaZ-0.002);
+    g.add(vesaDisk);
+
+    for(var sx=-1;sx<=1;sx+=2)for(var sy=-1;sy<=1;sy+=2){
+      var ear=mesh(new THREE.SphereGeometry(0.014,12,8),blk);
+      ear.scale.set(1.15,1.15,0.35);
+      ear.position.set(sx*0.048,0.438+sy*0.043,vesaZ-0.010);
+      g.add(ear);
+
+      var screwHead=mesh(new THREE.CylinderGeometry(0.005,0.005,0.004,10),screwM);
+      screwHead.rotation.x=Math.PI/2;
+      screwHead.position.set(sx*0.042,0.438+sy*0.036,vesaZ+0.000);
+      g.add(screwHead);
+    }
 
     return g;
   }
   function joint(x,y,z,r,m){ var s=mesh(new THREE.SphereGeometry(r,12,10),m); s.position.set(x,y,z); return s; }
 
   /* pNotebook — Soporte ergonomico elevador para notebook (aluminio, inclinado) */
-  function bStand(){ var g=new THREE.Group(); var alu=mat(COL.alu,{m:0.6,r:0.4});
+  function bStand(){
+    var g=new THREE.Group();
+    var black=mat(0x121417,{m:0.24,r:0.42});
+    var satin=mat(0x252a2d,{m:0.20,r:0.50});
+    var pad=mat(0xaeb4b8,{m:0.06,r:0.76});
+    var slotM=mat(0xf1f3f5,{r:0.62,m:0.02});
+
+    var baseL=mesh(rbox(0.035,0.016,0.250,0.012),black); baseL.position.set(-0.135,0.008,0); g.add(baseL);
+    var baseR=mesh(rbox(0.035,0.016,0.250,0.012),black); baseR.position.set(0.135,0.008,0); g.add(baseR);
+    var baseF=mesh(rbox(0.270,0.016,0.032,0.010),black); baseF.position.set(0,0.008,0.110); g.add(baseF);
+    var baseB=mesh(rbox(0.270,0.016,0.032,0.010),black); baseB.position.set(0,0.008,-0.110); g.add(baseB);
+
     for(var sx=-1;sx<=1;sx+=2){
-      var legF=mesh(rbox(0.022,0.10,0.022,0.006),alu); legF.position.set(sx*0.14,0.05,0.09); g.add(legF);
-      var legB=mesh(rbox(0.022,0.14,0.022,0.006),alu); legB.position.set(sx*0.14,0.07,-0.09); g.add(legB);
+      var rear=mesh(rbox(0.026,0.128,0.030,0.010),black);
+      rear.position.set(sx*0.118,0.072,-0.088); g.add(rear);
+
+      var front=mesh(rbox(0.024,0.070,0.028,0.010),black);
+      front.position.set(sx*0.118,0.043,0.096); g.add(front);
+
+      var side=mesh(rbox(0.010,0.086,0.150,0.010),satin);
+      side.position.set(sx*0.135,0.074,0.005);
+      side.rotation.x=rad(13);
+      g.add(side);
+
+      var slot=mesh(rbox(0.005,0.044,0.015,0.007),slotM);
+      slot.position.set(sx*0.141,0.082,-0.050);
+      slot.rotation.x=rad(13);
+      g.add(slot);
+
+      var rail=mesh(rbox(0.046,0.016,0.235,0.010),black);
+      rail.position.set(sx*0.068,0.112,0.005);
+      rail.rotation.x=rad(13);
+      g.add(rail);
+
+      var railPad=mesh(rbox(0.030,0.004,0.190,0.005),pad);
+      railPad.position.set(sx*0.068,0.123,-0.002);
+      railPad.rotation.x=rad(13);
+      railPad.castShadow=false;
+      g.add(railPad);
+
+      var stop=mesh(rbox(0.060,0.028,0.018,0.006),black);
+      stop.position.set(sx*0.068,0.062,0.116);
+      stop.rotation.x=rad(13);
+      g.add(stop);
     }
-    var plate=mesh(rbox(0.28,0.012,0.21,0.008),alu); plate.position.set(0,0.118,0); plate.rotation.x=rad(13); g.add(plate);
-    var lip=mesh(rbox(0.28,0.02,0.012,0.004),alu); lip.position.set(0,0.10,0.105); g.add(lip);
-    return g; }
+
+    var rearBrace=mesh(rbox(0.210,0.020,0.026,0.008),black);
+    rearBrace.position.set(0,0.130,-0.105);
+    rearBrace.rotation.x=rad(13);
+    g.add(rearBrace);
+
+    return g;
+  }
 
   /* pMechanic — Teclado mecanico compacto RGB (negro, underglow) */
-  function bKeyboard(){ var g=new THREE.Group();
-    var base=mesh(rbox(0.40,0.022,0.135,0.006),mat(COL.kbCase,{r:0.5,m:0.2})); base.position.y=0.012; g.add(base);
-    var glow=box(0.40,0.004,0.135,mat(0x0c0f12,{e:COL.accent,ei:0.7})); glow.position.y=0.001; g.add(glow);
-    var keyM=mat(COL.keycap,{r:0.6}), gk=keyGeo();
-    for(var r=0;r<4;r++)for(var c=0;c<13;c++){ var k=mesh(gk,keyM); k.castShadow=true; k.position.set(-0.168+c*0.028,0.027,-0.041+r*0.027); g.add(k); }
-    var sb=box(0.14,0.011,0.022,keyM); sb.position.set(0,0.027,0.05); g.add(sb);
-    return g; }
+  function bKeyboard(){
+    var g=new THREE.Group();
+    var caseM=mat(0x1a1d20,{r:0.46,m:0.18});
+    var deckM=mat(0x292d31,{r:0.52,m:0.12});
+    var keyM=mat(0x24282c,{r:0.58,m:0.04});
+    var sideM=mat(0x111315,{r:0.50,m:0.18});
+    var legendColors=[0xff315f,0xff8a1f,0xf4e04d,0x22c55e,0x29d3ff,0x536dfe,0xd946ef];
+
+    var base=mesh(rbox(0.470,0.026,0.164,0.012),caseM);
+    base.position.y=0.013;
+    g.add(base);
+
+    var deck=mesh(rbox(0.452,0.010,0.145,0.010),deckM);
+    deck.position.y=0.030;
+    g.add(deck);
+
+    var frontLip=mesh(rbox(0.460,0.010,0.014,0.006),sideM);
+    frontLip.position.set(0,0.022,0.078);
+    g.add(frontLip);
+
+    function glowMat(c){ return mat(0x050607,{e:c,ei:0.95,r:0.62}); }
+    function legendMat(c){ return mat(c,{e:c,ei:1.15,r:0.55}); }
+
+    [-0.061,-0.036,-0.011,0.014,0.039,0.064].forEach(function(z,i){
+      var strip=box(0.420,0.004,0.006,glowMat(legendColors[i%legendColors.length]));
+      strip.position.set(-0.006,0.024,z);
+      strip.castShadow=false;
+      g.add(strip);
+    });
+
+    function addKey(x,z,w,d,ci){
+      var k=mesh(rbox(w,0.018,d,0.004),keyM);
+      k.position.set(x,0.044,z);
+      g.add(k);
+
+      var legend=box(Math.min(w*0.36,0.010),0.0016,0.003,legendMat(legendColors[ci%legendColors.length]));
+      legend.position.set(x,0.054,z-d*0.12);
+      legend.castShadow=false;
+      g.add(legend);
+
+      var under=box(w*0.72,0.003,0.003,glowMat(legendColors[ci%legendColors.length]));
+      under.position.set(x,0.031,z+d*0.46);
+      under.castShadow=false;
+      g.add(under);
+    }
+
+    for(var f=0;f<15;f++) addKey(-0.203+f*0.029,-0.060,0.021,0.016,f);
+    for(var n=0;n<14;n++) addKey(-0.198+n*0.030,-0.035,n===13?0.036:0.023,0.020,n+1);
+    for(var q=0;q<13;q++) addKey(-0.183+q*0.030,-0.010,q===12?0.040:0.023,0.020,q+2);
+    for(var a=0;a<12;a++) addKey(-0.168+a*0.030,0.015,a===11?0.050:0.023,0.020,a+3);
+    for(var z=0;z<11;z++) addKey(-0.153+z*0.030,0.040,z===0||z===10?0.050:0.023,0.020,z+4);
+
+    addKey(-0.202,0.065,0.034,0.020,0);
+    addKey(-0.162,0.065,0.028,0.020,1);
+    addKey(-0.124,0.065,0.030,0.020,2);
+    addKey(-0.036,0.065,0.145,0.020,3);
+    addKey(0.064,0.065,0.032,0.020,4);
+    addKey(0.102,0.065,0.030,0.020,5);
+    addKey(0.140,0.065,0.030,0.020,6);
+    addKey(0.177,0.065,0.026,0.020,5);
+    addKey(0.207,0.065,0.026,0.020,4);
+
+    var logoPlate=mesh(rbox(0.054,0.006,0.045,0.006),deckM);
+    logoPlate.position.set(0.188,0.036,0.023);
+    g.add(logoPlate);
+
+    for(var led=0;led<3;led++){
+      var l=box(0.012,0.002,0.003,legendMat(0x22c55e));
+      l.position.set(0.207,0.041,0.012+led*0.011);
+      l.castShadow=false;
+      g.add(l);
+    }
+
+    var logoMark=box(0.004,0.014,0.003,mat(0xe5e7eb,{e:0xe5e7eb,ei:0.35,r:0.55}));
+    logoMark.position.set(0.170,0.041,0.020);
+    g.add(logoMark);
+
+    return g;
+  }
 
   /* Mouse — placeholder original estable y visualmente limpio */
   function bMouse(){
     var g=new THREE.Group();
+    var shell=mat(0x111315,{m:0.12,r:0.46});
+    var satin=mat(0x202326,{m:0.08,r:0.54});
+    var groove=mat(0x070808,{r:0.70});
+    var mark=mat(0xd8dde2,{r:0.58,m:0.02});
 
-    var body=mesh(
-      new THREE.SphereGeometry(0.035,16,12),
-      mat(COL.accent,{r:0.4})
-    );
+    var base=mesh(rbox(0.098,0.014,0.138,0.032),mat(0x0c0d0f,{m:0.10,r:0.62}));
+    base.position.y=0.007;
+    g.add(base);
 
-    body.scale.set(1,0.55,1.5);
-    body.position.y=0.02;
+    var tilt=new THREE.Group();
+    tilt.rotation.z=rad(-12);
+    tilt.position.y=0.010;
+    g.add(tilt);
 
-    g.add(body);
+    var body=mesh(new THREE.SphereGeometry(0.052,24,16),shell);
+    body.scale.set(0.86,1.22,1.30);
+    body.position.set(0.012,0.055,0.006);
+    tilt.add(body);
+
+    var palm=mesh(new THREE.SphereGeometry(0.044,20,14),satin);
+    palm.scale.set(0.74,1.08,1.18);
+    palm.position.set(0.030,0.063,0.020);
+    tilt.add(palm);
+
+    var thumb=mesh(rbox(0.020,0.078,0.034,0.014),mat(0x181a1d,{m:0.12,r:0.34}));
+    thumb.position.set(-0.043,0.060,-0.005);
+    tilt.add(thumb);
+
+    var sideBtnA=mesh(rbox(0.010,0.014,0.036,0.006),satin);
+    sideBtnA.position.set(-0.054,0.071,-0.030);
+    sideBtnA.rotation.y=rad(4);
+    tilt.add(sideBtnA);
+
+    var sideBtnB=mesh(rbox(0.010,0.014,0.032,0.006),satin);
+    sideBtnB.position.set(-0.054,0.057,0.000);
+    sideBtnB.rotation.y=rad(4);
+    tilt.add(sideBtnB);
+
+    var leftBtn=mesh(rbox(0.023,0.009,0.067,0.008),satin);
+    leftBtn.position.set(-0.010,0.107,-0.018);
+    leftBtn.rotation.x=rad(-7);
+    tilt.add(leftBtn);
+
+    var rightBtn=mesh(rbox(0.023,0.009,0.067,0.008),satin);
+    rightBtn.position.set(0.020,0.107,-0.015);
+    rightBtn.rotation.x=rad(-7);
+    tilt.add(rightBtn);
+
+    var midGroove=box(0.004,0.004,0.078,groove);
+    midGroove.position.set(0.005,0.113,-0.017);
+    midGroove.rotation.x=rad(-7);
+    tilt.add(midGroove);
+
+    var wheel=mesh(new THREE.CylinderGeometry(0.010,0.010,0.023,18),mat(0x0b0c0d,{r:0.54}));
+    wheel.rotation.z=Math.PI/2;
+    wheel.position.set(0.005,0.116,-0.052);
+    tilt.add(wheel);
+
+    for(var wi=-2;wi<=2;wi++){
+      var ridge=box(0.003,0.011,0.002,mat(0x2e3338,{r:0.58}));
+      ridge.position.set(0.005+wi*0.004,0.126,-0.052);
+      ridge.rotation.z=rad(18);
+      tilt.add(ridge);
+    }
+
+    var dpi=mesh(rbox(0.016,0.007,0.026,0.007),satin);
+    dpi.position.set(0.006,0.101,-0.007);
+    dpi.rotation.x=rad(-6);
+    tilt.add(dpi);
+
+    for(var i=0;i<10;i++){
+      var rib=box(0.004,0.0015,0.066,mat(0x2a2d30,{r:0.64}));
+      rib.position.set(0.049,0.025+i*0.0045,0.026+i*0.001);
+      rib.rotation.z=rad(-6);
+      tilt.add(rib);
+    }
+
+    var logoA=box(0.003,0.014,0.002,mark);
+    logoA.position.set(-0.053,0.089,-0.022);
+    tilt.add(logoA);
+    var logoB=box(0.003,0.002,0.015,mark);
+    logoB.position.set(-0.053,0.083,-0.014);
+    tilt.add(logoB);
 
     return g;
   }
@@ -391,7 +625,7 @@
       var onStand=isVisible('dsi-stand');
       /* Notebook y pNotebook deben compartir la MISMA inclinación.
          Antes estaban inclinados en sentidos opuestos y se atravesaban. */
-      y = onStand ? 0.124 : 0.0;
+      y = onStand ? 0.142 : 0.0;
       rx = onStand ? rad(13) : 0;
     } else if(id==='dsi-keyboard'){
       y = isVisible('dsi-mousepad') ? 0.013 : 0.0;   /* sobre el pad si está */
@@ -502,6 +736,125 @@
     scene.add(roomBaseboard);
   }
 
+  var _deskWoodMat=null;
+  function makeDeskWoodMaterial(){
+    if(_deskWoodMat) return _deskWoodMat;
+    var canvas=document.createElement('canvas');
+    canvas.width=512; canvas.height=256;
+    var ctx=canvas.getContext('2d');
+    ctx.fillStyle='#c9985f';
+    ctx.fillRect(0,0,512,256);
+    for(var z=0;z<256;z+=42){
+      ctx.fillStyle=(z/42)%2 ? 'rgba(255,238,204,.12)' : 'rgba(91,49,22,.055)';
+      ctx.fillRect(0,z,512,42);
+      ctx.strokeStyle='rgba(94,57,29,.18)';
+      ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(0,z+.5); ctx.lineTo(512,z+.5); ctx.stroke();
+    }
+    for(var x=0;x<512;x+=36){
+      var wave=Math.sin(x*0.055)*5;
+      ctx.strokeStyle='rgba(104,61,29,.09)';
+      ctx.beginPath();
+      for(var y=0;y<256;y+=12){
+        var px=x+Math.sin(y*.06+x*.02)*4+wave;
+        if(y===0) ctx.moveTo(px,y); else ctx.lineTo(px,y);
+      }
+      ctx.stroke();
+    }
+    ctx.strokeStyle='rgba(255,246,220,.10)';
+    for(var hi=18;hi<256;hi+=42){
+      ctx.beginPath(); ctx.moveTo(0,hi+.5); ctx.lineTo(512,hi+.5); ctx.stroke();
+    }
+    var tex=new THREE.CanvasTexture(canvas);
+    if('colorSpace' in tex) tex.colorSpace=THREE.SRGBColorSpace;
+    tex.wrapS=THREE.RepeatWrapping;
+    tex.wrapT=THREE.RepeatWrapping;
+    tex.repeat.set(1.35,1.05);
+    _deskWoodMat=new THREE.MeshStandardMaterial({map:tex,color:COL.pWood,roughness:0.78,metalness:0});
+    return _deskWoodMat;
+  }
+
+  function makeStandingFrame(){
+    var g=new THREE.Group();
+    var black=mat(COL.pStandBlack,{m:0.62,r:0.34});
+    var gun=mat(COL.pStandGun,{m:0.62,r:0.36});
+    var rail=mat(COL.pStandRail,{m:0.56,r:0.38});
+    var woodEdge=mat(COL.pWoodEdge,{r:0.78,m:0.02});
+    var shell=mat(0xe9e2d4,{r:0.62,m:0.06});
+    var button=mat(0xe8ecee,{r:0.48,m:0.10});
+
+    var frontEdge=mesh(rbox(1.52,0.026,0.018,0.006),woodEdge);
+    frontEdge.position.set(0,-0.044,0.365); frontEdge.castShadow=false; g.add(frontEdge);
+    var leftEdge=mesh(rbox(0.018,0.026,0.70,0.006),woodEdge);
+    leftEdge.position.set(-0.755,-0.044,0); leftEdge.castShadow=false; g.add(leftEdge);
+    var rightEdge=mesh(rbox(0.018,0.026,0.70,0.006),woodEdge);
+    rightEdge.position.set(0.755,-0.044,0); rightEdge.castShadow=false; g.add(rightEdge);
+
+    for(var sx=-1;sx<=1;sx+=2){
+      var plate=mesh(rbox(0.30,0.018,0.42,0.006),black);
+      plate.position.set(sx*0.62,-0.064,-0.020);
+      g.add(plate);
+
+      var cap=mesh(rbox(0.15,0.032,0.12,0.008),gun);
+      cap.position.set(sx*0.62,-0.095,-0.265);
+      g.add(cap);
+    }
+
+    var railOuter=mesh(rbox(1.18,0.046,0.052,0.008),gun);
+    railOuter.position.set(0,-0.127,-0.315);
+    g.add(railOuter);
+
+    var railSleeve=mesh(rbox(0.38,0.056,0.064,0.008),rail);
+    railSleeve.position.set(0,-0.126,-0.315);
+    g.add(railSleeve);
+
+    var railSeam=box(0.012,0.058,0.068,black);
+    railSeam.position.set(0.22,-0.126,-0.315);
+    g.add(railSeam);
+
+    var controlBox=mesh(rbox(0.25,0.036,0.095,0.008),black);
+    controlBox.position.set(0.16,-0.168,-0.305);
+    g.add(controlBox);
+
+    var motor=mesh(new THREE.CylinderGeometry(0.035,0.038,0.23,18),black);
+    motor.position.set(0.58,-0.185,-0.270);
+    g.add(motor);
+
+    var motorCase=mesh(rbox(0.070,0.180,0.074,0.012),black);
+    motorCase.position.set(0.625,-0.170,-0.270);
+    g.add(motorCase);
+
+    var cable=mesh(new THREE.CylinderGeometry(0.004,0.004,0.76,8),mat(COL.cable,{r:0.68}));
+    cable.rotation.z=Math.PI/2;
+    cable.position.set(-0.12,-0.166,-0.348);
+    g.add(cable);
+
+    var cableKnob=mesh(new THREE.SphereGeometry(0.014,12,8),black);
+    cableKnob.position.set(-0.48,-0.166,-0.348);
+    g.add(cableKnob);
+
+    var keypadShell=mesh(rbox(0.150,0.026,0.076,0.008),shell);
+    keypadShell.position.set(0.555,-0.079,0.390);
+    g.add(keypadShell);
+
+    var keypadFace=mesh(rbox(0.066,0.024,0.006,0.003),black);
+    keypadFace.position.set(0.520,-0.079,0.432);
+    g.add(keypadFace);
+
+    var display=box(0.018,0.010,0.004,mat(0x0e1114,{e:0x162d36,ei:0.45,r:0.5}));
+    display.position.set(0.498,-0.079,0.436);
+    g.add(display);
+
+    for(var i=0;i<3;i++){
+      var btn=mesh(new THREE.CylinderGeometry(0.0038,0.0038,0.004,10),button);
+      btn.rotation.x=Math.PI/2;
+      btn.position.set(0.516+i*0.014,-0.079,0.437);
+      g.add(btn);
+    }
+
+    return g;
+  }
+
   function buildScene(){
     var w=host.clientWidth||520, h=host.clientHeight||390;
     renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});
@@ -561,11 +914,13 @@
 
     surfaceAnchor=new THREE.Object3D(); surfaceAnchor.position.y=curTopY; scene.add(surfaceAnchor);
     deskTop=mesh(rbox(1.5,0.04,0.72,0.012),mat(COL.surface,{r:0.6,m:0.04})); deskTop.position.y=-0.02; surfaceAnchor.add(deskTop);
-    var edge=mesh(rbox(1.52,0.012,0.74,0.012),mat(COL.edge,{r:0.7})); edge.position.y=-0.045; edge.castShadow=false; surfaceAnchor.add(edge);
-    var beam=box(1.18,0.05,0.07,mat(COL.frame,{m:0.6,r:0.4})); beam.position.set(0,-0.10,-0.22); surfaceAnchor.add(beam);
-    var ctrl=mesh(rbox(0.11,0.022,0.055,0.006),mat(COL.frameDark,{m:0.4,r:0.5})); ctrl.position.set(0.5,-0.07,0.3); surfaceAnchor.add(ctrl);
+    deskEdge=mesh(rbox(1.52,0.012,0.74,0.012),mat(COL.edge,{r:0.7})); deskEdge.position.y=-0.045; deskEdge.castShadow=false; surfaceAnchor.add(deskEdge);
+    deskBeam=box(1.18,0.05,0.07,mat(COL.frame,{m:0.6,r:0.4})); deskBeam.position.set(0,-0.10,-0.22); surfaceAnchor.add(deskBeam);
+    deskControl=mesh(rbox(0.11,0.022,0.055,0.006),mat(COL.frameDark,{m:0.4,r:0.5})); deskControl.position.set(0.5,-0.07,0.3); surfaceAnchor.add(deskControl);
     var b1=box(0.014,0.006,0.014,mat(COL.accent,{e:COL.accent,ei:0.5})); b1.position.set(0.476,-0.057,0.3); surfaceAnchor.add(b1);
     var b2=box(0.014,0.006,0.014,mat(0x222a34)); b2.position.set(0.5,-0.057,0.3); surfaceAnchor.add(b2);
+    deskButtons=[b1,b2];
+    standingFrame=makeStandingFrame(); standingFrame.visible=false; surfaceAnchor.add(standingFrame);
 
     legL=makeLeg(); legR=makeLeg(); scene.add(legL,legR); setLegs();
 
@@ -597,22 +952,86 @@
   function makeLeg(){
     var g=new THREE.Group();
     var dk=mat(COL.frame,{m:0.6,r:0.4}), ft=mat(COL.frameDark,{m:0.5,r:0.5});
-    var foot=mesh(rbox(0.10,0.035,0.50,0.01),ft); foot.position.y=0.0175; g.add(foot);
+    var foot=mesh(rbox(0.10,0.035,0.50,0.01),ft); foot.position.y=0.0175; g.userData.foot=foot; g.add(foot);
     var lower=mesh(rbox(0.085,1,0.085,0.012),dk); g.userData.lower=lower; g.add(lower);
     var upper=mesh(rbox(0.062,1,0.062,0.01),dk); g.userData.upper=upper; g.add(upper);
+
+    var standingOnly=[];
+    var glideM=mat(0x0f1012,{m:0.45,r:0.46});
+    for(var sz=-1;sz<=1;sz+=2){
+      var glide=mesh(new THREE.CylinderGeometry(0.028,0.032,0.014,18),glideM);
+      glide.position.set(0,0.007,sz*0.285);
+      g.add(glide); standingOnly.push(glide);
+    }
+
+    var faceM=mat(0x111315,{m:0.52,r:0.42});
+    var lowerFace=mesh(rbox(0.052,1,0.004,0.002),faceM);
+    lowerFace.position.z=0.046; g.add(lowerFace); standingOnly.push(lowerFace);
+    var upperFace=mesh(rbox(0.040,1,0.004,0.002),faceM);
+    upperFace.position.z=0.034; g.add(upperFace); standingOnly.push(upperFace);
+
+    for(var sy=0.11;sy<=0.23;sy+=0.12){
+      var screw=mesh(new THREE.CylinderGeometry(0.005,0.005,0.003,10),mat(0x08090a,{m:0.5,r:0.5}));
+      screw.rotation.x=Math.PI/2;
+      screw.position.set(0.024,sy,0.049);
+      g.add(screw); standingOnly.push(screw);
+    }
+
+    standingOnly.forEach(function(p){ p.visible=false; });
+    g.userData.standingOnly=standingOnly;
+    g.userData.lowerFace=lowerFace;
+    g.userData.upperFace=upperFace;
     return g;
   }
   function setLegs(){
-    var colH=Math.max(0.30,curTopY-0.04), xx=0.62, lowerH=0.40;
+    if(!legL||!legR) return;
+    var colH=Math.max(0.30,curTopY-0.04), xx=0.62, lowerH=deskModeStanding?0.50:0.40;
+    var lowerM=deskModeStanding ? mat(COL.pStandGun,{m:0.62,r:0.36}) : mat(COL.frame,{m:0.6,r:0.4});
+    var upperM=deskModeStanding ? mat(COL.pStandRail,{m:0.58,r:0.38}) : mat(COL.frame,{m:0.6,r:0.4});
+    var footM=deskModeStanding ? mat(COL.pStandBlack,{m:0.62,r:0.34}) : mat(COL.frameDark,{m:0.5,r:0.5});
     [legL,legR].forEach(function(L,i){
       L.position.set(i===0?-xx:xx,0,0);
-      var lo=L.userData.lower, up=L.userData.upper;
-      lo.scale.y=lowerH; lo.position.y=0.02+lowerH/2;
-      var upH=Math.max(0.05,colH-lowerH); up.scale.y=upH; up.position.y=0.02+lowerH+upH/2;
+      var lo=L.userData.lower, up=L.userData.upper, ft=L.userData.foot;
+      if(ft){
+        ft.material=footM;
+        ft.scale.set(deskModeStanding?1.18:1,deskModeStanding?1.22:1,deskModeStanding?1.30:1);
+        ft.position.y=deskModeStanding?0.022:0.0175;
+      }
+      lo.material=lowerM; up.material=upperM;
+      lo.scale.set(deskModeStanding?1.08:1,lowerH,deskModeStanding?1.04:1);
+      lo.position.y=0.02+lowerH/2;
+      var upH=Math.max(0.05,colH-lowerH);
+      up.scale.set(deskModeStanding?0.96:1,upH,deskModeStanding?0.96:1);
+      up.position.y=0.02+lowerH+upH/2;
+
+      var details=L.userData.standingOnly||[];
+      details.forEach(function(p){ p.visible=deskModeStanding; });
+      if(L.userData.lowerFace){
+        L.userData.lowerFace.scale.y=lowerH;
+        L.userData.lowerFace.position.y=0.02+lowerH/2;
+      }
+      if(L.userData.upperFace){
+        L.userData.upperFace.scale.y=upH;
+        L.userData.upperFace.position.y=0.02+lowerH+upH/2;
+      }
     });
   }
 
+  function setDeskVisual(standing){
+    standing=!!standing;
+    deskModeStanding=standing;
+    if(deskTop) deskTop.material=standing ? makeDeskWoodMaterial() : mat(COL.surface,{r:0.6,m:0.04});
+    if(deskEdge) deskEdge.material=standing ? mat(COL.pWoodEdge,{r:0.78,m:0.02}) : mat(COL.edge,{r:0.7});
+    if(deskBeam) deskBeam.visible=!standing;
+    if(deskControl) deskControl.visible=!standing;
+    deskButtons.forEach(function(b){ b.visible=!standing; });
+    if(standingFrame) standingFrame.visible=standing;
+    setLegs();
+  }
+
   function setDeskMode(standing,animated){
+    standing=!!standing;
+    setDeskVisual(standing);
     var target=standing?DESK_STAND:DESK_SIT; if(target===curTopY)return;
     var from=curTopY;
     addTween(animated&&!reduce?700:0,function(e){ curTopY=lerp(from,target,e); if(surfaceAnchor)surfaceAnchor.position.y=curTopY; setLegs(); if(controls)controls.target.y=curTopY*0.55; },function(){ if(controls)controls.update(); });
