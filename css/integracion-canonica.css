@@ -9,15 +9,35 @@
 
 /* ---------- ESCENA 3D (reemplaza el preview 2D dentro del resultado) ---------- */
 .s3d-stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius-lg,20px);overflow:hidden;
-  background:radial-gradient(60% 45% at 80% 12%,rgba(56,189,248,.22),transparent 70%),linear-gradient(160deg,#0b1424,#13233d);
+  --s3d-photo-opacity:.82;--s3d-photo-scale:106%;
+  background:
+    radial-gradient(48% 34% at 84% 12%,rgba(255,255,255,.30),transparent 74%),
+    linear-gradient(180deg,#e7ede7 0%,#dfe5dd 56%,#cdbb99 78%,#b69870 100%);
   border:1px solid rgba(255,255,255,.08);margin-bottom:.75rem;isolation:isolate}
+.s3d-stage::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(180deg,rgba(246,250,247,0) 0%,rgba(238,235,224,.04) 46%,rgba(221,211,190,.42) 64%,rgba(209,194,164,.96) 82%,rgba(209,194,164,1) 100%),
+    url("../assets/images/comparacion/setup-despues.webp");
+  background-repeat:no-repeat;background-position:center top;background-size:var(--s3d-photo-scale) auto;
+  opacity:var(--s3d-photo-opacity);filter:saturate(.98) contrast(.98) brightness(1.02);
+  -webkit-mask-image:linear-gradient(180deg,#000 0 58%,rgba(0,0,0,.82) 64%,rgba(0,0,0,.18) 74%,transparent 84%);
+  mask-image:linear-gradient(180deg,#000 0 58%,rgba(0,0,0,.82) 64%,rgba(0,0,0,.18) 74%,transparent 84%)}
+.s3d-stage[data-s3d-view="frontal"]{--s3d-photo-opacity:.46;--s3d-photo-scale:112%}
+.s3d-stage[data-s3d-view="frontal"]::before{
+  -webkit-mask-image:linear-gradient(180deg,#000 0 44%,rgba(0,0,0,.48) 56%,transparent 72%);
+  mask-image:linear-gradient(180deg,#000 0 44%,rgba(0,0,0,.48) 56%,transparent 72%)}
+.s3d-stage[data-s3d-view="superior"]{--s3d-photo-opacity:.045;--s3d-photo-scale:124%;
+  background:linear-gradient(180deg,#e4e3d8 0%,#d5c8aa 100%)}
+.s3d-stage[data-s3d-view="superior"]::before{
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.34) 0,transparent 30%);
+  mask-image:linear-gradient(180deg,rgba(0,0,0,.34) 0,transparent 30%)}
 .s3d-host{position:absolute;inset:0;z-index:1}
-.s3d-host canvas{display:block;width:100%!important;height:100%!important;touch-action:none;outline:none}
+.s3d-host canvas{display:block;width:100%!important;height:100%!important;touch-action:none;outline:none;background:transparent}
 .s3d-toolbar{position:absolute;top:10px;right:10px;z-index:3;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 20px)}
 .s3d-cam{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 10px;border-radius:9px;
-  font-family:inherit;font-size:.72rem;font-weight:700;color:#dcf3ff;background:rgba(11,22,38,.55);
+  font-family:inherit;font-size:.72rem;font-weight:700;color:#eef9ff;background:rgba(9,18,32,.72);
   border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  transition:background .18s,border-color .18s,color .18s,transform .15s}
+  box-shadow:0 8px 24px rgba(7,16,28,.18);transition:background .18s,border-color .18s,color .18s,transform .15s}
 .s3d-cam svg{width:14px;height:14px}
 .s3d-cam:hover{background:rgba(56,189,248,.28);border-color:rgba(56,189,248,.55);color:#fff}
 .s3d-cam:active{transform:translateY(1px)}
@@ -27,17 +47,26 @@
 .s3d-spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(56,189,248,.22);border-top-color:var(--accent,#38bdf8);animation:s3dSpin .9s linear infinite}
 @keyframes s3dSpin{to{transform:rotate(360deg)}}
 .s3d-hint{position:absolute;left:10px;bottom:10px;z-index:3;margin:0;padding:6px 11px;border-radius:100px;
-  font-size:.68rem;font-weight:600;color:rgba(230,246,253,.82);background:rgba(11,22,38,.5);
+  font-size:.68rem;font-weight:600;color:rgba(240,250,255,.88);background:rgba(9,18,32,.66);
   border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);pointer-events:none}
 .s3d-cam:focus-visible{outline:3px solid rgba(56,189,248,.6);outline-offset:2px}
 /* Acciones del configurador: modo libre (mover objetos) + reiniciar posiciones */
 .s3d-div{align-self:stretch;width:1px;margin:3px 1px;background:rgba(255,255,255,.16);border-radius:1px}
-.s3d-act.is-active{background:linear-gradient(135deg,#10b981,#0ea5e9);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.35)}
-.s3d-act.is-active:hover{background:linear-gradient(135deg,#0ea5a0,#0284c7);color:#fff}
-.s3d-reset:hover{background:rgba(248,113,113,.26);border-color:rgba(248,113,113,.5);color:#fff}
+.s3d-act.is-active,.s3d-action.is-active{background:linear-gradient(135deg,#10b981,#0ea5e9);border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.35)}
+.s3d-act.is-active:hover,.s3d-action.is-active:hover{background:linear-gradient(135deg,#0ea5a0,#0284c7);color:#fff}
+.s3d-reset:hover,.s3d-action[data-action="reiniciar"]:hover{background:rgba(248,113,113,.26);border-color:rgba(248,113,113,.5);color:#fff}
 .s3d-stage.is-free::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:inherit;
   box-shadow:inset 0 0 0 2px rgba(16,185,129,.6);transition:box-shadow .2s}
-@media(max-width:600px){.s3d-cam span{display:none}.s3d-cam{padding:0 9px}}
+@media(max-width:600px){
+  .s3d-stage{--s3d-photo-scale:126%}
+  .s3d-stage::before{
+    -webkit-mask-image:linear-gradient(180deg,#000 0 52%,rgba(0,0,0,.66) 62%,rgba(0,0,0,.12) 74%,transparent 84%);
+    mask-image:linear-gradient(180deg,#000 0 52%,rgba(0,0,0,.66) 62%,rgba(0,0,0,.12) 74%,transparent 84%)}
+  .s3d-stage[data-s3d-view="frontal"]{--s3d-photo-scale:132%}
+  .s3d-stage[data-s3d-view="superior"]{--s3d-photo-scale:138%}
+  .s3d-cam[data-view] span{display:none}.s3d-cam{padding:0 9px}
+  .s3d-action{padding:0 10px}
+}
 
 /* ---------- PANELES (teaser / lead) dentro de la sección oscura del quiz ---------- */
 .pq-panel[hidden]{display:none}
