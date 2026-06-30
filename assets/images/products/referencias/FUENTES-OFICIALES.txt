@@ -1,0 +1,36 @@
+Referencias oficiales descargadas del catálogo de PrimOffice
+Fecha de descarga: 2026-06-29
+
+pHub
+Página oficial: https://www.primoffice.com.ar/productos/adaptador-hub-usbc-multifuncional-phub/
+Dimensiones publicadas: 7 x 3 x 1 cm. Cable: 10 cm.
+Archivos:
+- pHub/01-vista-principal.webp
+- pHub/02-puertos-y-cable.webp
+- pHub/03-escala-y-uso-real.webp
+
+pMat
+Página oficial: https://www.primoffice.com.ar/productos/pad-xl-cuero-ecologico-pmat/
+Dimensiones publicadas: 80 x 40 cm.
+Archivos:
+- pMat/01-vista-superior-negro.webp
+- pMat/02-instalado-en-escritorio.webp
+- pMat/03-textura-costura-y-bordes.webp
+
+pBox
+Página oficial: https://www.primoffice.com.ar/productos/bandeja-organizadora-de-cables-para-escritorio-pbox/
+Dimensiones publicadas: 40 x 18 x 10 cm.
+Archivos:
+- pBox/01-vista-principal-abierta.webp
+- pBox/02-vista-trasera-y-ranuras.webp
+- pBox/03-instalado-en-escritorio.webp
+
+pGlow
+Página oficial: https://www.primoffice.com.ar/productos/lampara-para-monitor-barra-de-luz-led-pglow/
+Dimensiones publicadas: 41 x 12 x 2 cm.
+Archivos:
+- pGlow/01-vista-frontal.webp
+- pGlow/02-vista-trasera-y-soporte.webp
+- pGlow/03-instalado-y-luz-encendida.webp
+
+Todas las imágenes fueron descargadas desde el CDN usado por la tienda oficial de PrimOffice.

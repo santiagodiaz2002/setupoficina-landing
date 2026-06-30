@@ -34,7 +34,7 @@
   var ready = false, initStarted = false, running = false, camFly = false;
   var objects = {}, deskTop, deskEdge, deskBeam, deskControl, standingFrame, surfaceAnchor, legL, legR, roomFloor, roomWall, roomBaseboard;
   var deskButtons = [], deskModeStanding = false;
-  var DESK_SIT = 0.73, DESK_STAND = 1.08, curTopY = DESK_SIT;
+  var DESK_SIT = 0.73, DESK_STAND = 1.08, MAT_TOP = 0.0022, curTopY = DESK_SIT;
   var DSI = ['dsi-chair','dsi-monitor','dsi-monitor-stand','dsi-monitor-arm','dsi-laptop','dsi-stand','dsi-keyboard','dsi-mousepad','dsi-mouse','dsi-hub','dsi-organizer','dsi-lightbar'];
 
   function $(id){ return document.getElementById(id); }
@@ -137,76 +137,140 @@
      hasta el monitor (y ~ 0.44, z local ~ 0). Así NUNCA flota detrás del escritorio. */
   function bMonArm(){
     var g=new THREE.Group();
-    var blk=mat(0x111315,{m:0.58,r:0.38});
-    var shell=mat(0x1b1f22,{m:0.44,r:0.44});
-    var screwM=mat(0xb6c0c8,{m:0.72,r:0.28});
-    var rubber=mat(0x090a0b,{m:0.35,r:0.55});
+    var blk=mat(0x0e1012,{m:0.42,r:0.48});
+    var shell=mat(0x171a1d,{m:0.32,r:0.50});
+    var edge=mat(0x08090a,{m:0.36,r:0.62});
+    var screwM=mat(0xb7c3cc,{m:0.76,r:0.24});
+    var rubber=mat(0x050607,{m:0.18,r:0.70});
 
     var clampX=0.24, rearZ=-0.18, vesaZ=-0.014;
 
-    function bar3(a,b,w,d,material){
+    function bar3(a,b,w,d,material,radius){
       var dir=new THREE.Vector3().subVectors(b,a);
       var len=dir.length();
       var n=dir.clone().normalize();
-      var part=mesh(rbox(w,len,d,0.014),material);
+      var part=mesh(rbox(w,len,d,radius||0.014),material);
       part.position.copy(a).add(b).multiplyScalar(0.5);
       part.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),n);
       return part;
     }
-    function cyl3(a,b,r,material){
+    function cyl3(a,b,r,material,segments){
       var dir=new THREE.Vector3().subVectors(b,a);
       var len=dir.length();
       var n=dir.clone().normalize();
-      var part=mesh(new THREE.CylinderGeometry(r,r,len,16),material);
+      var part=mesh(new THREE.CylinderGeometry(r,r,len,segments||16),material);
       part.position.copy(a).add(b).multiplyScalar(0.5);
       part.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),n);
       return part;
+    }
+    function frontDisk(x,y,z,r,d,material,segments){
+      var part=mesh(new THREE.CylinderGeometry(r,r,d,segments||22),material);
+      part.rotation.x=Math.PI/2;
+      part.position.set(x,y,z);
+      return part;
+    }
+    function sideBar(x,y,z,w,h,d,material,radius){
+      var rr=radius||0.006;
+      rr=Math.min(rr,Math.min(w,h,d)*0.45);
+      var part=mesh(rbox(w,h,d,rr),material);
+      part.position.set(x,y,z);
+      return part;
+    }
+    function hinge(p,r){
+      var body=frontDisk(p.x,p.y,p.z,r,0.050,blk,24);
+      g.add(body);
+      var cap=frontDisk(p.x,p.y,p.z+0.026,r*0.62,0.006,edge,20);
+      g.add(cap);
+      var bolt=frontDisk(p.x,p.y,p.z+0.030,r*0.24,0.004,screwM,14);
+      g.add(bolt);
+    }
+    function armHousing(a,b,w,d,trimCylinderEnd){
+      g.add(bar3(a,b,w,d,shell,0.018));
+      g.add(bar3(a.clone().add(new THREE.Vector3(0,0.002,0.003)),b.clone().add(new THREE.Vector3(0,0.002,0.003)),w*0.62,d*0.52,blk,0.014));
+      g.add(bar3(a.clone().add(new THREE.Vector3(0,-0.016,0.023)),b.clone().add(new THREE.Vector3(0,-0.016,0.023)),0.020,0.018,edge,0.008));
+
+      var cylinderEnd=b.clone();
+      if(trimCylinderEnd){
+        cylinderEnd.add(new THREE.Vector3().subVectors(a,b).normalize().multiplyScalar(trimCylinderEnd));
+      }
+      g.add(cyl3(a.clone().add(new THREE.Vector3(0,-0.019,0.026)),cylinderEnd.add(new THREE.Vector3(0,-0.019,0.026)),0.010,blk,16));
     }
 
-    var clampTop=mesh(rbox(0.135,0.034,0.105,0.012),blk);
-    clampTop.position.set(clampX,0.017,rearZ);
+    var clampTop=mesh(rbox(0.150,0.026,0.116,0.014),blk);
+    clampTop.position.set(clampX,0.013,rearZ);
     g.add(clampTop);
 
-    var clampBack=mesh(rbox(0.050,0.150,0.034,0.008),blk);
-    clampBack.position.set(clampX,-0.050,rearZ-0.047);
+    var topCover=mesh(rbox(0.105,0.016,0.084,0.012),shell);
+    topCover.position.set(clampX,0.034,rearZ);
+    g.add(topCover);
+
+    var clampBack=mesh(rbox(0.046,0.148,0.034,0.008),blk);
+    clampBack.position.set(clampX,-0.054,rearZ-0.052);
     g.add(clampBack);
 
-    var clampFoot=mesh(rbox(0.086,0.018,0.058,0.006),rubber);
-    clampFoot.position.set(clampX,-0.128,rearZ);
+    for(var side=-1;side<=1;side+=2){
+      var cheek=mesh(rbox(0.009,0.122,0.044,0.004),edge);
+      cheek.position.set(clampX+side*0.028,-0.058,rearZ-0.034);
+      g.add(cheek);
+    }
+
+    var clampFoot=mesh(rbox(0.090,0.019,0.058,0.006),rubber);
+    clampFoot.position.set(clampX,-0.126,rearZ-0.001);
     g.add(clampFoot);
 
-    var screw=mesh(new THREE.CylinderGeometry(0.008,0.008,0.128,16),screwM);
-    screw.position.set(clampX,-0.073,rearZ);
+    var screw=mesh(new THREE.CylinderGeometry(0.007,0.007,0.122,16),screwM);
+    screw.position.set(clampX,-0.078,rearZ+0.001);
     g.add(screw);
 
-    var knob=mesh(rbox(0.045,0.024,0.030,0.008),rubber);
-    knob.position.set(clampX,-0.151,rearZ);
+    var washer=mesh(new THREE.CylinderGeometry(0.022,0.022,0.006,24),screwM);
+    washer.position.set(clampX,-0.028,rearZ+0.001);
+    g.add(washer);
+
+    var knob=mesh(rbox(0.046,0.020,0.032,0.008),rubber);
+    knob.position.set(clampX,-0.154,rearZ+0.001);
     g.add(knob);
 
-    var post=mesh(new THREE.CylinderGeometry(0.024,0.026,0.142,18),blk);
-    post.position.set(clampX,0.100,rearZ);
+    for(var h=0;h<2;h++){
+      var clampBolt=frontDisk(clampX,-0.020-h*0.050,rearZ-0.033,0.006,0.004,screwM,12);
+      g.add(clampBolt);
+    }
+
+    var port=sideBar(clampX-0.040,0.037,rearZ+0.050,0.020,0.004,0.007,edge,0.003);
+    g.add(port);
+    var button=sideBar(clampX+0.040,0.037,rearZ+0.050,0.014,0.004,0.007,edge,0.003);
+    g.add(button);
+
+    var post=mesh(new THREE.CylinderGeometry(0.020,0.022,0.112,22),blk);
+    post.position.set(clampX,0.094,rearZ);
     g.add(post);
+    var lowerCollar=mesh(new THREE.CylinderGeometry(0.030,0.030,0.020,22),shell);
+    lowerCollar.position.set(clampX,0.043,rearZ);
+    g.add(lowerCollar);
+    var upperCollar=mesh(new THREE.CylinderGeometry(0.028,0.028,0.018,22),shell);
+    upperCollar.position.set(clampX,0.151,rearZ);
+    g.add(upperCollar);
 
     var p0=new THREE.Vector3(clampX,0.166,rearZ);
-    var p1=new THREE.Vector3(0.180,0.305,-0.092);
-    var p2=new THREE.Vector3(0.020,0.448,vesaZ);
+    var p1=new THREE.Vector3(0.176,0.308,-0.092);
+    var p2=new THREE.Vector3(0.018,0.448,vesaZ);
 
-    g.add(joint(p0.x,p0.y,p0.z,0.031,blk));
-    g.add(bar3(p0,p1,0.050,0.038,shell));
-    g.add(cyl3(p0.clone().add(new THREE.Vector3(0,-0.014,0.020)),p1.clone().add(new THREE.Vector3(0,-0.014,0.020)),0.012,blk));
-    g.add(joint(p1.x,p1.y,p1.z,0.033,blk));
-    g.add(bar3(p1,p2,0.052,0.040,shell));
-    g.add(cyl3(p1.clone().add(new THREE.Vector3(0,-0.015,0.018)),p2.clone().add(new THREE.Vector3(0,-0.015,0.018)),0.012,blk));
-    g.add(joint(p2.x,p2.y,p2.z,0.026,blk));
+    hinge(p0,0.032);
+    armHousing(p0,p1,0.050,0.036);
+    hinge(p1,0.034);
+    armHousing(p1,p2,0.052,0.038,0.030);
+    hinge(p2,0.027);
 
-    var tilt=mesh(new THREE.CylinderGeometry(0.019,0.019,0.060,16),blk);
+    var tilt=mesh(new THREE.CylinderGeometry(0.018,0.018,0.060,18),blk);
     tilt.rotation.z=Math.PI/2;
-    tilt.position.set(0.000,0.444,vesaZ);
+    tilt.position.set(0.001,0.444,vesaZ-0.002);
     g.add(tilt);
 
-    var vesa=mesh(rbox(0.112,0.102,0.014,0.010),blk);
-    vesa.position.set(0,0.438,vesaZ-0.010);
-    g.add(vesa);
+    var link=bar3(new THREE.Vector3(0.020,0.448,vesaZ-0.001),new THREE.Vector3(0.000,0.438,vesaZ-0.006),0.038,0.026,blk,0.009);
+    g.add(link);
+
+    var vesaCore=mesh(rbox(0.070,0.088,0.012,0.010),blk);
+    vesaCore.position.set(0,0.438,vesaZ-0.012);
+    g.add(vesaCore);
 
     var vesaDisk=mesh(new THREE.CylinderGeometry(0.030,0.030,0.010,20),shell);
     vesaDisk.rotation.x=Math.PI/2;
@@ -214,16 +278,24 @@
     g.add(vesaDisk);
 
     for(var sx=-1;sx<=1;sx+=2)for(var sy=-1;sy<=1;sy+=2){
-      var ear=mesh(new THREE.SphereGeometry(0.014,12,8),blk);
-      ear.scale.set(1.15,1.15,0.35);
-      ear.position.set(sx*0.048,0.438+sy*0.043,vesaZ-0.010);
-      g.add(ear);
+      var lobe=mesh(new THREE.SphereGeometry(0.018,14,10),blk);
+      lobe.scale.set(1.08,1.20,0.34);
+      lobe.position.set(sx*0.046,0.438+sy*0.040,vesaZ-0.012);
+      g.add(lobe);
 
-      var screwHead=mesh(new THREE.CylinderGeometry(0.005,0.005,0.004,10),screwM);
+      var slot=sideBar(sx*0.038,0.438+sy*0.042,vesaZ-0.004,0.008,0.020,0.003,edge,0.004);
+      g.add(slot);
+
+      var screwHead=mesh(new THREE.CylinderGeometry(0.005,0.005,0.004,12),screwM);
       screwHead.rotation.x=Math.PI/2;
-      screwHead.position.set(sx*0.042,0.438+sy*0.036,vesaZ+0.000);
+      screwHead.position.set(sx*0.043,0.438+sy*0.034,vesaZ+0.000);
       g.add(screwHead);
     }
+
+    var topBite=frontDisk(0,0.491,vesaZ-0.004,0.018,0.003,edge,18);
+    g.add(topBite);
+    var bottomBite=frontDisk(0,0.385,vesaZ-0.004,0.018,0.003,edge,18);
+    g.add(bottomBite);
 
     return g;
   }
@@ -232,53 +304,81 @@
   /* pNotebook — Soporte ergonomico elevador para notebook (aluminio, inclinado) */
   function bStand(){
     var g=new THREE.Group();
-    var black=mat(0x121417,{m:0.24,r:0.42});
-    var satin=mat(0x252a2d,{m:0.20,r:0.50});
-    var pad=mat(0xaeb4b8,{m:0.06,r:0.76});
+    var black=mat(0x111316,{m:0.22,r:0.46});
+    var satin=mat(0x262a2d,{m:0.18,r:0.52});
+    var pad=mat(0xb5b8b2,{m:0.04,r:0.82});
     var slotM=mat(0xf1f3f5,{r:0.62,m:0.02});
 
-    var baseL=mesh(rbox(0.035,0.016,0.250,0.012),black); baseL.position.set(-0.135,0.008,0); g.add(baseL);
-    var baseR=mesh(rbox(0.035,0.016,0.250,0.012),black); baseR.position.set(0.135,0.008,0); g.add(baseR);
-    var baseF=mesh(rbox(0.270,0.016,0.032,0.010),black); baseF.position.set(0,0.008,0.110); g.add(baseF);
-    var baseB=mesh(rbox(0.270,0.016,0.032,0.010),black); baseB.position.set(0,0.008,-0.110); g.add(baseB);
+    function railBetween(a,b,w,d,material,radius){
+      var dir=new THREE.Vector3().subVectors(b,a);
+      var len=dir.length();
+      var n=dir.clone().normalize();
+      var part=mesh(rbox(w,len,d,radius||0.008),material);
+      part.position.copy(a).add(b).multiplyScalar(0.5);
+      part.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),n);
+      return part;
+    }
+
+    var baseL=mesh(rbox(0.026,0.010,0.255,0.010),black); baseL.position.set(-0.126,0.005,0); g.add(baseL);
+    var baseR=mesh(rbox(0.026,0.010,0.255,0.010),black); baseR.position.set(0.126,0.005,0); g.add(baseR);
+    var baseF=mesh(rbox(0.250,0.010,0.024,0.009),black); baseF.position.set(0,0.005,0.112); g.add(baseF);
+    var baseB=mesh(rbox(0.250,0.010,0.024,0.009),black); baseB.position.set(0,0.005,-0.112); g.add(baseB);
 
     for(var sx=-1;sx<=1;sx+=2){
-      var rear=mesh(rbox(0.026,0.128,0.030,0.010),black);
-      rear.position.set(sx*0.118,0.072,-0.088); g.add(rear);
+      var rear=mesh(rbox(0.020,0.122,0.025,0.010),black);
+      rear.position.set(sx*0.126,0.065,-0.088); g.add(rear);
 
-      var front=mesh(rbox(0.024,0.070,0.028,0.010),black);
-      front.position.set(sx*0.118,0.043,0.096); g.add(front);
+      var front=mesh(rbox(0.018,0.058,0.022,0.009),black);
+      front.position.set(sx*0.126,0.035,0.100); g.add(front);
 
-      var side=mesh(rbox(0.010,0.086,0.150,0.010),satin);
-      side.position.set(sx*0.135,0.074,0.005);
-      side.rotation.x=rad(13);
-      g.add(side);
+      var sideTop=railBetween(
+        new THREE.Vector3(sx*0.126,0.064,0.104),
+        new THREE.Vector3(sx*0.126,0.128,-0.086),
+        0.020,0.024,black,0.009
+      );
+      g.add(sideTop);
 
-      var slot=mesh(rbox(0.005,0.044,0.015,0.007),slotM);
-      slot.position.set(sx*0.141,0.082,-0.050);
-      slot.rotation.x=rad(13);
+      var sideInside=railBetween(
+        new THREE.Vector3(sx*0.112,0.063,0.101),
+        new THREE.Vector3(sx*0.112,0.124,-0.080),
+        0.010,0.014,satin,0.006
+      );
+      g.add(sideInside);
+
+      var slot=mesh(rbox(0.005,0.040,0.012,0.006),slotM);
+      slot.position.set(sx*0.132,0.076,-0.080);
       g.add(slot);
 
-      var rail=mesh(rbox(0.046,0.016,0.235,0.010),black);
-      rail.position.set(sx*0.068,0.112,0.005);
-      rail.rotation.x=rad(13);
+      var rail=railBetween(
+        new THREE.Vector3(sx*0.062,0.061,0.108),
+        new THREE.Vector3(sx*0.062,0.126,-0.096),
+        0.030,0.016,black,0.008
+      );
       g.add(rail);
 
-      var railPad=mesh(rbox(0.030,0.004,0.190,0.005),pad);
-      railPad.position.set(sx*0.068,0.123,-0.002);
-      railPad.rotation.x=rad(13);
+      var railPad=railBetween(
+        new THREE.Vector3(sx*0.062,0.066,0.090),
+        new THREE.Vector3(sx*0.062,0.121,-0.083),
+        0.020,0.004,pad,0.004
+      );
       railPad.castShadow=false;
       g.add(railPad);
 
-      var stop=mesh(rbox(0.060,0.028,0.018,0.006),black);
-      stop.position.set(sx*0.068,0.062,0.116);
-      stop.rotation.x=rad(13);
+      var stop=mesh(rbox(0.052,0.016,0.014,0.006),black);
+      stop.position.set(sx*0.062,0.058,0.119);
+      stop.rotation.x=rad(11);
       g.add(stop);
+
+      var stopFace=mesh(rbox(0.036,0.004,0.010,0.003),satin);
+      stopFace.position.set(sx*0.062,0.065,0.116);
+      stopFace.rotation.x=rad(11);
+      stopFace.castShadow=false;
+      g.add(stopFace);
     }
 
-    var rearBrace=mesh(rbox(0.210,0.020,0.026,0.008),black);
-    rearBrace.position.set(0,0.130,-0.105);
-    rearBrace.rotation.x=rad(13);
+    var rearBrace=mesh(rbox(0.198,0.014,0.020,0.007),black);
+    rearBrace.position.set(0,0.126,-0.104);
+    rearBrace.rotation.x=rad(11);
     g.add(rearBrace);
 
     return g;
@@ -287,197 +387,367 @@
   /* pMechanic — Teclado mecanico compacto RGB (negro, underglow) */
   function bKeyboard(){
     var g=new THREE.Group();
-    var caseM=mat(0x1a1d20,{r:0.46,m:0.18});
-    var deckM=mat(0x292d31,{r:0.52,m:0.12});
-    var keyM=mat(0x24282c,{r:0.58,m:0.04});
-    var sideM=mat(0x111315,{r:0.50,m:0.18});
-    var legendColors=[0xff315f,0xff8a1f,0xf4e04d,0x22c55e,0x29d3ff,0x536dfe,0xd946ef];
+    var caseM=mat(0x151719,{r:0.48,m:0.18});
+    var deckM=mat(0x25282b,{r:0.54,m:0.12});
+    var keyM=mat(0x202326,{r:0.62,m:0.03});
+    var keyTopM=mat(0x2a2d30,{r:0.68,m:0.02});
+    var edgeM=mat(0x0d0f11,{r:0.58,m:0.20});
+    var rgb=[0xf43f5e,0xf59e0b,0x84cc16,0x10b981,0x22d3ee,0x6366f1,0xd946ef];
+    var U=0.0228, GAP=0.0022, mainLeft=-0.203;
 
-    var base=mesh(rbox(0.470,0.026,0.164,0.012),caseM);
-    base.position.y=0.013;
+    var base=mesh(rbox(0.426,0.014,0.146,0.007),caseM);
+    base.position.y=0.007;
     g.add(base);
 
-    var deck=mesh(rbox(0.452,0.010,0.145,0.010),deckM);
-    deck.position.y=0.030;
+    var deck=mesh(rbox(0.416,0.005,0.136,0.006),deckM);
+    deck.position.y=0.0155;
     g.add(deck);
 
-    var frontLip=mesh(rbox(0.460,0.010,0.014,0.006),sideM);
-    frontLip.position.set(0,0.022,0.078);
-    g.add(frontLip);
+    var frontEdge=mesh(rbox(0.418,0.005,0.009,0.004),edgeM);
+    frontEdge.position.set(0,0.006,0.069);
+    g.add(frontEdge);
 
-    function glowMat(c){ return mat(0x050607,{e:c,ei:0.95,r:0.62}); }
-    function legendMat(c){ return mat(c,{e:c,ei:1.15,r:0.55}); }
+    function glowMat(c){ return mat(0x08090a,{e:c,ei:0.32,r:0.72}); }
+    function legendMat(c){ return mat(0x35383c,{e:c,ei:0.38,r:0.70}); }
 
-    [-0.061,-0.036,-0.011,0.014,0.039,0.064].forEach(function(z,i){
-      var strip=box(0.420,0.004,0.006,glowMat(legendColors[i%legendColors.length]));
-      strip.position.set(-0.006,0.024,z);
-      strip.castShadow=false;
-      g.add(strip);
-    });
-
-    function addKey(x,z,w,d,ci){
-      var k=mesh(rbox(w,0.018,d,0.004),keyM);
-      k.position.set(x,0.044,z);
-      g.add(k);
-
-      var legend=box(Math.min(w*0.36,0.010),0.0016,0.003,legendMat(legendColors[ci%legendColors.length]));
-      legend.position.set(x,0.054,z-d*0.12);
-      legend.castShadow=false;
-      g.add(legend);
-
-      var under=box(w*0.72,0.003,0.003,glowMat(legendColors[ci%legendColors.length]));
-      under.position.set(x,0.031,z+d*0.46);
+    function addKey(x,z,units,ci,depth){
+      var w=U*units-GAP;
+      var d=depth||0.0186;
+      var under=mesh(rbox(Math.max(0.008,w-0.003),0.0014,d-0.002,0.002),glowMat(rgb[ci%rgb.length]));
+      under.position.set(x,0.019,z);
       under.castShadow=false;
       g.add(under);
+
+      var cap=mesh(rbox(w,0.010,d,0.003),keyM);
+      cap.position.set(x,0.025,z);
+      g.add(cap);
+
+      var top=mesh(rbox(Math.max(0.006,w-0.004),0.0014,d-0.004,0.002),keyTopM);
+      top.position.set(x,0.0304,z-0.0007);
+      top.castShadow=false;
+      g.add(top);
+
+      var markW=Math.min(Math.max(w*0.28,0.004),0.009);
+      var legend=box(markW,0.0012,0.0017,legendMat(rgb[ci%rgb.length]));
+      legend.position.set(x,0.0313,z-0.002);
+      legend.castShadow=false;
+      g.add(legend);
     }
 
-    for(var f=0;f<15;f++) addKey(-0.203+f*0.029,-0.060,0.021,0.016,f);
-    for(var n=0;n<14;n++) addKey(-0.198+n*0.030,-0.035,n===13?0.036:0.023,0.020,n+1);
-    for(var q=0;q<13;q++) addKey(-0.183+q*0.030,-0.010,q===12?0.040:0.023,0.020,q+2);
-    for(var a=0;a<12;a++) addKey(-0.168+a*0.030,0.015,a===11?0.050:0.023,0.020,a+3);
-    for(var z=0;z<11;z++) addKey(-0.153+z*0.030,0.040,z===0||z===10?0.050:0.023,0.020,z+4);
+    function addRow(z,units,offset){
+      var cursor=mainLeft;
+      units.forEach(function(unitsWide,i){
+        var x=cursor+U*unitsWide/2;
+        addKey(x,z,unitsWide,offset+i);
+        cursor+=U*unitsWide;
+      });
+    }
 
-    addKey(-0.202,0.065,0.034,0.020,0);
-    addKey(-0.162,0.065,0.028,0.020,1);
-    addKey(-0.124,0.065,0.030,0.020,2);
-    addKey(-0.036,0.065,0.145,0.020,3);
-    addKey(0.064,0.065,0.032,0.020,4);
-    addKey(0.102,0.065,0.030,0.020,5);
-    addKey(0.140,0.065,0.030,0.020,6);
-    addKey(0.177,0.065,0.026,0.020,5);
-    addKey(0.207,0.065,0.026,0.020,4);
+    /* Bloque principal ANSI compacto de 15 unidades. */
+    addRow(-0.031,[1,1,1,1,1,1,1,1,1,1,1,1,1,2],0);
+    addRow(-0.008,[1.5,1,1,1,1,1,1,1,1,1,1,1,1,1.5],1);
+    addRow(0.015,[1.75,1,1,1,1,1,1,1,1,1,1,1,2.25],2);
+    addRow(0.038,[2.25,1,1,1,1,1,1,1,1,1,1,2.75],3);
+    addRow(0.061,[1.25,1.25,1.25,6.25,1.25,1.25,1.25,1.25],4);
 
-    var logoPlate=mesh(rbox(0.054,0.006,0.045,0.006),deckM);
-    logoPlate.position.set(0.188,0.036,0.023);
-    g.add(logoPlate);
+    /* Fila de funciones con separaciones reales entre grupos. */
+    addKey(-0.192,-0.055,1,0,0.0165);
+    [-0.151,-0.127,-0.103,-0.079,-0.043,-0.019,0.005,0.029,0.065,0.089,0.113,0.137].forEach(function(x,i){
+      addKey(x,-0.055,0.86,i+1,0.0165);
+    });
+
+    /* Navegacion de tres columnas y bloque de flechas independiente. */
+    var navX=[0.153,0.177,0.201];
+    [-0.055,-0.031,-0.008].forEach(function(z,row){
+      navX.forEach(function(x,col){ addKey(x,z,0.92,5+row*3+col,z===-0.055?0.0165:0.0186); });
+    });
+    addKey(0.177,0.038,0.92,4);
+    addKey(0.153,0.061,0.92,5);
+    addKey(0.177,0.061,0.92,6);
+    addKey(0.201,0.061,0.92,0);
+
+    /* Espaciadora oficial ancha con indicador central discreto. */
+    var spaceIndicator=box(0.020,0.0013,0.0018,legendMat(0x22c55e));
+    spaceIndicator.position.set(-0.003,0.0315,0.058);
+    spaceIndicator.castShadow=false;
+    g.add(spaceIndicator);
+
+    /* Sector derecho libre con marca e indicadores de estado. */
+    var brandA=box(0.003,0.0012,0.012,mat(0xb8bec5,{r:0.66,m:0.04}));
+    brandA.position.set(0.161,0.019,0.017);
+    brandA.castShadow=false;
+    g.add(brandA);
+    var brandB=box(0.018,0.0012,0.002,mat(0x7f8790,{r:0.68,m:0.04}));
+    brandB.position.set(0.174,0.019,0.022);
+    brandB.castShadow=false;
+    g.add(brandB);
 
     for(var led=0;led<3;led++){
-      var l=box(0.012,0.002,0.003,legendMat(0x22c55e));
-      l.position.set(0.207,0.041,0.012+led*0.011);
-      l.castShadow=false;
-      g.add(l);
+      var indicator=box(0.007,0.0014,0.0022,legendMat(led===0?0x22c55e:0x94a3b8));
+      indicator.position.set(0.197,0.019,0.010+led*0.006);
+      indicator.castShadow=false;
+      g.add(indicator);
     }
-
-    var logoMark=box(0.004,0.014,0.003,mat(0xe5e7eb,{e:0xe5e7eb,ei:0.35,r:0.55}));
-    logoMark.position.set(0.170,0.041,0.020);
-    g.add(logoMark);
 
     return g;
   }
 
-  /* Mouse — placeholder original estable y visualmente limpio */
+  /* pMouseProV — mouse vertical ergonomico, variante oficial negra */
   function bMouse(){
     var g=new THREE.Group();
-    var shell=mat(0x111315,{m:0.12,r:0.46});
-    var satin=mat(0x202326,{m:0.08,r:0.54});
-    var groove=mat(0x070808,{r:0.70});
-    var mark=mat(0xd8dde2,{r:0.58,m:0.02});
 
-    var base=mesh(rbox(0.098,0.014,0.138,0.032),mat(0x0c0d0f,{m:0.10,r:0.62}));
-    base.position.y=0.007;
-    g.add(base);
-
-    var tilt=new THREE.Group();
-    tilt.rotation.z=rad(-12);
-    tilt.position.y=0.010;
-    g.add(tilt);
-
-    var body=mesh(new THREE.SphereGeometry(0.052,24,16),shell);
-    body.scale.set(0.86,1.22,1.30);
-    body.position.set(0.012,0.055,0.006);
-    tilt.add(body);
-
-    var palm=mesh(new THREE.SphereGeometry(0.044,20,14),satin);
-    palm.scale.set(0.74,1.08,1.18);
-    palm.position.set(0.030,0.063,0.020);
-    tilt.add(palm);
-
-    var thumb=mesh(rbox(0.020,0.078,0.034,0.014),mat(0x181a1d,{m:0.12,r:0.34}));
-    thumb.position.set(-0.043,0.060,-0.005);
-    tilt.add(thumb);
-
-    var sideBtnA=mesh(rbox(0.010,0.014,0.036,0.006),satin);
-    sideBtnA.position.set(-0.054,0.071,-0.030);
-    sideBtnA.rotation.y=rad(4);
-    tilt.add(sideBtnA);
-
-    var sideBtnB=mesh(rbox(0.010,0.014,0.032,0.006),satin);
-    sideBtnB.position.set(-0.054,0.057,0.000);
-    sideBtnB.rotation.y=rad(4);
-    tilt.add(sideBtnB);
-
-    var leftBtn=mesh(rbox(0.023,0.009,0.067,0.008),satin);
-    leftBtn.position.set(-0.010,0.107,-0.018);
-    leftBtn.rotation.x=rad(-7);
-    tilt.add(leftBtn);
-
-    var rightBtn=mesh(rbox(0.023,0.009,0.067,0.008),satin);
-    rightBtn.position.set(0.020,0.107,-0.015);
-    rightBtn.rotation.x=rad(-7);
-    tilt.add(rightBtn);
-
-    var midGroove=box(0.004,0.004,0.078,groove);
-    midGroove.position.set(0.005,0.113,-0.017);
-    midGroove.rotation.x=rad(-7);
-    tilt.add(midGroove);
-
-    var wheel=mesh(new THREE.CylinderGeometry(0.010,0.010,0.023,18),mat(0x0b0c0d,{r:0.54}));
-    wheel.rotation.z=Math.PI/2;
-    wheel.position.set(0.005,0.116,-0.052);
-    tilt.add(wheel);
-
-    for(var wi=-2;wi<=2;wi++){
-      var ridge=box(0.003,0.011,0.002,mat(0x2e3338,{r:0.58}));
-      ridge.position.set(0.005+wi*0.004,0.126,-0.052);
-      ridge.rotation.z=rad(18);
-      tilt.add(ridge);
+    function roundedRect(ctx,x,y,w,h,r){
+      var rr=Math.min(r,w/2,h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr,y);
+      ctx.lineTo(x+w-rr,y);
+      ctx.quadraticCurveTo(x+w,y,x+w,y+rr);
+      ctx.lineTo(x+w,y+h-rr);
+      ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h);
+      ctx.lineTo(x+rr,y+h);
+      ctx.quadraticCurveTo(x,y+h,x,y+h-rr);
+      ctx.lineTo(x,y+rr);
+      ctx.quadraticCurveTo(x,y,x+rr,y);
+      ctx.closePath();
     }
 
-    var dpi=mesh(rbox(0.016,0.007,0.026,0.007),satin);
-    dpi.position.set(0.006,0.101,-0.007);
-    dpi.rotation.x=rad(-6);
-    tilt.add(dpi);
-
-    for(var i=0;i<10;i++){
-      var rib=box(0.004,0.0015,0.066,mat(0x2a2d30,{r:0.64}));
-      rib.position.set(0.049,0.025+i*0.0045,0.026+i*0.001);
-      rib.rotation.z=rad(-6);
-      tilt.add(rib);
+    function canvasTexture(canvas,isColor){
+      var tex=new THREE.CanvasTexture(canvas);
+      tex.wrapS=THREE.ClampToEdgeWrapping;
+      tex.wrapT=THREE.ClampToEdgeWrapping;
+      if(isColor && 'colorSpace' in tex) tex.colorSpace=THREE.SRGBColorSpace;
+      return tex;
     }
 
-    var logoA=box(0.003,0.014,0.002,mark);
-    logoA.position.set(-0.053,0.089,-0.022);
-    tilt.add(logoA);
-    var logoB=box(0.003,0.002,0.015,mark);
-    logoB.position.set(-0.053,0.083,-0.014);
-    tilt.add(logoB);
+    function makeShellMaps(){
+      var colorCanvas=document.createElement('canvas');
+      var bumpCanvas=document.createElement('canvas');
+      var roughCanvas=document.createElement('canvas');
+      colorCanvas.width=colorCanvas.height=256;
+      bumpCanvas.width=bumpCanvas.height=256;
+      roughCanvas.width=roughCanvas.height=256;
+      var color=colorCanvas.getContext('2d');
+      var bump=bumpCanvas.getContext('2d');
+      var rough=roughCanvas.getContext('2d');
+
+      color.fillStyle='#111315'; color.fillRect(0,0,256,256);
+      bump.fillStyle='#808080'; bump.fillRect(0,0,256,256);
+      rough.fillStyle='#c8c8c8'; rough.fillRect(0,0,256,256);
+
+      /* Nervaduras moldeadas en la zona de apoyo, no geometria agregada. */
+      color.strokeStyle='#1d2022';
+      bump.strokeStyle='#969696';
+      rough.strokeStyle='#e0e0e0';
+      color.lineWidth=1.2; bump.lineWidth=1.5; rough.lineWidth=2;
+      for(var r=0;r<9;r++){
+        color.beginPath(); color.ellipse(128,140,114-r*6.4,124-r*7,0,0,Math.PI*2); color.stroke();
+        bump.beginPath(); bump.ellipse(128,140,114-r*6.4,124-r*7,0,0,Math.PI*2); bump.stroke();
+        rough.beginPath(); rough.ellipse(128,140,114-r*6.4,124-r*7,0,0,Math.PI*2); rough.stroke();
+      }
+
+      /* Riel, ranura de rueda y boton central impresos sobre la carcasa. */
+      roundedRect(color,43,46,42,142,18); color.fillStyle='#1b1d1f'; color.fill();
+      roundedRect(rough,43,46,42,142,18); rough.fillStyle='#707070'; rough.fill();
+      roundedRect(color,94,41,34,49,12); color.fillStyle='#050607'; color.fill();
+      roundedRect(bump,94,41,34,49,12); bump.fillStyle='#696969'; bump.fill();
+      roundedRect(color,97,101,27,30,10); color.fillStyle='#17191b'; color.fill();
+      roundedRect(rough,97,101,27,30,10); rough.fillStyle='#858585'; rough.fill();
+
+      /* Juntas de los botones principales, hundidas en el acabado. */
+      color.strokeStyle='#050607'; bump.strokeStyle='#6a6a6a';
+      color.lineWidth=3; bump.lineWidth=3;
+      color.beginPath(); color.moveTo(136,22); color.bezierCurveTo(137,68,140,111,143,184); color.stroke();
+      bump.beginPath(); bump.moveTo(136,22); bump.bezierCurveTo(137,68,140,111,143,184); bump.stroke();
+      color.beginPath(); color.moveTo(55,182); color.bezierCurveTo(109,187,161,181,214,166); color.stroke();
+      bump.beginPath(); bump.moveTo(55,182); bump.bezierCurveTo(109,187,161,181,214,166); bump.stroke();
+
+      /* Botones laterales enrasados, visibles como cambio de acabado. */
+      roundedRect(color,5,102,15,40,7); color.fillStyle='#1b1d1f'; color.fill();
+      roundedRect(color,5,150,15,36,7); color.fillStyle='#1b1d1f'; color.fill();
+      roundedRect(rough,5,102,15,40,7); rough.fillStyle='#828282'; rough.fill();
+      roundedRect(rough,5,150,15,36,7); rough.fillStyle='#828282'; rough.fill();
+
+      return {
+        color:canvasTexture(colorCanvas,true),
+        bump:canvasTexture(bumpCanvas,false),
+        rough:canvasTexture(roughCanvas,false)
+      };
+    }
+
+    function makeShellGeometry(){
+      var segments=48, rings=14;
+      var positions=[], uvs=[], indices=[];
+      var halfW=0.048, halfL=0.066;
+
+      positions.push(-0.014,0.082,0.006);
+      uvs.push(0.35,0.55);
+
+      for(var ring=1;ring<=rings;ring++){
+        var rr=ring/rings;
+        var profile=Math.pow(Math.max(0,1-Math.pow(rr,1.62)),0.82);
+        for(var i=0;i<segments;i++){
+          var a=i/segments*Math.PI*2;
+          var ca=Math.cos(a), sa=Math.sin(a);
+          var z=sa*halfL*rr;
+          var rear=(z/halfL+1)*0.5;
+          var widthScale=0.82+rear*0.18;
+          var x=ca*halfW*widthScale*rr-0.014*Math.pow(1-rr,1.1);
+          var sideFall=0.91+0.09*(1-ca)*0.5;
+          var endFall=0.94+0.06*(1+sa)*0.5;
+          var y=0.004+0.078*profile*sideFall*endFall;
+          positions.push(x,y,z);
+          uvs.push(0.5+x/(halfW*2.05),0.5+z/(halfL*2.05));
+        }
+      }
+
+      for(var c=0;c<segments;c++){
+        indices.push(0,1+(c+1)%segments,1+c);
+      }
+      for(var row=1;row<rings;row++){
+        var inner=1+(row-1)*segments;
+        var outer=1+row*segments;
+        for(var col=0;col<segments;col++){
+          var next=(col+1)%segments;
+          indices.push(inner+col,inner+next,outer+col);
+          indices.push(inner+next,outer+next,outer+col);
+        }
+      }
+
+      var topEdge=1+(rings-1)*segments;
+      var bottomEdge=positions.length/3;
+      for(var edge=0;edge<segments;edge++){
+        var px=positions[(topEdge+edge)*3];
+        var pz=positions[(topEdge+edge)*3+2];
+        positions.push(px,0,pz);
+        uvs.push(0.5+px/(halfW*2.05),0.5+pz/(halfL*2.05));
+      }
+      for(var side=0;side<segments;side++){
+        var sn=(side+1)%segments;
+        indices.push(topEdge+side,topEdge+sn,bottomEdge+side);
+        indices.push(topEdge+sn,bottomEdge+sn,bottomEdge+side);
+      }
+
+      var bottomCenter=positions.length/3;
+      positions.push(0,0,0.004);
+      uvs.push(0.5,0.53);
+      for(var base=0;base<segments;base++){
+        indices.push(bottomCenter,bottomEdge+base,bottomEdge+(base+1)%segments);
+      }
+
+      var geo=new THREE.BufferGeometry();
+      geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+      geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+      geo.setIndex(indices);
+      geo.computeVertexNormals();
+      geo.computeBoundingSphere();
+      return geo;
+    }
+
+    var shellMaps=makeShellMaps();
+    var shellM=new THREE.MeshStandardMaterial({
+      color:0xffffff,
+      metalness:0.08,
+      roughness:0.62,
+      map:shellMaps.color,
+      bumpMap:shellMaps.bump,
+      bumpScale:0.00075,
+      roughnessMap:shellMaps.rough
+    });
+    var body=mesh(makeShellGeometry(),shellM);
+    g.add(body);
 
     return g;
   }
 
   /* pHub — Adaptador Hub USB-C multifuncional 7 en 1 (aluminio, puertos + LED) */
   function bHub(){
-    var g = new THREE.Group();
-    var alu = mat(COL.alu, { m: 0.72, r: 0.30 });
-    var aluDark = mat(COL.aluDark, { m: 0.58, r: 0.38 });
-    var portM = mat(COL.portDark, { r: 0.62 });
-    var cableM = mat(COL.cable, { r: 0.68 });
-    var w = 0.18, h = 0.026, d = 0.058;
-    var body = mesh(rbox(w, h, d, 0.006), alu); body.position.y = h / 2; g.add(body);
-    var top = mesh(rbox(w - 0.016, 0.005, d - 0.012, 0.004), aluDark); top.position.y = h + 0.002; g.add(top);
-    for(var i = 0; i < 3; i++){
-      var port = box(0.022, 0.009, 0.004, portM);
-      port.position.set(-0.047 + i * 0.038, h / 2, d / 2 + 0.001); g.add(port);
+    var g=new THREE.Group();
+    var spaceGray=mat(0x6f747a,{m:0.58,r:0.40});
+    var edgeM=mat(0x34383d,{m:0.34,r:0.54});
+    var portM=mat(0x090b0d,{m:0.04,r:0.72});
+    var usbBlue=mat(0x276b8f,{m:0.08,r:0.55});
+    var cableM=mat(0x202429,{m:0.02,r:0.82});
+    var plugM=mat(0x90979d,{m:0.68,r:0.34});
+    var w=0.070, h=0.010, d=0.030;
+
+    var body=mesh(rbox(w,h,d,0.003),spaceGray);
+    body.position.y=h/2;
+    g.add(body);
+
+    /* Tapas ABS discretas: rematan la extrusion sin engrosarla. */
+    for(var sx=-1;sx<=1;sx+=2){
+      var endCap=mesh(rbox(0.0032,h*0.92,d-0.003,0.0014),edgeM);
+      endCap.position.set(sx*(w/2-0.0012),h/2,0);
+      g.add(endCap);
     }
-    var sidePort = box(0.004, 0.009, 0.020, portM);
-    sidePort.position.set(w / 2 + 0.001, h / 2, -0.010); g.add(sidePort);
-    var cable = mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.09, 8), cableM);
-    cable.rotation.z = Math.PI / 2; cable.position.set(-(w / 2 + 0.045), h / 2, -0.006); g.add(cable);
-    var plug = mesh(rbox(0.022, 0.010, 0.014, 0.003), aluDark);
-    plug.position.set(-(w / 2 + 0.094), h / 2, -0.006); g.add(plug);
-    var led = mesh(new THREE.SphereGeometry(0.004, 8, 6), mat(0x0c0f12, { e: COL.accent, ei: 1.7 }));
-    led.position.set(0.066, h + 0.004, 0.008); g.add(led);
-    g.rotation.y = rad(-10);
+
+    function facePort(x,z,width,height,material){
+      var port=mesh(rbox(width,height,0.0012,Math.min(0.0012,height*0.36)),material||portM);
+      port.position.set(x,h/2,z);
+      port.castShadow=false;
+      g.add(port);
+      return port;
+    }
+
+    /* Frente: dos USB 3.0 y HDMI 4K. */
+    [-0.023,-0.008].forEach(function(x){
+      facePort(x,d/2+0.00045,0.0115,0.0054,portM);
+      var tongue=box(0.0075,0.0012,0.00055,usbBlue);
+      tongue.position.set(x,h/2-0.0013,d/2+0.0011);
+      tongue.castShadow=false;
+      g.add(tongue);
+    });
+
+    var hdmiShape=new THREE.Shape();
+    hdmiShape.moveTo(-0.0075,-0.0028);
+    hdmiShape.lineTo(0.0075,-0.0028);
+    hdmiShape.lineTo(0.0062,0.0028);
+    hdmiShape.lineTo(-0.0062,0.0028);
+    hdmiShape.closePath();
+    var hdmi=mesh(new THREE.ShapeGeometry(hdmiShape),portM);
+    hdmi.position.set(0.020,h/2,d/2+0.0011);
+    hdmi.castShadow=false;
+    g.add(hdmi);
+
+    /* Dorso: lectores SD/TF y los dos USB-C oficiales. */
+    facePort(-0.021,-d/2-0.00045,0.021,0.0012,portM);
+    facePort(-0.002,-d/2-0.00045,0.012,0.0010,portM);
+    facePort(0.015,-d/2-0.00045,0.0085,0.0032,portM);
+    facePort(0.029,-d/2-0.00045,0.0085,0.0032,portM);
+
+    /* Cable moldeado desde la tapa, con curva y alivio de tension. */
+    var cableCurve=new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-w/2+0.001,h/2,-0.002),
+      new THREE.Vector3(-0.047,h/2,-0.003),
+      new THREE.Vector3(-0.061,h/2,-0.009),
+      new THREE.Vector3(-0.074,h/2,-0.012)
+    ]);
+    var cable=mesh(new THREE.TubeGeometry(cableCurve,22,0.0018,8,false),cableM);
+    cable.castShadow=false;
+    g.add(cable);
+
+    var relief=mesh(rbox(0.011,0.0065,0.008,0.0025),cableM);
+    relief.position.set(-0.078,h/2,-0.012);
+    relief.rotation.y=rad(-4);
+    g.add(relief);
+
+    var connector=mesh(rbox(0.010,0.0042,0.0072,0.002),plugM);
+    connector.position.set(-0.087,h/2,-0.0126);
+    connector.rotation.y=rad(-4);
+    g.add(connector);
+
+    var connectorCore=mesh(rbox(0.0058,0.0024,0.0048,0.0012),portM);
+    connectorCore.position.set(-0.0921,h/2,-0.0130);
+    connectorCore.rotation.y=rad(-4);
+    connectorCore.castShadow=false;
+    g.add(connectorCore);
+
+    var led=mesh(new THREE.SphereGeometry(0.00125,10,6),mat(0x101820,{e:0x4cc9f0,ei:0.58,r:0.72}));
+    led.position.set(0.025,h+0.00035,0.008);
+    led.castShadow=false;
+    g.add(led);
+
+    g.rotation.y=rad(-10);
     return g;
   }
 
@@ -485,16 +755,57 @@
   function bMousepad(){
     var g = new THREE.Group();
     var w = 0.72, d = 0.38;
-    var base = mesh(rbox(w, 0.006, d, 0.016), mat(COL.matEdge, { r: 0.86 }));
-    base.position.y = 0.003; base.castShadow = false; g.add(base);
-    var top = mesh(rbox(w - 0.018, 0.006, d - 0.018, 0.014), mat(COL.mat, { r: 0.94 }));
-    top.position.y = 0.007; top.castShadow = false; g.add(top);
-    var seamM = mat(0x4a5b6e, { r: 0.92 });
-    var sy = 0.0105;
-    var seamFront = box(w - 0.05, 0.0015, 0.002, seamM); seamFront.position.set(0, sy, d / 2 - 0.024); seamFront.castShadow = false; g.add(seamFront);
-    var seamBack = box(w - 0.05, 0.0015, 0.002, seamM); seamBack.position.set(0, sy, -(d / 2 - 0.024)); seamBack.castShadow = false; g.add(seamBack);
-    var seamLeft = box(0.002, 0.0015, d - 0.05, seamM); seamLeft.position.set(-(w / 2 - 0.024), sy, 0); seamLeft.castShadow = false; g.add(seamLeft);
-    var seamRight = box(0.002, 0.0015, d - 0.05, seamM); seamRight.position.set(w / 2 - 0.024, sy, 0); seamRight.castShadow = false; g.add(seamRight);
+
+    var grainCanvas=document.createElement('canvas');
+    grainCanvas.width=256; grainCanvas.height=128;
+    var grain=grainCanvas.getContext('2d');
+    grain.fillStyle='#808080';
+    grain.fillRect(0,0,256,128);
+    grain.strokeStyle='rgba(162,162,162,.42)';
+    grain.lineWidth=0.7;
+    for(var gy=6;gy<128;gy+=9){
+      grain.beginPath();
+      for(var gx=0;gx<=256;gx+=16){
+        var yy=gy+Math.sin((gx+gy)*0.11)*1.4;
+        if(gx===0) grain.moveTo(gx,yy); else grain.lineTo(gx,yy);
+      }
+      grain.stroke();
+    }
+    var grainTex=new THREE.CanvasTexture(grainCanvas);
+    grainTex.wrapS=THREE.RepeatWrapping;
+    grainTex.wrapT=THREE.RepeatWrapping;
+    grainTex.repeat.set(3.2,2.1);
+
+    var leatherM=new THREE.MeshStandardMaterial({
+      color:COL.mat,
+      roughness:0.94,
+      metalness:0.01,
+      bumpMap:grainTex,
+      bumpScale:0.00012
+    });
+    var pad=mesh(rbox(w,MAT_TOP,d,0.001),leatherM);
+    pad.position.y=MAT_TOP/2;
+    pad.castShadow=false;
+    pad.receiveShadow=true;
+    g.add(pad);
+
+    /* Costura de un pixel, al ras y siguiendo las esquinas redondeadas. */
+    var stitchPts=[];
+    var rx=w/2-0.012, rz=d/2-0.012, corner=0.012;
+    for(var i=0;i<72;i++){
+      var a=i/72*Math.PI*2;
+      var ca=Math.cos(a), sa=Math.sin(a);
+      stitchPts.push(new THREE.Vector3(
+        (ca<0?-1:1)*(rx-corner)+corner*ca,
+        MAT_TOP+0.00018,
+        (sa<0?-1:1)*(rz-corner)+corner*sa
+      ));
+    }
+    var stitchGeo=new THREE.BufferGeometry().setFromPoints(stitchPts);
+    var stitchM=new THREE.LineBasicMaterial({color:0x596574,transparent:true,opacity:0.62});
+    var stitch=new THREE.LineLoop(stitchGeo,stitchM);
+    stitch.renderOrder=2;
+    g.add(stitch);
     return g;
   }
 
@@ -504,66 +815,196 @@
   function bCableBox(){
     var g=new THREE.Group();
 
-    var steel=mat(COL.boxSteel,{m:0.55,r:0.45});
-    var lidM=mat(COL.boxLid,{m:0.50,r:0.50});
-    var bracketM=mat(COL.steelDark,{m:0.58,r:0.44});
-    var cableM=mat(COL.cable,{r:0.62});
+    var steel=mat(0x111417,{m:0.48,r:0.50});
+    var faceM=mat(0x1b2024,{m:0.42,r:0.54});
+    var innerM=mat(0x050607,{m:0.18,r:0.78});
+    var edgeM=mat(0x2a3035,{m:0.52,r:0.42});
+    var bracketM=mat(0x101317,{m:0.55,r:0.46});
+    var cableM=mat(COL.cable,{r:0.64});
 
-    var w=0.40, h=0.10, d=0.18, t=0.010;
+    var w=0.56, h=0.108, d=0.142, t=0.008;
 
-    /* Cuerpo de la bandeja */
-    var floor=mesh(rbox(w,t,d,0.004),steel);
-    floor.position.set(0,t/2,0);
+    var floor=mesh(rbox(w,t,d+0.050,0.004),steel);
+    floor.position.set(0,t/2,0.018);
     g.add(floor);
 
-    var back=mesh(rbox(w,h,t,0.004),steel);
+    var frontLip=mesh(rbox(w+0.018,0.010,t,0.004),edgeM);
+    frontLip.position.set(0,0.018,d/2+0.048);
+    g.add(frontLip);
+
+    for(var si=0;si<13;si++){
+      var slot=mesh(rbox(0.018,0.0016,0.064,0.004),innerM);
+      slot.position.set(-0.234+si*0.039,0.0094,0.038);
+      slot.rotation.y=rad(si%2 ? -3 : 3);
+      slot.castShadow=false;
+      g.add(slot);
+    }
+
+    var back=mesh(rbox(w,h,t,0.004),faceM);
     back.position.set(0,h/2,-d/2+t/2);
     g.add(back);
 
-    var front=mesh(rbox(w,0.045,t,0.004),steel);
-    front.position.set(0,0.0225,d/2-t/2);
+    var front=mesh(rbox(w,0.060,t,0.004),faceM);
+    front.position.set(0,0.030,d/2-t/2);
     g.add(front);
 
     for(var sx=-1;sx<=1;sx+=2){
-      var sideWall=mesh(rbox(t,h,d,0.004),steel);
+      var sideWall=mesh(rbox(t,h,d,0.004),faceM);
       sideWall.position.set(sx*(w/2-t/2),h/2,0);
       g.add(sideWall);
+
+      var sideWindow=mesh(rbox(0.0014,0.036,0.050,0.006),innerM);
+      sideWindow.position.set(sx*(w/2+0.0008),0.052,0.022);
+      sideWindow.castShadow=false;
+      g.add(sideWindow);
     }
 
-    /* Tapa cerrada: evita intersecciones visuales con el escritorio */
-    var lid=mesh(rbox(w,t,d*0.96,0.004),lidM);
-    lid.position.set(0,h+t/2,-0.002);
-    g.add(lid);
+    var topRear=mesh(rbox(w,0.012,0.034,0.004),edgeM);
+    topRear.position.set(0,h+0.006,-d/2+0.020);
+    g.add(topRear);
 
-    /* Soportes superiores que conectan la bandeja al tablero */
+    for(var vx=-1;vx<=1;vx+=2){
+      var endCap=mesh(rbox(0.014,h+0.012,d,0.004),edgeM);
+      endCap.position.set(vx*(w/2-0.007),h/2+0.006,0);
+      g.add(endCap);
+    }
+
+    function addHorizontalSlot(x,z,ww){
+      var s=mesh(rbox(ww,0.018,0.0014,0.006),innerM);
+      s.position.set(x,0.055,z);
+      s.castShadow=false;
+      g.add(s);
+    }
+    addHorizontalSlot(-0.165,d/2+0.0008,0.142);
+    addHorizontalSlot(0.075,d/2+0.0008,0.190);
+    addHorizontalSlot(-0.120,-d/2-0.0008,0.190);
+    addHorizontalSlot(0.150,-d/2-0.0008,0.210);
+
+    for(var nx=-2;nx<=2;nx++){
+      var notch=mesh(rbox(0.016,0.014,0.003,0.004),innerM);
+      notch.position.set(nx*0.055,0.018,d/2+0.002);
+      notch.castShadow=false;
+      g.add(notch);
+    }
+
+    var rearInside=mesh(rbox(w-0.055,0.004,0.010,0.002),innerM);
+    rearInside.position.set(0,h-0.018,-d/2+0.016);
+    rearInside.castShadow=false;
+    g.add(rearInside);
+
+    var screwM=mat(0x050607,{m:0.20,r:0.74});
+    for(var sx2=-1;sx2<=1;sx2+=2){
+      for(var sz2=-1;sz2<=1;sz2+=2){
+        var screw=mesh(new THREE.CylinderGeometry(0.004,0.004,0.0014,12),screwM);
+        screw.position.set(sx2*(w/2-0.030),h+0.013,sz2*(d/2-0.020));
+        screw.castShadow=false;
+        g.add(screw);
+      }
+    }
+
     for(var bx=-1;bx<=1;bx+=2){
-      var stem=mesh(rbox(0.025,0.055,0.035,0.005),bracketM);
-      stem.position.set(bx*0.145,h+0.032,-0.035);
+      var stem=mesh(rbox(0.020,0.046,0.030,0.004),bracketM);
+      stem.position.set(bx*0.190,h+0.026,-0.032);
       g.add(stem);
 
-      var plate=mesh(rbox(0.085,0.010,0.070,0.005),bracketM);
-      plate.position.set(bx*0.145,h+0.064,-0.035);
+      var plate=mesh(rbox(0.096,0.010,0.064,0.004),bracketM);
+      plate.position.set(bx*0.190,h+0.054,-0.032);
       g.add(plate);
+
+      var rail=mesh(rbox(0.022,0.010,0.090,0.004),bracketM);
+      rail.position.set(bx*0.190,h+0.006,-0.012);
+      g.add(rail);
     }
 
-    /* Cables internos discretos */
     for(var c=0;c<3;c++){
-      var cyl=mesh(new THREE.CylinderGeometry(0.004,0.004,0.11,8),cableM);
-      cyl.position.set(-0.10+c*0.10,0.064,0.010);
-      cyl.rotation.x=rad(76);
-      g.add(cyl);
+      var curve=new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.150+c*0.110,0.072,-0.024),
+        new THREE.Vector3(-0.120+c*0.105,0.040,0.018),
+        new THREE.Vector3(-0.095+c*0.095,0.024,0.060)
+      ]);
+      var cable=mesh(new THREE.TubeGeometry(curve,16,0.0032,8,false),cableM);
+      cable.castShadow=false;
+      g.add(cable);
     }
 
     return g;
   }
 
   /* pGlow — Lampara/barra de luz LED para monitor (se apoya sobre la pantalla) */
-  function bLightbar(){ var g=new THREE.Group(); var dk=mat(COL.barDark,{r:0.5,m:0.3});
-    var bar=mesh(rbox(0.44,0.028,0.05,0.01),dk); g.add(bar);
-    var glow=box(0.40,0.010,0.028,mat(0x0c0f12,{e:COL.warmLight,ei:1.5})); glow.position.set(0,-0.016,0.008); g.add(glow);
-    var arm=mesh(rbox(0.03,0.05,0.02,0.006),dk); arm.position.set(0,-0.03,-0.032); g.add(arm);
-    var weight=mesh(rbox(0.10,0.03,0.05,0.008),dk); weight.position.set(0,-0.06,-0.06); g.add(weight);
-    return g; }
+  function bLightbar(){
+    var g=new THREE.Group();
+    var dk=mat(0x0c0e10,{r:0.48,m:0.34});
+    var satin=mat(0x1b1f22,{r:0.54,m:0.26});
+    var rubber=mat(0x050607,{r:0.72,m:0.10});
+    var lightM=mat(0xfff1d4,{e:COL.warmLight,ei:1.75,r:0.42,m:0.02});
+
+    var bar=mesh(new THREE.CylinderGeometry(0.014,0.014,0.505,28),dk);
+    bar.rotation.z=Math.PI/2;
+    g.add(bar);
+
+    var lens=mesh(rbox(0.440,0.0045,0.010,0.003),lightM);
+    lens.position.set(0,-0.010,0.010);
+    lens.castShadow=false;
+    g.add(lens);
+
+    for(var ex=-1;ex<=1;ex+=2){
+      var cap=mesh(new THREE.CylinderGeometry(0.0145,0.0145,0.006,24),satin);
+      cap.rotation.z=Math.PI/2;
+      cap.position.set(ex*0.256,0,0);
+      g.add(cap);
+
+      var ring=mesh(new THREE.TorusGeometry(0.010,0.0013,8,24),rubber);
+      ring.rotation.y=Math.PI/2;
+      ring.position.set(ex*0.259,0,0);
+      ring.castShadow=false;
+      g.add(ring);
+    }
+
+    var sleeve=mesh(new THREE.CylinderGeometry(0.0175,0.0175,0.082,28),satin);
+    sleeve.rotation.z=Math.PI/2;
+    sleeve.position.set(0,0.0005,-0.001);
+    g.add(sleeve);
+
+    var usb=mesh(rbox(0.018,0.009,0.003,0.002),rubber);
+    usb.position.set(0,0.003,-0.019);
+    usb.castShadow=false;
+    g.add(usb);
+
+    var shelf=mesh(rbox(0.152,0.010,0.046,0.005),dk);
+    shelf.position.set(0,-0.027,-0.032);
+    g.add(shelf);
+
+    var pad=mesh(rbox(0.132,0.004,0.020,0.003),rubber);
+    pad.position.set(0,-0.033,-0.010);
+    pad.castShadow=false;
+    g.add(pad);
+
+    var hinge=mesh(new THREE.CylinderGeometry(0.011,0.011,0.070,18),satin);
+    hinge.rotation.x=Math.PI/2;
+    hinge.position.set(0,-0.041,-0.038);
+    g.add(hinge);
+
+    var neck=mesh(rbox(0.034,0.044,0.022,0.008),dk);
+    neck.position.set(0,-0.059,-0.047);
+    g.add(neck);
+
+    var counter=mesh(rbox(0.066,0.070,0.040,0.018),dk);
+    counter.position.set(0,-0.096,-0.058);
+    g.add(counter);
+
+    var belly=mesh(new THREE.SphereGeometry(0.032,22,14),dk);
+    belly.scale.set(1.02,1.18,0.68);
+    belly.position.set(0,-0.112,-0.057);
+    g.add(belly);
+
+    var rearPad=mesh(rbox(0.052,0.006,0.034,0.004),rubber);
+    rearPad.position.set(0,-0.083,-0.084);
+    rearPad.rotation.x=rad(-8);
+    rearPad.castShadow=false;
+    g.add(rearPad);
+
+    return g;
+  }
 
   /* =====================================================================
      REGISTRO de productos: id 'dsi-*' -> { name, build, model, scale, position, rotation }
@@ -573,7 +1014,7 @@
     'dsi-monitor-stand': { name:'pStandard',  build:bMonStand, model:null, glb:'assets/models/products/pStandard.glb',  scale:1, position:null, rotation:null },
     'dsi-stand':         { name:'pNotebook',  build:bStand,    model:null, glb:'assets/models/products/pNotebook.glb',  scale:1, position:null, rotation:null },
     'dsi-mousepad':      { name:'pMat',       build:bMousepad, model:null, glb:'assets/models/products/pMat.glb',       scale:1, position:null, rotation:null },
-    'dsi-hub':           { name:'pHub',       build:bHub,      model:null, glb:'assets/models/products/pHub.glb',       scale:1, position:null, rotation:null },
+    'dsi-hub':           { name:'pHub',       build:bHub,      model:null, glb:'assets/models/products/pHub.glb',       scale:1.55, position:null, rotation:null },
     'dsi-organizer':     { name:'pBox',       build:bCableBox, model:null, glb:'assets/models/products/pBox.glb',       scale:1, position:null, rotation:null },
     'dsi-lightbar':      { name:'pGlow',      build:bLightbar, model:null, glb:'assets/models/products/pGlow.glb',      scale:1, position:null, rotation:null },
     'dsi-keyboard':      { name:'pMechanic',  build:bKeyboard, model:null, glb:'assets/models/products/pMechanic.glb',  scale:1, position:null, rotation:null },
@@ -601,8 +1042,8 @@
     'dsi-keyboard':      {x:-0.02, y: 0.00,  z: 0.15, rx:0, ry:0},
     'dsi-mousepad':      {x: 0.03, y: 0.00,  z: 0.12, rx:0, ry:0},
     'dsi-mouse':         {x: 0.30, y: 0.00,  z: 0.20, rx:0, ry:0},    
-    'dsi-hub':           {x: 0.52, y: 0.00,  z:-0.05, rx:0, ry:0},
-    'dsi-organizer':     {x: 0.00, y:-0.215, z:-0.17, rx:0, ry:0},
+    'dsi-hub':           {x: 0.53, y: 0.00,  z:-0.035, rx:0, ry:0},
+    'dsi-organizer':     {x: 0.00, y:-0.207, z: 0.215, rx:0, ry:0},
     'dsi-lightbar':      {x: 0.00, y: 0.50,  z:-0.12, rx:0, ry:0},
     'dsi-chair':         {x: 0.00, y: 0.00,  z: 0.95, rx:0, ry:0}
   };
@@ -620,7 +1061,7 @@
       y = arm ? 0.44 : (stand ? 0.30 : 0.19);
     } else if(id==='dsi-lightbar'){
       var t=computeHome('dsi-monitor');
-      x=t.x; y=t.y+0.18+0.02; z=t.z+0.05;   /* apoyada sobre el borde superior del monitor */
+      x=t.x; y=t.y+0.18+0.036; z=t.z+0.035;   /* apoyada sobre el borde superior del monitor */
     } else if(id==='dsi-laptop'){
       var onStand=isVisible('dsi-stand');
       /* Notebook y pNotebook deben compartir la MISMA inclinación.
@@ -628,9 +1069,9 @@
       y = onStand ? 0.142 : 0.0;
       rx = onStand ? rad(13) : 0;
     } else if(id==='dsi-keyboard'){
-      y = isVisible('dsi-mousepad') ? 0.013 : 0.0;   /* sobre el pad si está */
+      y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
     } else if(id==='dsi-mouse'){
-      y = isVisible('dsi-mousepad') ? 0.010 : 0.0;
+      y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
     }
     return {x:x,y:y,z:z,rx:rx,ry:ry};
   }
@@ -915,7 +1356,7 @@
     surfaceAnchor=new THREE.Object3D(); surfaceAnchor.position.y=curTopY; scene.add(surfaceAnchor);
     deskTop=mesh(rbox(1.5,0.04,0.72,0.012),mat(COL.surface,{r:0.6,m:0.04})); deskTop.position.y=-0.02; surfaceAnchor.add(deskTop);
     deskEdge=mesh(rbox(1.52,0.012,0.74,0.012),mat(COL.edge,{r:0.7})); deskEdge.position.y=-0.045; deskEdge.castShadow=false; surfaceAnchor.add(deskEdge);
-    deskBeam=box(1.18,0.05,0.07,mat(COL.frame,{m:0.6,r:0.4})); deskBeam.position.set(0,-0.10,-0.22); surfaceAnchor.add(deskBeam);
+    deskBeam=box(1.18,0.05,0.07,mat(COL.frame,{m:0.6,r:0.4})); deskBeam.position.set(0,-0.075,-0.30); surfaceAnchor.add(deskBeam);
     deskControl=mesh(rbox(0.11,0.022,0.055,0.006),mat(COL.frameDark,{m:0.4,r:0.5})); deskControl.position.set(0.5,-0.07,0.3); surfaceAnchor.add(deskControl);
     var b1=box(0.014,0.006,0.014,mat(COL.accent,{e:COL.accent,ei:0.5})); b1.position.set(0.476,-0.057,0.3); surfaceAnchor.add(b1);
     var b2=box(0.014,0.006,0.014,mat(0x222a34)); b2.position.set(0.5,-0.057,0.3); surfaceAnchor.add(b2);
@@ -929,6 +1370,7 @@
       var holder=new THREE.Group();
       holder.name=id; holder.userData.dsiId=id;
       var proc=cfg.build(); holder.add(proc); holder.userData.proc=proc; holder.userData.isModel=false;
+      if(id==='dsi-hub') holder.scale.setScalar(cfg.scale);
       holder.visible=false; objects[id]=holder;
       if(id==='dsi-chair'){ scene.add(holder); }
       else { surfaceAnchor.add(holder); }
