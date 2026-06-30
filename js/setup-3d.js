@@ -18,7 +18,6 @@
    - Botón REINICIAR: anima todo de vuelta a su posición predeterminada
      y restablece cámara y modo libre.
    - Entorno de reflejos (RoomEnvironment + PMREM) para acabado moderno.
-   - Pipeline .glb opcional por producto (GLTFLoader, carga diferida).
    - Espeja la MISMA visibilidad de productos que el carrito mediante
      window.Setup3D.setVisible(visMap, {standing}).
    - Cámara con OrbitControls (rotar/zoom/táctil), vistas y reset.
@@ -32,10 +31,16 @@
   var THREE, OrbitControls, RoundedBox, RoomEnv;
   var renderer, scene, camera, controls, host, toolbar, loaderEl, deskScene2D, stageEl, hintEl;
   var ready = false, initStarted = false, running = false, camFly = false;
-  var objects = {}, deskTop, deskEdge, deskBeam, deskControl, standingFrame, surfaceAnchor, legL, legR, roomFloor, roomWall, roomBaseboard;
+  var objects = {}, deskTop, deskEdge, deskBeam, deskControl, standingFrame, surfaceAnchor, legL, legR, roomFloor, roomWall, roomBaseboard, roomPlant, roomArt;
+  var glowSpot, glowTarget, glowPool, hemiLight, ambientLight, keyLight, rimLight, fillLight, modeSwapTimer=0;
+  var activeView='perspectiva', cameraTweenToken=0, userAdjustedCamera=false;
   var deskButtons = [], deskModeStanding = false;
   var DESK_SIT = 0.73, DESK_STAND = 1.08, MAT_TOP = 0.0022, curTopY = DESK_SIT;
-  var DSI = ['dsi-chair','dsi-monitor','dsi-monitor-stand','dsi-monitor-arm','dsi-laptop','dsi-stand','dsi-keyboard','dsi-mousepad','dsi-mouse','dsi-hub','dsi-organizer','dsi-lightbar'];
+  var DSI = ['dsi-chair','dsi-lumbar','dsi-monitor','dsi-monitor-base','dsi-monitor-stand','dsi-monitor-arm','dsi-laptop','dsi-stand','dsi-keyboard','dsi-wrist-rest','dsi-mousepad','dsi-mouse','dsi-hub','dsi-organizer','dsi-lightbar','dsi-context'];
+  var comparisonMode = 'current';
+  var diagnosisAnswers = new Array(6).fill(null);
+  var primOfficeState = {vis:{},opts:{}};
+  var hasPrimOfficeState = false;
 
   function $(id){ return document.getElementById(id); }
   function lerp(a,b,t){ return a+(b-a)*t; }
@@ -60,7 +65,7 @@
   }
 
   /* ---- materiales / geometrias con cache (reutilizacion -> performance) ---- */
-  var _matCache={};
+  var _matCache={}, _microTextures={}, _surfaceMatCache={}, _screenMaterial=null;
   function mat(color,o){
     o=o||{};
     var r=o.r!=null?o.r:0.7, m=o.m!=null?o.m:0.05, e=o.e||0, ei=o.ei!=null?o.ei:1;
@@ -71,7 +76,52 @@
     var mm=new THREE.MeshStandardMaterial(p);
     _matCache[key]=mm; return mm;
   }
-  function screenMat(){ return mat(0x0c1622,{e:0x1b6fa0,ei:0.8,r:0.4}); }
+  function microTexture(kind){
+    if(_microTextures[kind]) return _microTextures[kind];
+    var canvas=document.createElement('canvas'); canvas.width=96; canvas.height=96;
+    var ctx=canvas.getContext('2d'); ctx.fillStyle='#808080'; ctx.fillRect(0,0,96,96);
+    if(kind==='fabric'){
+      ctx.strokeStyle='rgba(210,210,210,.28)'; ctx.lineWidth=1;
+      for(var i=0;i<96;i+=4){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,96); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(96,i); ctx.stroke(); }
+    }else if(kind==='leather'){
+      for(var n=0;n<180;n++){ var x=(n*37)%96,y=(n*61)%96,r=1+(n%3); ctx.fillStyle=n%2?'rgba(205,205,205,.22)':'rgba(45,45,45,.16)'; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+    }else if(kind==='rubber'){
+      for(var d=0;d<150;d++){ var dx=(d*29)%96,dy=(d*47)%96; ctx.fillStyle=d%3?'rgba(40,40,40,.20)':'rgba(190,190,190,.14)'; ctx.fillRect(dx,dy,1.4,1.4); }
+    }else if(kind==='paper'){
+      ctx.strokeStyle='rgba(220,220,220,.26)';
+      for(var py=2;py<96;py+=5){ ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(96,py+(py%3)-1); ctx.stroke(); }
+    }
+    var tex=new THREE.CanvasTexture(canvas); tex.wrapS=THREE.RepeatWrapping; tex.wrapT=THREE.RepeatWrapping; tex.repeat.set(2,2);
+    _microTextures[kind]=tex; return tex;
+  }
+  function surfaceMat(color,kind,o){
+    o=o||{}; var key=color+'|'+kind+'|'+(o.r||'')+'|'+(o.m||'');
+    if(_surfaceMatCache[key]) return _surfaceMatCache[key];
+    var material=new THREE.MeshStandardMaterial({color:color,roughness:o.r!=null?o.r:(kind==='fabric'?0.92:kind==='leather'?0.70:kind==='rubber'?0.88:0.96),metalness:o.m||0,bumpMap:microTexture(kind),bumpScale:kind==='paper'?0.00045:(kind==='fabric'?0.0018:0.0012)});
+    _surfaceMatCache[key]=material; return material;
+  }
+  function screenMat(){
+    if(_screenMaterial) return _screenMaterial;
+    var canvas=document.createElement('canvas'); canvas.width=768; canvas.height=432;
+    var ctx=canvas.getContext('2d');
+    ctx.fillStyle='#071827'; ctx.fillRect(0,0,768,432);
+    ctx.fillStyle='#0c2940'; ctx.fillRect(0,0,768,48);
+    ctx.fillStyle='#29b6e8'; ctx.fillRect(24,17,88,13);
+    ctx.fillStyle='rgba(255,255,255,.68)'; ctx.fillRect(604,17,48,12); ctx.fillRect(670,17,72,12);
+    ctx.fillStyle='#0a2235'; ctx.fillRect(0,48,148,384);
+    for(var nav=0;nav<5;nav++){ ctx.fillStyle=nav===1?'#0d6f9f':'#17364b'; ctx.fillRect(22,82+nav*52,102,20); }
+    ctx.fillStyle='#e5f6fc'; ctx.fillRect(178,78,224,18);
+    ctx.fillStyle='#12364e'; ctx.fillRect(178,117,258,112); ctx.fillRect(458,117,280,112);
+    ctx.fillStyle='#1c516e'; ctx.fillRect(198,142,88,58); ctx.fillRect(303,142,112,58);
+    ctx.fillStyle='#29b6e8'; ctx.fillRect(478,183,36,25); ctx.fillRect(526,162,36,46); ctx.fillRect(574,144,36,64); ctx.fillRect(622,125,36,83); ctx.fillRect(670,154,36,54);
+    ctx.strokeStyle='#70d4f4'; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(190,332); ctx.bezierCurveTo(276,274,320,355,390,294); ctx.bezierCurveTo(466,230,535,320,610,258); ctx.bezierCurveTo(652,224,684,238,720,194); ctx.stroke();
+    ctx.fillStyle='#102f45'; ctx.fillRect(178,254,560,142);
+    ctx.fillStyle='#1f4a63'; for(var row=0;row<4;row++){ ctx.fillRect(198,278+row*26,330+(row%2)*96,9); }
+    var tex=new THREE.CanvasTexture(canvas); if('colorSpace' in tex) tex.colorSpace=THREE.SRGBColorSpace;
+    if(renderer&&renderer.capabilities) tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+    _screenMaterial=new THREE.MeshStandardMaterial({map:tex,emissive:0x0a4466,emissiveMap:tex,emissiveIntensity:0.58,roughness:0.34,metalness:0.03});
+    return _screenMaterial;
+  }
   function rbox(w,h,d,r){ return new RoundedBox(w,h,d,2,r||0.02); }
   function mesh(g,m){ var x=new THREE.Mesh(g,m); x.castShadow=true; x.receiveShadow=true; return x; }
   function box(w,h,d,m){ return mesh(new THREE.BoxGeometry(w,h,d),m); }
@@ -95,16 +145,61 @@
      BUILDERS — devuelven un Group con la base apoyada en y~0 (superficie).
      ===================================================================== */
 
-  /* Silla ergonomica (contextual, generica) — base centrada en el origen */
-  function bChair(){
-    var g=new THREE.Group(); var fab=mat(COL.fabric,{r:0.85}), met=mat(COL.frame,{r:0.4,m:0.6});
-    var hub=mesh(new THREE.CylinderGeometry(0.05,0.06,0.06,16),met); hub.position.y=0.11; g.add(hub);
-    for(var i=0;i<5;i++){ var a=i/5*Math.PI*2; var leg=box(0.26,0.03,0.05,met); leg.position.set(Math.cos(a)*0.13,0.05,Math.sin(a)*0.13); leg.rotation.y=-a; g.add(leg);
-      var cs=mesh(new THREE.SphereGeometry(0.03,10,8),mat(COL.dark,{r:0.5})); cs.position.set(Math.cos(a)*0.24,0.03,Math.sin(a)*0.24); g.add(cs); }
-    var post=mesh(new THREE.CylinderGeometry(0.03,0.035,0.34,12),met); post.position.y=0.30; g.add(post);
+  /* Sillas contextuales: tres siluetas distintas segun el diagnostico. */
+  function chairStarBase(parent,spokes){
+    var met=mat(COL.frame,{r:0.4,m:0.58}), wheel=mat(COL.dark,{r:0.58});
+    var hub=mesh(new THREE.CylinderGeometry(0.05,0.06,0.06,16),met); hub.position.y=0.11; parent.add(hub);
+    for(var i=0;i<spokes;i++){
+      var a=i/spokes*Math.PI*2;
+      var leg=box(0.26,0.03,0.05,met); leg.position.set(Math.cos(a)*0.13,0.05,Math.sin(a)*0.13); leg.rotation.y=-a; parent.add(leg);
+      var caster=mesh(new THREE.SphereGeometry(0.028,10,8),wheel); caster.position.set(Math.cos(a)*0.24,0.03,Math.sin(a)*0.24); parent.add(caster);
+    }
+    var post=mesh(new THREE.CylinderGeometry(0.03,0.035,0.34,12),met); post.position.y=0.30; parent.add(post);
+  }
+  function ergonomicChair(){
+    var g=new THREE.Group(); g.name='chair-ergonomic';
+    var fab=surfaceMat(COL.fabric,'fabric',{r:0.88}), met=mat(COL.frame,{r:0.4,m:0.58});
+    chairStarBase(g,5);
     var seat=mesh(rbox(0.50,0.09,0.48,0.04),fab); seat.position.y=0.50; g.add(seat);
-    var back=mesh(rbox(0.46,0.56,0.08,0.04),fab); back.position.set(0,0.84,0.22); back.rotation.x=rad(8); g.add(back);
+    var back=mesh(rbox(0.46,0.58,0.075,0.04),fab); back.position.set(0,0.86,0.22); back.rotation.x=rad(8); g.add(back);
+    for(var sx=-1;sx<=1;sx+=2){
+      var armPost=box(0.025,0.22,0.025,met); armPost.position.set(sx*0.245,0.64,0.02); g.add(armPost);
+      var armPad=mesh(rbox(0.065,0.025,0.24,0.012),fab); armPad.position.set(sx*0.245,0.76,0.02); g.add(armPad);
+    }
+    var head=mesh(rbox(0.31,0.12,0.065,0.03),fab); head.position.set(0,1.18,0.27); head.rotation.x=rad(8); g.add(head);
     return g;
+  }
+  function basicOfficeChair(){
+    var g=new THREE.Group(); g.name='chair-basic';
+    var fab=surfaceMat(0x3f4853,'leather',{r:0.74}), met=mat(0x4b535c,{r:0.52,m:0.35});
+    chairStarBase(g,4);
+    var seat=mesh(rbox(0.46,0.075,0.43,0.025),fab); seat.position.y=0.49; g.add(seat);
+    var support=box(0.055,0.42,0.045,met); support.position.set(0,0.70,0.19); support.rotation.x=rad(5); g.add(support);
+    var back=mesh(rbox(0.40,0.39,0.065,0.025),fab); back.position.set(0,0.86,0.22); back.rotation.x=rad(5); g.add(back);
+    return g;
+  }
+  function diningChair(){
+    var g=new THREE.Group(); g.name='chair-dining';
+    var wood=mat(0x9a6740,{r:0.78,m:0.01}), edge=mat(0x71472d,{r:0.82,m:0.01});
+    var seat=mesh(rbox(0.46,0.075,0.42,0.018),wood); seat.position.y=0.48; g.add(seat);
+    for(var sx=-1;sx<=1;sx+=2){
+      for(var sz=-1;sz<=1;sz+=2){
+        var leg=mesh(rbox(0.045,0.48,0.045,0.008),edge); leg.position.set(sx*0.18,0.24,sz*0.16); leg.rotation.z=rad(-sx*3); leg.rotation.x=rad(sz*3); g.add(leg);
+      }
+    }
+    for(var bx=-1;bx<=1;bx+=2){
+      var upright=mesh(rbox(0.045,0.58,0.045,0.008),edge); upright.position.set(bx*0.18,0.76,0.18); g.add(upright);
+    }
+    for(var y=0.67;y<=1.00;y+=0.11){
+      var slat=mesh(rbox(0.39,0.045,0.035,0.008),wood); slat.position.set(0,y,0.18); g.add(slat);
+    }
+    return g;
+  }
+  function bChair(){
+    var root=new THREE.Group();
+    root.add(ergonomicChair(),basicOfficeChair(),diningChair());
+    root.children.forEach(function(chair){ chair.visible=false; });
+    return root;
   }
 
   /* Monitor (contextual, generico) */
@@ -120,6 +215,98 @@
     var disp=mesh(new THREE.PlaneGeometry(0.30,0.185),screenMat()); disp.position.z=0.0075; lid.add(disp);
     lid.position.set(0,0.12,-0.11); lid.rotation.x=rad(-15); g.add(lid);
     g.userData.baseY=0; return g; }
+
+  /* Base comun del monitor contextual. No representa un producto PrimOffice. */
+  function bMonitorBase(){
+    var g=new THREE.Group(); var body=mat(0x3b424b,{r:0.48,m:0.42});
+    var foot=mesh(rbox(0.30,0.025,0.19,0.012),body); foot.position.y=0.013; g.add(foot);
+    var post=mesh(rbox(0.055,0.25,0.045,0.012),body); post.position.set(0,0.135,-0.035); g.add(post);
+    var neck=mesh(rbox(0.18,0.045,0.04,0.01),body); neck.position.set(0,0.245,-0.018); g.add(neck);
+    return g;
+  }
+
+  /* pEase - reposamunecas acolchado delante del teclado. */
+  function bWristRest(){
+    var g=new THREE.Group();
+    var cushion=surfaceMat(0x263746,'fabric',{r:0.94}), base=surfaceMat(0x151c24,'rubber',{r:0.84});
+    var lower=mesh(rbox(0.39,0.022,0.070,0.018),base); lower.position.y=0.011; g.add(lower);
+    var pad=mesh(rbox(0.38,0.040,0.064,0.024),cushion); pad.position.set(0,0.028,0.002); pad.scale.z=0.95; g.add(pad);
+    return g;
+  }
+
+  /* pLumbar - almohadilla acolchada sobre el respaldo contextual. */
+  function bLumbar(){
+    var g=new THREE.Group();
+    var cushion=surfaceMat(0x263746,'leather',{r:0.72}), strap=surfaceMat(0x111820,'fabric',{r:0.88});
+    var pad=mesh(rbox(0.34,0.19,0.075,0.055),cushion); pad.scale.set(1,1,0.82); g.add(pad);
+    for(var sy=-1;sy<=1;sy+=2){
+      var band=mesh(rbox(0.37,0.022,0.018,0.008),strap); band.position.set(0,sy*0.062,0.028); g.add(band);
+    }
+    return g;
+  }
+
+  /* Contexto diagnostico: cables, cargadores, papeles y rutas resueltas. */
+  function bDeskContext(){
+    var root=new THREE.Group();
+    var cableM=surfaceMat(0x222832,'rubber',{r:0.86}), cableAlt=surfaceMat(0x56606c,'rubber',{r:0.82});
+    var paperM=surfaceMat(0xf0eadc,'paper',{r:0.97}), paperAlt=surfaceMat(0xd7e5ed,'paper',{r:0.96});
+    var chargerM=mat(0x343b44,{r:0.68,m:0.12});
+
+    function group(name){ var g=new THREE.Group(); g.name=name; g.visible=false; root.add(g); return g; }
+    function cable(parent,points,radius,material){
+      var curve=new THREE.CatmullRomCurve3(points.map(function(p){return new THREE.Vector3(p[0],p[1],p[2]);}));
+      var line=mesh(new THREE.TubeGeometry(curve,24,radius||0.004,8,false),material||cableM);
+      line.castShadow=false; parent.add(line); return line;
+    }
+    function paper(parent,x,z,ry,color){
+      var p=mesh(rbox(0.22,0.004,0.28,0.006),color||paperM); p.position.set(x,0.006,z); p.rotation.y=ry||0; parent.add(p);
+      var mark=box(0.14,0.001,0.006,mat(0x9eabb5,{r:0.9})); mark.position.set(x,0.009,z-0.055); mark.rotation.y=ry||0; mark.castShadow=false; parent.add(mark);
+    }
+    function charger(parent,x,z,ry){
+      var c=mesh(rbox(0.11,0.035,0.075,0.012),chargerM); c.position.set(x,0.020,z); c.rotation.y=ry||0; parent.add(c);
+    }
+
+    var clean=group('context-clean');
+    cable(clean,[[-0.42,0.008,-0.25],[-0.20,0.008,-0.31],[0.12,0.008,-0.31]],0.0035,cableAlt);
+
+    var medium=group('context-medium');
+    cable(medium,[[-0.50,0.010,-0.03],[-0.30,0.010,0.08],[-0.08,0.010,-0.22]],0.004);
+    cable(medium,[[0.44,0.010,0.10],[0.28,0.010,-0.04],[0.50,-0.10,-0.36]],0.004,cableAlt);
+    cable(medium,[[-0.10,0.010,0.28],[0.12,0.010,0.23],[0.27,0.010,0.30]],0.0038);
+    paper(medium,0.46,0.18,rad(-10)); charger(medium,-0.54,0.22,rad(14));
+
+    var messy=group('context-messy');
+    cable(messy,[[-0.60,0.012,-0.16],[-0.24,0.012,0.12],[0.28,0.012,-0.22],[0.60,0.012,0.20]],0.005);
+    cable(messy,[[-0.56,0.012,0.24],[-0.20,0.012,-0.18],[0.20,0.012,0.25],[0.55,0.012,-0.12]],0.0045,cableAlt);
+    cable(messy,[[-0.40,0.012,0.32],[-0.08,0.012,0.02],[0.36,0.012,0.30]],0.0045);
+    cable(messy,[[0.48,0.012,-0.26],[0.22,0.012,-0.03],[-0.36,0.012,-0.29]],0.0045,cableAlt);
+    cable(messy,[[-0.62,0.010,0.02],[-0.72,-0.12,0.34],[-0.64,-0.34,0.40]],0.005);
+    cable(messy,[[0.54,0.010,0.06],[0.68,-0.10,0.35],[0.58,-0.30,0.42]],0.005,cableAlt);
+    cable(messy,[[-0.18,0.010,-0.30],[-0.02,-0.12,-0.37],[0.18,-0.28,-0.38]],0.0045);
+    cable(messy,[[0.14,0.010,0.31],[-0.18,0.010,0.20],[-0.48,0.010,0.28]],0.004);
+    paper(messy,0.47,0.14,rad(-18)); paper(messy,-0.43,-0.04,rad(22),paperAlt); paper(messy,0.18,0.25,rad(8));
+    charger(messy,-0.55,0.20,rad(24)); charger(messy,0.52,-0.18,rad(-16));
+    var looseKeyboard=mesh(rbox(0.34,0.025,0.12,0.008),chargerM); looseKeyboard.position.set(-0.18,0.018,0.20); looseKeyboard.rotation.y=rad(17); messy.add(looseKeyboard);
+    var looseMouse=mesh(new THREE.SphereGeometry(0.035,14,10),chargerM); looseMouse.scale.set(0.78,0.45,1.15); looseMouse.position.set(0.42,0.028,0.27); messy.add(looseMouse);
+
+    var tidy=group('context-tidy');
+    cable(tidy,[[-0.42,0.008,-0.25],[-0.12,0.008,-0.31],[0.32,0.008,-0.31]],0.0032,cableAlt);
+
+    var hub=group('context-hub');
+    cable(hub,[[-0.44,0.010,-0.02],[-0.08,0.010,-0.17],[0.53,0.010,-0.035]],0.0032,cableAlt);
+    cable(hub,[[0.03,0.010,0.18],[0.22,0.010,0.08],[0.53,0.010,-0.035]],0.0032,cableM);
+    cable(hub,[[0.33,0.010,0.20],[0.42,0.010,0.08],[0.53,0.010,-0.035]],0.0032,cableAlt);
+
+    var boxRoute=group('context-box');
+    cable(boxRoute,[[0.53,0.010,-0.035],[0.42,0.008,-0.29],[0.18,-0.20,-0.34],[0.02,-0.20,-0.13]],0.0038,cableM);
+
+    var hubBox=group('context-hub-box');
+    cable(hubBox,[[-0.44,0.010,-0.02],[-0.08,0.010,-0.17],[0.53,0.010,-0.035],[0.34,-0.08,-0.30],[0.02,-0.20,-0.13]],0.0035,cableAlt);
+    cable(hubBox,[[0.30,0.010,0.20],[0.42,0.010,0.08],[0.53,0.010,-0.035]],0.0032,cableM);
+
+    root.userData.cableCounts={clean:1,medium:3,messy:8,tidy:1,hub:3,box:1,hubBox:2};
+    return root;
+  }
 
   /* pStandard — Soporte para Monitor de altura regulable (acero al carbono / epoxi, negro) */
   function bMonStand(){ var g=new THREE.Group(); var steel=mat(COL.steel,{m:0.5,r:0.42}), dk=mat(COL.steelDark,{m:0.5,r:0.5});
@@ -1007,22 +1194,26 @@
   }
 
   /* =====================================================================
-     REGISTRO de productos: id 'dsi-*' -> { name, build, model, scale, position, rotation }
+     REGISTRO de productos procedurales: id 'dsi-*' -> { name, build, scale }
      ===================================================================== */
   var REGISTRY={
-    'dsi-monitor-arm':   { name:'pArm',       build:bMonArm,   model:null, glb:'assets/models/products/pArm.glb',       scale:1, position:null, rotation:null },
-    'dsi-monitor-stand': { name:'pStandard',  build:bMonStand, model:null, glb:'assets/models/products/pStandard.glb',  scale:1, position:null, rotation:null },
-    'dsi-stand':         { name:'pNotebook',  build:bStand,    model:null, glb:'assets/models/products/pNotebook.glb',  scale:1, position:null, rotation:null },
-    'dsi-mousepad':      { name:'pMat',       build:bMousepad, model:null, glb:'assets/models/products/pMat.glb',       scale:1, position:null, rotation:null },
-    'dsi-hub':           { name:'pHub',       build:bHub,      model:null, glb:'assets/models/products/pHub.glb',       scale:1.55, position:null, rotation:null },
-    'dsi-organizer':     { name:'pBox',       build:bCableBox, model:null, glb:'assets/models/products/pBox.glb',       scale:1, position:null, rotation:null },
-    'dsi-lightbar':      { name:'pGlow',      build:bLightbar, model:null, glb:'assets/models/products/pGlow.glb',      scale:1, position:null, rotation:null },
-    'dsi-keyboard':      { name:'pMechanic',  build:bKeyboard, model:null, glb:'assets/models/products/pMechanic.glb',  scale:1, position:null, rotation:null },
-    'dsi-mouse':         { name:'pMouseProV', build:bMouse,    model:null, glb:'assets/models/products/pMouseProV.glb', scale:1, position:null, rotation:null },
+    'dsi-monitor-arm':   { name:'pArm',       build:bMonArm },
+    'dsi-monitor-stand': { name:'pStandard',  build:bMonStand },
+    'dsi-stand':         { name:'pNotebook',  build:bStand },
+    'dsi-mousepad':      { name:'pMat',       build:bMousepad },
+    'dsi-hub':           { name:'pHub',       build:bHub, scale:1.55 },
+    'dsi-organizer':     { name:'pBox',       build:bCableBox },
+    'dsi-lightbar':      { name:'pGlow',      build:bLightbar },
+    'dsi-keyboard':      { name:'pMechanic',  build:bKeyboard },
+    'dsi-wrist-rest':    { name:'pEase',      build:bWristRest },
+    'dsi-mouse':         { name:'pMouseProV', build:bMouse },
+    'dsi-lumbar':        { name:'pLumbar',    build:bLumbar, draggable:false },
     /* contextuales genericos (no son productos del catalogo a modelar) */
-    'dsi-monitor':       { name:'monitor (contextual)',  build:bMonitor, model:null },
-    'dsi-laptop':        { name:'notebook (contextual)', build:bLaptop,  model:null },
-    'dsi-chair':         { name:'silla (contextual)',    build:bChair,   model:null }
+    'dsi-monitor':       { name:'monitor (contextual)',  build:bMonitor },
+    'dsi-monitor-base':  { name:'base de monitor (contextual)', build:bMonitorBase, draggable:false },
+    'dsi-laptop':        { name:'notebook (contextual)', build:bLaptop },
+    'dsi-chair':         { name:'silla (contextual)',    build:bChair },
+    'dsi-context':       { name:'contexto del diagnostico', build:bDeskContext, draggable:false }
   };
 
   /* =====================================================================
@@ -1035,20 +1226,102 @@
      ===================================================================== */
   var HOME={
     'dsi-monitor':       {x: 0.00, y: 0.30,  z:-0.18, rx:0, ry:0},
+    'dsi-monitor-base':  {x: 0.00, y: 0.00,  z:-0.18, rx:0, ry:0},
     'dsi-monitor-stand': {x: 0.00, y: 0.00,  z:-0.18, rx:0, ry:0},
     'dsi-monitor-arm':   {x: 0.00, y: 0.00,  z:-0.18, rx:0, ry:0},
     'dsi-laptop':        {x:-0.46, y: 0.00,  z: 0.05, rx:0, ry:0.16},
     'dsi-stand':         {x:-0.46, y: 0.00,  z: 0.05, rx:0, ry:0.16},
     'dsi-keyboard':      {x:-0.02, y: 0.00,  z: 0.15, rx:0, ry:0},
+    'dsi-wrist-rest':    {x:-0.02, y: 0.00,  z: 0.285,rx:0, ry:0},
     'dsi-mousepad':      {x: 0.03, y: 0.00,  z: 0.12, rx:0, ry:0},
     'dsi-mouse':         {x: 0.30, y: 0.00,  z: 0.20, rx:0, ry:0},    
     'dsi-hub':           {x: 0.53, y: 0.00,  z:-0.035, rx:0, ry:0},
     'dsi-organizer':     {x: 0.00, y:-0.207, z:-0.10,  rx:0, ry:0},
     'dsi-lightbar':      {x: 0.00, y: 0.50,  z:-0.12, rx:0, ry:0},
-    'dsi-chair':         {x: 0.00, y: 0.00,  z: 0.95, rx:0, ry:0}
+    'dsi-chair':         {x: 0.00, y: 0.00,  z: 0.95, rx:0, ry:0},
+    'dsi-lumbar':        {x: 0.00, y: 0.76,  z: 0.155,rx:-7*Math.PI/180,ry:0},
+    'dsi-context':       {x: 0.00, y: 0.00,  z: 0.00, rx:0, ry:0}
   };
 
   function isVisible(id){ return objects[id] && objects[id].visible; }
+  function diagnosisValue(index){
+    var value=diagnosisAnswers[index];
+    return value===0||value===1||value===2?value:0;
+  }
+
+  function configureLighting(glowOn,animated){
+    if(!renderer||!hemiLight||!ambientLight||!keyLight||!rimLight||!fillLight) return;
+    var current=comparisonMode==='current';
+    var target=current
+      ? {hemi:0.90,ambient:0.54,key:1.48,rim:0.11,fill:0.34,exposure:0.99,glow:0,pool:0}
+      : {hemi:1.04,ambient:0.43,key:1.92,rim:0.24,fill:0.52,exposure:glowOn?1.05:1.08,glow:glowOn?3.55:0,pool:glowOn?0.18:0};
+    var from={hemi:hemiLight.intensity,ambient:ambientLight.intensity,key:keyLight.intensity,rim:rimLight.intensity,fill:fillLight.intensity,exposure:renderer.toneMappingExposure,glow:glowSpot?glowSpot.intensity:0,pool:glowPool?glowPool.material.opacity:0};
+    var duration=animated&&!reduce&&running?520:0;
+    if(glowSpot) glowSpot.visible=target.glow>0||from.glow>0;
+    if(glowPool) glowPool.visible=target.pool>0||from.pool>0;
+    addTween(duration,function(e){
+      hemiLight.intensity=lerp(from.hemi,target.hemi,e); ambientLight.intensity=lerp(from.ambient,target.ambient,e);
+      keyLight.intensity=lerp(from.key,target.key,e); rimLight.intensity=lerp(from.rim,target.rim,e); fillLight.intensity=lerp(from.fill,target.fill,e);
+      renderer.toneMappingExposure=lerp(from.exposure,target.exposure,e);
+      if(glowSpot) glowSpot.intensity=lerp(from.glow,target.glow,e);
+      if(glowPool) glowPool.material.opacity=lerp(from.pool,target.pool,e);
+    },function(){
+      if(glowSpot) glowSpot.visible=target.glow>0;
+      if(glowPool) glowPool.visible=target.pool>0;
+    });
+  }
+
+  function configureVisualContext(vis,animated){
+    var device=diagnosisValue(2), order=diagnosisValue(3), chairType=diagnosisValue(4);
+    var chairNames=['chair-ergonomic','chair-basic','chair-dining'];
+    var chairHolder=objects['dsi-chair'];
+    if(chairHolder){
+      chairNames.forEach(function(name){ var part=chairHolder.getObjectByName(name); if(part) part.visible=name===chairNames[chairType]; });
+    }
+
+    var monitorBase=objects['dsi-monitor-base'];
+    if(monitorBase){
+      monitorBase.scale.set(1,device===1?0.78:1.18,1);
+    }
+
+    var contextHolder=objects['dsi-context'];
+    var cableCount=0;
+    if(contextHolder){
+      ['context-clean','context-medium','context-messy','context-tidy','context-hub','context-box','context-hub-box'].forEach(function(name){
+        var group=contextHolder.getObjectByName(name); if(group) group.visible=false;
+      });
+      if(comparisonMode==='current'){
+        var currentNames=['context-clean','context-medium','context-messy'];
+        var currentGroup=contextHolder.getObjectByName(currentNames[order]);
+        if(currentGroup) currentGroup.visible=true;
+        cableCount=[1,3,8][order];
+      }else{
+        var hasBox=!!vis['dsi-organizer'], hasHub=!!vis['dsi-hub'];
+        if(hasBox&&hasHub&&order>0){ var combined=contextHolder.getObjectByName('context-hub-box'); if(combined) combined.visible=true; cableCount=2; }
+        else if(hasBox){ var boxRoutes=contextHolder.getObjectByName('context-box'); if(boxRoutes) boxRoutes.visible=true; cableCount=1; }
+        else if(hasHub){ var hubRoutes=contextHolder.getObjectByName('context-hub'); if(hubRoutes) hubRoutes.visible=true; cableCount=3; }
+        else { var tidy=contextHolder.getObjectByName('context-tidy'); if(tidy) tidy.visible=true; cableCount=1; }
+      }
+    }
+
+    var glowOn=comparisonMode==='primoffice'&&!!vis['dsi-lightbar'];
+    configureLighting(glowOn,animated);
+
+    if(stageEl){
+      stageEl.setAttribute('data-s3d-device',['laptop-low','monitor-low','monitor-correct'][device]);
+      stageEl.setAttribute('data-s3d-monitor-position',vis['dsi-monitor-arm']?'elevated-arm':(vis['dsi-monitor']?(device===1?'low-base':'correct-base'):'hidden'));
+      stageEl.setAttribute('data-s3d-laptop-position',vis['dsi-stand']?'elevated-stand':(vis['dsi-laptop']?'flat':'hidden'));
+      stageEl.setAttribute('data-s3d-order',['clean','medium','messy'][order]);
+      stageEl.setAttribute('data-s3d-chair',['ergonomic','basic','dining'][chairType]);
+      stageEl.setAttribute('data-s3d-cables',String(cableCount));
+      stageEl.setAttribute('data-s3d-box',vis['dsi-organizer']?'true':'false');
+      stageEl.setAttribute('data-s3d-hub',vis['dsi-hub']?'true':'false');
+      stageEl.setAttribute('data-s3d-glow',glowOn?'true':'false');
+      stageEl.setAttribute('data-s3d-lighting',comparisonMode==='current'?'neutral-flat':(glowOn?'clean-warm-focus':'clean-balanced'));
+      stageEl.setAttribute('data-s3d-ease',vis['dsi-wrist-rest']?'true':'false');
+      stageEl.setAttribute('data-s3d-lumbar',vis['dsi-lumbar']?'true':'false');
+    }
+  }
 
   /* Resuelve la posición/rotación canónica de un objeto según el contexto
      actual de visibilidad (apoyos dependientes). */
@@ -1058,7 +1331,11 @@
 
     if(id==='dsi-monitor'){
       var arm=isVisible('dsi-monitor-arm'), stand=isVisible('dsi-monitor-stand');
-      y = arm ? 0.44 : (stand ? 0.30 : 0.19);
+      var device=diagnosisValue(2);
+      y = arm ? 0.44 : (stand ? 0.30 : (device===1?0.20:0.32));
+      z = arm ? -0.18 : (device===1?-0.08:-0.18);
+    } else if(id==='dsi-monitor-base'){
+      z=diagnosisValue(2)===1?-0.08:-0.18;
     } else if(id==='dsi-lightbar'){
       var t=computeHome('dsi-monitor');
       x=t.x; y=t.y+0.18+0.036; z=t.z+0.035;   /* apoyada sobre el borde superior del monitor */
@@ -1068,10 +1345,19 @@
          Antes estaban inclinados en sentidos opuestos y se atravesaban. */
       y = onStand ? 0.142 : 0.0;
       rx = onStand ? rad(13) : 0;
+      x = onStand ? -0.46 : 0;
+      z = onStand ? 0.05 : 0.015;
+      ry = onStand ? 0.16 : 0;
     } else if(id==='dsi-keyboard'){
+      y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
+    } else if(id==='dsi-wrist-rest'){
       y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
     } else if(id==='dsi-mouse'){
       y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
+    } else if(id==='dsi-lumbar'){
+      var chair=diagnosisValue(4);
+      y = chair===0?0.79:(chair===1?0.76:0.75);
+      z = chair===0?0.155:(chair===1?0.145:0.14);
     }
     return {x:x,y:y,z:z,rx:rx,ry:ry};
   }
@@ -1099,7 +1385,7 @@
     if(!anim) render1();
   }
 
-  function applyVisible(vis){
+  function applyVisible(vis,animated){
     vis=Object.assign({},vis||{});
 
     /* Mantener coherencia sin inventar productos:
@@ -1111,6 +1397,7 @@
          el soporte elevador. */
     if(vis['dsi-monitor-arm']){
       vis['dsi-monitor-stand']=false;
+      vis['dsi-monitor-base']=false;
     }
     if(!vis['dsi-monitor']){
       vis['dsi-lightbar']=false;
@@ -1118,8 +1405,12 @@
     if(vis['dsi-stand']){
       vis['dsi-laptop']=true;
     }
+    if(vis['dsi-lumbar']){
+      vis['dsi-chair']=true;
+    }
 
     DSI.forEach(function(id){ if(objects[id]) objects[id].visible=!!vis[id]; });
+    configureVisualContext(vis,animated);
     placeAll(false);
   }
 
@@ -1162,9 +1453,9 @@
     scene.add(roomFloor);
 
     var wallMat=new THREE.MeshStandardMaterial({color:0xd8d0bd,roughness:0.96,metalness:0});
-    roomWall=new THREE.Mesh(new THREE.PlaneGeometry(5.8,0.44),wallMat);
-    roomWall.name='s3d-lower-wall';
-    roomWall.position.set(0,0.24,-0.90);
+    roomWall=new THREE.Mesh(new THREE.PlaneGeometry(5.8,2.6),wallMat);
+    roomWall.name='s3d-room-wall';
+    roomWall.position.set(0,1.30,-0.90);
     roomWall.receiveShadow=true;
     roomWall.castShadow=false;
     scene.add(roomWall);
@@ -1175,6 +1466,33 @@
     roomBaseboard.castShadow=false;
     roomBaseboard.receiveShadow=true;
     scene.add(roomBaseboard);
+
+    /* Elemento ambiental 1: planta de piso discreta, fuera del escritorio. */
+    roomPlant=new THREE.Group(); roomPlant.name='s3d-room-plant';
+    var potM=mat(0x8f5f43,{r:0.86,m:0.01}), leafM=mat(0x426b51,{r:0.9,m:0.01}), stemM=mat(0x4d5a3f,{r:0.9});
+    var pot=mesh(new THREE.CylinderGeometry(0.14,0.11,0.22,24),potM); pot.position.y=0.11; roomPlant.add(pot);
+    var stem=mesh(new THREE.CylinderGeometry(0.012,0.016,0.52,12),stemM); stem.position.y=0.42; roomPlant.add(stem);
+    for(var li=0;li<7;li++){
+      var leaf=mesh(new THREE.SphereGeometry(0.12,16,10),leafM); var la=li/7*Math.PI*2;
+      leaf.scale.set(0.48,1,0.30); leaf.rotation.z=rad(-28+li*9); leaf.rotation.y=-la;
+      leaf.position.set(Math.cos(la)*0.10,0.46+(li%3)*0.11,Math.sin(la)*0.07); roomPlant.add(leaf);
+    }
+    roomPlant.position.set(-1.18,0,-0.62); scene.add(roomPlant);
+
+    /* Elemento ambiental 2: cuadro abstracto procedural. */
+    roomArt=new THREE.Group(); roomArt.name='s3d-room-art';
+    var artCanvas=document.createElement('canvas'); artCanvas.width=384; artCanvas.height=256;
+    var actx=artCanvas.getContext('2d'); actx.fillStyle='#e9e2d5'; actx.fillRect(0,0,384,256);
+    actx.fillStyle='#0d2a43'; actx.fillRect(24,26,152,188); actx.fillStyle='#26a6d6'; actx.beginPath(); actx.arc(244,94,62,0,Math.PI*2); actx.fill();
+    actx.fillStyle='#c99963'; actx.fillRect(198,152,142,64); actx.fillStyle='rgba(255,255,255,.72)'; actx.fillRect(218,43,118,14);
+    var artTex=new THREE.CanvasTexture(artCanvas); if('colorSpace' in artTex) artTex.colorSpace=THREE.SRGBColorSpace;
+    var art=mesh(new THREE.PlaneGeometry(0.66,0.44),new THREE.MeshStandardMaterial({map:artTex,roughness:0.88,metalness:0})); art.position.z=0.006; art.castShadow=false; roomArt.add(art);
+    var frameM=mat(0x313840,{r:0.58,m:0.16});
+    var frameTop=mesh(rbox(0.72,0.035,0.035,0.006),frameM); frameTop.position.set(0,0.237,0); roomArt.add(frameTop);
+    var frameBottom=frameTop.clone(); frameBottom.position.y=-0.237; roomArt.add(frameBottom);
+    var frameLeft=mesh(rbox(0.035,0.51,0.035,0.006),frameM); frameLeft.position.set(-0.342,0,0); roomArt.add(frameLeft);
+    var frameRight=frameLeft.clone(); frameRight.position.x=0.342; roomArt.add(frameRight);
+    roomArt.position.set(1.10,1.43,-0.86); scene.add(roomArt);
   }
 
   var _deskWoodMat=null;
@@ -1320,6 +1638,7 @@
     controls.enableDamping=true;
     controls.dampingFactor=0.08;
     controls.enablePan=false;
+    controls.addEventListener('start',function(){ if(!camFly) userAdjustedCamera=true; });
 
     /* Zoom y rotación libres dentro de límites razonables */
     controls.enableZoom=true;
@@ -1342,20 +1661,27 @@
     controls.touches.ONE=THREE.TOUCH.ROTATE;
     controls.touches.TWO=THREE.TOUCH.DOLLY_ROTATE;
 
-    scene.add(new THREE.HemisphereLight(0xf2fbff,0xd8bf98,1.08));
-    scene.add(new THREE.AmbientLight(0xc8d8e5,0.46));
-    var key=new THREE.DirectionalLight(0xffffff,1.95); key.position.set(4.8,5.4,2.6); key.castShadow=true;
-    key.shadow.mapSize.set(2048,2048); key.shadow.bias=-0.00035; key.shadow.normalBias=0.026; key.shadow.radius=7;
-    var sc=key.shadow.camera; sc.near=0.5; sc.far=14; sc.left=-2.8; sc.right=2.8; sc.top=2.8; sc.bottom=-2.8; sc.updateProjectionMatrix();
-    scene.add(key);
-    var rim=new THREE.DirectionalLight(0x9fd8ff,0.24); rim.position.set(-3,2.1,-2.5); scene.add(rim);
-    var fill=new THREE.DirectionalLight(0xffe0b8,0.52); fill.position.set(2.2,2.0,3.4); scene.add(fill);
+    hemiLight=new THREE.HemisphereLight(0xf2fbff,0xd8bf98,1.02); scene.add(hemiLight);
+    ambientLight=new THREE.AmbientLight(0xc8d8e5,0.43); scene.add(ambientLight);
+    keyLight=new THREE.DirectionalLight(0xffffff,1.90); keyLight.position.set(4.2,5.0,2.8); keyLight.castShadow=true;
+    keyLight.shadow.mapSize.set(2048,2048); keyLight.shadow.bias=-0.00018; keyLight.shadow.normalBias=0.018; keyLight.shadow.radius=9;
+    var sc=keyLight.shadow.camera; sc.near=0.5; sc.far=13; sc.left=-2.35; sc.right=2.35; sc.top=2.35; sc.bottom=-2.35; sc.updateProjectionMatrix();
+    scene.add(keyLight);
+    rimLight=new THREE.DirectionalLight(0x9fd8ff,0.22); rimLight.position.set(-3,2.1,-2.5); scene.add(rimLight);
+    fillLight=new THREE.DirectionalLight(0xffe0b8,0.48); fillLight.position.set(2.2,2.0,3.4); scene.add(fillLight);
 
     buildAmbientRoom();
 
     surfaceAnchor=new THREE.Object3D(); surfaceAnchor.position.y=curTopY; scene.add(surfaceAnchor);
     deskTop=mesh(rbox(1.5,0.04,0.72,0.012),mat(COL.surface,{r:0.6,m:0.04})); deskTop.position.y=-0.02; surfaceAnchor.add(deskTop);
     deskEdge=mesh(rbox(1.52,0.012,0.74,0.012),mat(COL.edge,{r:0.7})); deskEdge.position.y=-0.045; deskEdge.castShadow=false; surfaceAnchor.add(deskEdge);
+
+    /* Iluminacion localizada de pGlow: solo superficie, sin alterar la sala. */
+    glowTarget=new THREE.Object3D(); glowTarget.position.set(0,0,0.05); surfaceAnchor.add(glowTarget);
+    glowSpot=new THREE.SpotLight(0xffd9a6,0,1.45,rad(38),0.72,2);
+    glowSpot.position.set(0,0.52,-0.10); glowSpot.target=glowTarget; glowSpot.visible=false; surfaceAnchor.add(glowSpot);
+    glowPool=mesh(new THREE.CircleGeometry(0.48,48),new THREE.MeshBasicMaterial({color:0xffd49a,transparent:true,opacity:0.16,depthWrite:false}));
+    glowPool.rotation.x=-Math.PI/2; glowPool.scale.set(1.45,0.82,1); glowPool.position.set(0,0.004,0.035); glowPool.visible=false; glowPool.castShadow=false; glowPool.receiveShadow=false; surfaceAnchor.add(glowPool);
     /* Escritorio base limpio: sin viga trasera ni control genérico.
        Esos elementos no pertenecen a ningún producto seleccionado. */
     deskBeam=null;
@@ -1369,10 +1695,12 @@
       var cfg=REGISTRY[id]; if(!cfg) return;
       var holder=new THREE.Group();
       holder.name=id; holder.userData.dsiId=id;
-      var proc=cfg.build(); holder.add(proc); holder.userData.proc=proc; holder.userData.isModel=false;
+      holder.userData.draggable=cfg.draggable!==false;
+      holder.add(cfg.build());
       if(id==='dsi-hub') holder.scale.setScalar(cfg.scale);
       holder.visible=false; objects[id]=holder;
       if(id==='dsi-chair'){ scene.add(holder); }
+      else if(id==='dsi-lumbar'&&objects['dsi-chair']){ objects['dsi-chair'].add(holder); }
       else { surfaceAnchor.add(holder); }
     });
 
@@ -1380,14 +1708,14 @@
     placeAll(false);
     setupDrag();
     setView('perspectiva',false);
-    var ro=new ResizeObserver(function(){ var cw=host.clientWidth,ch=host.clientHeight; if(cw&&ch){ renderer.setSize(cw,ch,false); camera.aspect=cw/ch; camera.updateProjectionMatrix(); } });
+    var ro=new ResizeObserver(function(){ var cw=host.clientWidth,ch=host.clientHeight; if(cw&&ch){ renderer.setSize(cw,ch,false); camera.aspect=cw/ch; camera.updateProjectionMatrix(); if(ready&&!userAdjustedCamera) autoFrame(false,'resize',activeView); } });
     ro.observe(host);
 
     var vis=new IntersectionObserver(function(en){ if(en[0].isIntersecting){ running=true; renderer.setAnimationLoop(loop); } else { running=false; renderer.setAnimationLoop(null); } },{threshold:0.01});
     vis.observe(stageEl);
 
-    refreshFromDOM();
-    kickModelLoads();
+    if(hasPrimOfficeState) renderComparison(false,{force:true,reason:'initial'});
+    else refreshFromDOM();
   }
 
   /* Columna telescopica de escritorio (segmento inferior fijo + superior deslizante) */
@@ -1476,17 +1804,116 @@
     setDeskVisual(standing);
     var target=standing?DESK_STAND:DESK_SIT; if(target===curTopY)return;
     var from=curTopY;
-    addTween(animated&&!reduce?700:0,function(e){ curTopY=lerp(from,target,e); if(surfaceAnchor)surfaceAnchor.position.y=curTopY; setLegs(); if(controls)controls.target.y=curTopY*0.55; },function(){ if(controls)controls.update(); });
+    addTween(animated&&!reduce&&running?620:0,function(e){ curTopY=lerp(from,target,e); if(surfaceAnchor)surfaceAnchor.position.y=curTopY; setLegs(); },function(){ if(controls)controls.update(); });
     if(reduce||!animated){ curTopY=target; if(surfaceAnchor)surfaceAnchor.position.y=curTopY; setLegs(); }
   }
 
   /* ---- camara ---- */
-  function viewSpec(v){ var y=curTopY;
-    if(v==='frontal') return {p:new THREE.Vector3(0,y+0.78,3.05),t:new THREE.Vector3(0,y*0.99,0.03)};
-    if(v==='superior') return {p:new THREE.Vector3(0.001,y+3.08,0.04),t:new THREE.Vector3(0,y*0.10,0.04)};
-    return {p:new THREE.Vector3(2.35,y+1.18,2.54),t:new THREE.Vector3(0,y*0.82,-0.02)};
-  }
   function normalizedView(v){ return (v==='frontal'||v==='superior') ? v : 'perspectiva'; }
+  function actuallyVisible(node,root){
+    var current=node;
+    while(current){ if(current.visible===false) return false; if(current===root) break; current=current.parent; }
+    return true;
+  }
+  function expandVisibleBounds(box3,root){
+    if(!root||root.visible===false) return;
+    root.updateWorldMatrix(true,true);
+    root.traverse(function(node){
+      if(!node.isMesh||!actuallyVisible(node,root)) return;
+      if(!node.geometry.boundingBox) node.geometry.computeBoundingBox();
+      if(!node.geometry.boundingBox) return;
+      var local=node.geometry.boundingBox.clone(); local.applyMatrix4(node.matrixWorld); box3.union(local);
+    });
+  }
+  function contentBounds(plannedStanding){
+    var bounds=new THREE.Box3(); bounds.makeEmpty();
+    [deskTop,deskEdge,standingFrame,legL,legR].forEach(function(node){ expandVisibleBounds(bounds,node); });
+    DSI.forEach(function(id){ var node=objects[id]; if(node&&node.visible) expandVisibleBounds(bounds,node); });
+    if(bounds.isEmpty()) bounds.set(new THREE.Vector3(-0.8,0,-0.4),new THREE.Vector3(0.8,1.3,1.35));
+    var plannedY=plannedStanding?DESK_STAND:DESK_SIT, delta=plannedY-curTopY;
+    if(Math.abs(delta)>0.001) bounds.max.y=Math.max(bounds.min.y+0.55,bounds.max.y+delta);
+    return bounds;
+  }
+  function projectedCoverage(bounds,probe){
+    probe.updateProjectionMatrix(); probe.updateMatrixWorld();
+    var min=bounds.min,max=bounds.max;
+    var corners=[new THREE.Vector3(min.x,min.y,min.z),new THREE.Vector3(max.x,min.y,min.z),new THREE.Vector3(min.x,max.y,min.z),new THREE.Vector3(max.x,max.y,min.z),new THREE.Vector3(min.x,min.y,max.z),new THREE.Vector3(max.x,min.y,max.z),new THREE.Vector3(min.x,max.y,max.z),new THREE.Vector3(max.x,max.y,max.z)];
+    var minX=1,maxX=-1,minY=1,maxY=-1;
+    corners.forEach(function(point){ point.project(probe); minX=Math.min(minX,point.x); maxX=Math.max(maxX,point.x); minY=Math.min(minY,point.y); maxY=Math.max(maxY,point.y); });
+    return {width:(maxX-minX)/2,height:(maxY-minY)/2};
+  }
+  function refineFraming(spec){
+    var direction=spec.p.clone().sub(spec.t).normalize();
+    for(var i=0;i<3;i++){
+      var probe=camera.clone(); probe.aspect=camera.aspect; probe.position.copy(spec.p); probe.lookAt(spec.t);
+      var coverage=projectedCoverage(spec.bounds,probe);
+      var targetHeight=spec.view==='perspectiva'?0.92:0.87;
+      var scale=Math.max(coverage.width/0.83,coverage.height/targetHeight);
+      if(Math.abs(scale-1)<0.015) break;
+      spec.distance=clampN(spec.distance*scale*1.015,1.45,5.40);
+      spec.p.copy(spec.t).add(direction.clone().multiplyScalar(spec.distance));
+    }
+    return spec;
+  }
+  function framingSpec(view,plannedStanding){
+    view=normalizedView(view); var bounds=contentBounds(plannedStanding), size=new THREE.Vector3(), center=new THREE.Vector3();
+    bounds.getSize(size); bounds.getCenter(center);
+    var vfov=rad(camera.fov), hfov=2*Math.atan(Math.tan(vfov/2)*camera.aspect), useful=0.82;
+    var fitW=(size.x*0.5)/(Math.tan(hfov/2)*useful), fitH;
+    if(view==='superior') fitH=(size.z*0.5)/(Math.tan(vfov/2)*0.80);
+    else if(view==='frontal') fitH=(size.y*0.5)/(Math.tan(vfov/2)*0.82);
+    else fitH=((size.y+size.z*0.16)*0.5)/(Math.tan(vfov/2)*0.82);
+    var distance=clampN(Math.max(fitW,fitH)+(view==='perspectiva'?size.z*0.10:0.08),1.45,5.40);
+    var direction;
+    if(view==='superior') direction=new THREE.Vector3(0.001,1,0.001);
+    else if(view==='frontal') direction=new THREE.Vector3(0,0.16,1);
+    else if(comparisonMode==='current') direction=new THREE.Vector3(0.34,0.46,1.75);
+    else direction=new THREE.Vector3(1.18,0.72,1.46);
+    direction.normalize();
+    var target=center.clone();
+    if(view==='perspectiva') target.y+=comparisonMode==='current'?-0.02:0.04;
+    var position=target.clone().add(direction.multiplyScalar(distance));
+    if(view==='superior') position.x+=0.001;
+    return refineFraming({p:position,t:target,bounds:bounds,distance:distance,view:view});
+  }
+  function writeFrameDiagnostics(spec){
+    if(!stageEl||!spec||!spec.bounds) return;
+    var coverage=projectedCoverage(spec.bounds,camera);
+    stageEl.setAttribute('data-s3d-projected-width',String(Math.round(coverage.width*100)));
+    stageEl.setAttribute('data-s3d-projected-height',String(Math.round(coverage.height*100)));
+    stageEl.setAttribute('data-s3d-camera-distance',spec.distance.toFixed(2));
+  }
+  function animateCamera(spec,animated,reason){
+    zoomTarget=null; var token=++cameraTweenToken, duration=animated&&!reduce&&running?560:0;
+    userAdjustedCamera=false;
+    if(!duration){ camera.position.copy(spec.p); controls.target.copy(spec.t); camera.lookAt(spec.t); controls.update(); camFly=false; controls.enabled=true; writeFrameDiagnostics(spec); }
+    else{
+      camFly=true; controls.enabled=false; var p0=camera.position.clone(),t0=controls.target.clone();
+      addTween(duration,function(e){ if(token!==cameraTweenToken) return; camera.position.lerpVectors(p0,spec.p,e); controls.target.lerpVectors(t0,spec.t,e); camera.lookAt(controls.target); },function(){ if(token!==cameraTweenToken) return; camFly=false; controls.enabled=true; controls.update(); writeFrameDiagnostics(spec); });
+    }
+    if(stageEl){
+      stageEl.setAttribute('data-s3d-camera',comparisonMode+'-'+spec.view);
+      stageEl.setAttribute('data-s3d-frame-reason',reason||'manual');
+      stageEl.setAttribute('data-s3d-frame-width','82');
+    }
+  }
+  function autoFrame(animated,reason,view){
+    if(!ready) return;
+    activeView=normalizedView(view||activeView);
+    setStageView(activeView); animateCamera(framingSpec(activeView,deskModeStanding),animated,reason); highlight(activeView);
+  }
+  function objectOutsideFrame(id){
+    var object=objects[id]; if(!object||!object.visible) return false;
+    var box3=new THREE.Box3(); box3.makeEmpty(); expandVisibleBounds(box3,object); if(box3.isEmpty()) return false;
+    camera.updateMatrixWorld(); camera.updateProjectionMatrix();
+    var min=box3.min,max=box3.max;
+    var corners=[new THREE.Vector3(min.x,min.y,min.z),new THREE.Vector3(max.x,min.y,min.z),new THREE.Vector3(min.x,max.y,min.z),new THREE.Vector3(max.x,max.y,min.z),new THREE.Vector3(min.x,min.y,max.z),new THREE.Vector3(max.x,min.y,max.z),new THREE.Vector3(min.x,max.y,max.z),new THREE.Vector3(max.x,max.y,max.z)];
+    return corners.some(function(point){ point.project(camera); return Math.abs(point.x)>0.90||Math.abs(point.y)>0.88||point.z<-1||point.z>1; });
+  }
+  function importantChangeOutsideFrame(changedIds){
+    var important={'dsi-monitor-arm':1,'dsi-stand':1,'dsi-laptop':1,'dsi-lumbar':1,'dsi-chair':1};
+    return (changedIds||[]).some(function(id){ return important[id]&&objectOutsideFrame(id); });
+  }
   function setStageView(v){
     var nv=normalizedView(v);
     if(stageEl) stageEl.setAttribute('data-s3d-view',nv);
@@ -1494,16 +1921,11 @@
     if(roomFloor) roomFloor.receiveShadow=nv!=='superior';
     if(roomWall) roomWall.visible=showWall;
     if(roomBaseboard) roomBaseboard.visible=showWall;
+    if(roomArt) roomArt.visible=showWall;
   }
   function setView(v,animated){
-    if(!ready)return; var s=viewSpec(v);
-    setStageView(v);
-    /* Cancelar cualquier interpolación pendiente al elegir una vista */
-    zoomTarget=null;
-    if(reduce||!animated){ camera.position.copy(s.p); controls.target.copy(s.t); controls.update(); highlight(v); return; }
-    camFly=true; controls.enabled=false; var p0=camera.position.clone(), t0=controls.target.clone();
-    addTween(800,function(e){ camera.position.lerpVectors(p0,s.p,e); controls.target.lerpVectors(t0,s.t,e); camera.lookAt(controls.target); },function(){ camFly=false; controls.enabled=true; controls.update(); });
-    highlight(v);
+    if(!ready)return;
+    activeView=normalizedView(v); autoFrame(animated,'toolbar',activeView);
   }
   function highlight(v){ if(!toolbar)return; var hv=v==='reset'?'perspectiva':v; toolbar.querySelectorAll('[data-view]').forEach(function(b){ var on=b.getAttribute('data-view')===hv; b.classList.toggle('is-active',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
 
@@ -1605,7 +2027,7 @@ function stepSmoothZoom(){
     ndc.y=-((ev.clientY-r.top)/r.height)*2+1;
   }
   function visibleHolders(){
-    var out=[]; DSI.forEach(function(id){ var o=objects[id]; if(o&&o.visible) out.push(o); }); return out;
+    var out=[]; DSI.forEach(function(id){ var o=objects[id]; if(o&&o.visible&&o.userData.draggable!==false) out.push(o); }); return out;
   }
   function topHolder(o){ while(o){ if(o.userData && o.userData.dsiId) return o; o=o.parent; } return null; }
   function pickHolder(ev){
@@ -1688,57 +2110,102 @@ function stepSmoothZoom(){
     zoomTarget=null;
     setFree(false);
     placeAll(true);                 /* animado a HOME */
-    setView('perspectiva',true);
+    autoFrame(true,'reset','perspectiva');
   }
 
-  /* =====================================================================
-     PIPELINE .glb (carga diferida, opcional, con fallback procedural)
-     ===================================================================== */
-  var _gltfPromise=null;
-  function ensureGLTFLoader(){
-    if(_gltfPromise) return _gltfPromise;
-    _gltfPromise=import('three/addons/loaders/GLTFLoader.js')
-      .then(function(m){ return new m.GLTFLoader(); })
-      .catch(function(e){ _gltfPromise=null; throw e; });
-    return _gltfPromise;
+  /* ---- Comparador: diagnostico actual vs seleccion PrimOffice ---- */
+  function currentSetupVisible(){
+    var vis={'dsi-context':true,'dsi-chair':true};
+    var computer=diagnosisValue(2);
+
+    if(computer===0){
+      vis['dsi-laptop']=true;
+    }else if(computer===1){
+      vis['dsi-monitor']=true;
+      vis['dsi-monitor-base']=true;
+    }else if(computer===2){
+      vis['dsi-monitor']=true;
+      vis['dsi-monitor-base']=true;
+    }
+    return vis;
   }
-  function applyModel(holder,gltfScene,cfg){
-    gltfScene.traverse(function(o){ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
-    var s=cfg.scale!=null?cfg.scale:1;
-    if(typeof s==='number') gltfScene.scale.set(s,s,s); else gltfScene.scale.set(s[0],s[1],s[2]);
-    if(cfg.rotation) gltfScene.rotation.set(cfg.rotation[0]||0,cfg.rotation[1]||0,cfg.rotation[2]||0);
-    if(cfg.position) gltfScene.position.set(cfg.position[0]||0,cfg.position[1]||0,cfg.position[2]||0);
-    if(holder.userData.proc){ holder.remove(holder.userData.proc); }
-    holder.add(gltfScene); holder.userData.isModel=true;
+
+  function comparisonState(){
+    var current=currentSetupVisible();
+    if(comparisonMode==='current') return {vis:current,opts:{standing:false}};
+    return {
+      vis:Object.assign({},current,primOfficeState.vis),
+      opts:Object.assign({},primOfficeState.opts)
+    };
   }
-  function loadModelFor(id){
-    var cfg=REGISTRY[id]; if(!cfg||!cfg.model||cfg._tried) return; cfg._tried=true;
-    var holder=objects[id]; if(!holder) return;
-    ensureGLTFLoader().then(function(loader){
-      loader.load(cfg.model,function(gltf){
-        try{ applyModel(holder,gltf.scene,cfg); render1(); }
-        catch(e){ console.info('[setup-3d] '+cfg.name+': no se pudo aplicar el .glb, se mantiene procedural.'); }
-      },undefined,function(){
-        console.info('[setup-3d] '+cfg.name+' ('+id+'): sin .glb disponible, se usa geometria procedural.');
-      });
-    }).catch(function(){ /* GLTFLoader no disponible: se mantiene procedural */ });
+
+  function applyFallbackVisible(vis,standing){
+    var fallbackIds=DSI.concat(['dsi-stand-leg','dsi-pens','dsi-standing-badge']);
+    fallbackIds.forEach(function(id){
+      var el=$(id); if(!el) return;
+      var show=id==='dsi-standing-badge'?standing:!!vis[id];
+      el.classList.toggle('hidden-item',!show);
+    });
   }
-  function kickModelLoads(){
-    var ids=Object.keys(REGISTRY).filter(function(id){ return REGISTRY[id].model; });
-    if(!ids.length) return;
-    var run=function(){ ids.forEach(loadModelFor); };
-    if('requestIdleCallback' in window) requestIdleCallback(run,{timeout:2500}); else setTimeout(run,1200);
+
+  function renderComparison(animated,frameRequest){
+    var state=comparisonState();
+    if(stageEl) stageEl.setAttribute('data-s3d-setup',comparisonMode);
+    applyFallbackVisible(state.vis,!!state.opts.standing);
+    if(!ready) return;
+    applyVisible(state.vis,!!animated);
+    setDeskMode(!!state.opts.standing,!!animated);
+    frameRequest=frameRequest||{};
+    if(frameRequest.force){ autoFrame(!!animated,frameRequest.reason||'content',activeView); }
+    else if(comparisonMode==='primoffice'&&importantChangeOutsideFrame(frameRequest.changedIds)){ autoFrame(!!animated,'important-product',activeView); }
+  }
+
+  function setDiagnosis(diagnosis){
+    var source=diagnosis&&Array.isArray(diagnosis.answers)?diagnosis.answers:[];
+    diagnosisAnswers=new Array(6).fill(null).map(function(_,i){
+      var answer=source[i];
+      return Number.isInteger(answer)&&answer>=0&&answer<=2?answer:null;
+    });
+    pending=!ready;
+    renderComparison(false,{force:true,reason:'diagnosis'});
+  }
+
+  function setMode(mode){
+    if(mode!=='current'&&mode!=='primoffice') return false;
+    if(mode===comparisonMode){ renderComparison(false); return true; }
+    comparisonMode=mode;
+    pending=!ready;
+    if(!ready||reduce||!stageEl){ renderComparison(false,{force:true,reason:'mode'}); return true; }
+    if(modeSwapTimer) window.clearTimeout(modeSwapTimer);
+    stageEl.classList.add('is-switching');
+    modeSwapTimer=window.setTimeout(function(){
+      renderComparison(true,{force:true,reason:'mode'});
+      window.requestAnimationFrame(function(){ stageEl.classList.remove('is-switching'); });
+      modeSwapTimer=0;
+    },90);
+    return true;
   }
 
   /* ---- API publica ---- */
   function refreshFromDOM(){
-    if(!ready)return; var vis={}, standing=false;
+    var vis={}, standing=false;
     DSI.forEach(function(id){ var el=$(id); vis[id]=!!(el && !el.classList.contains('hidden-item')); });
     var sb=$('dsi-standing-badge'); standing=!!(sb && !sb.classList.contains('hidden-item'));
-    applyVisible(vis); setDeskMode(standing,false);
+    primOfficeState={vis:vis,opts:{standing:standing}};
+    hasPrimOfficeState=true;
+    renderComparison(false,{force:true,reason:'refresh'});
   }
-  function setVisible(vis,opts){ if(!ready){ pending={vis:vis,opts:opts||{}}; return; } applyVisible(vis||{}); setDeskMode(!!(opts&&opts.standing),true); }
-  var pending=null;
+  function setVisible(vis,opts){
+    var nextVis=Object.assign({},vis||{}), nextOpts=Object.assign({},opts||{}), previous=primOfficeState;
+    var changedIds=DSI.filter(function(id){ return !!previous.vis[id]!==!!nextVis[id]; });
+    var standingChanged=!!previous.opts.standing!==!!nextOpts.standing;
+    primOfficeState={vis:nextVis,opts:nextOpts};
+    hasPrimOfficeState=true;
+    pending=!ready;
+    var bulkChange=changedIds.length>=3;
+    renderComparison(true,{force:comparisonMode==='primoffice'&&(standingChanged||bulkChange),reason:standingChanged?'standing':(bulkChange?'preset':'cart'),changedIds:changedIds});
+  }
+  var pending=false;
 
   /* ---- arranque diferido ---- */
   function reveal(){
@@ -1746,7 +2213,7 @@ function stepSmoothZoom(){
     if(stageEl) stageEl.removeAttribute('hidden');
     if(loaderEl) loaderEl.style.display='none';
     if(toolbar) toolbar.style.display='';
-    if(pending){ setVisible(pending.vis,pending.opts); pending=null; }
+    if(pending){ renderComparison(false,{force:true,reason:'reveal'}); pending=false; }
   }
   function fallback(){
     if(stageEl) stageEl.setAttribute('hidden','');
@@ -1815,7 +2282,7 @@ function stepSmoothZoom(){
     } else { init(); }
   }
 
-  window.Setup3D={ setVisible:setVisible, setView:setView, refreshFromDOM:refreshFromDOM, isReady:function(){return ready;}, reset:resetPositions, setFree:setFree };
+  window.Setup3D={ setVisible:setVisible, setDiagnosis:setDiagnosis, setMode:setMode, setView:setView, refreshFromDOM:refreshFromDOM, isReady:function(){return ready;}, reset:resetPositions, setFree:setFree };
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
 })(); /* setup-3d ready */

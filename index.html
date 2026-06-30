@@ -848,6 +848,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87V15.13a1 1 0 01-1.447.9L15 14M3 8h12v8H3V8z" stroke-linecap="round"/></svg>
             Vista previa en tiempo real
           </div>
+          <div class="s3d-comparison" role="group" aria-label="Comparar estados del setup">
+            <button type="button" class="s3d-comparison__btn is-active" data-setup-state="current" aria-pressed="true">Tu setup actual</button>
+            <button type="button" class="s3d-comparison__btn" data-setup-state="primoffice" aria-pressed="false">Con PrimOffice</button>
+          </div>
           <div class="s3d-stage" id="s3dStage" hidden>
             <div class="s3d-toolbar" id="s3dToolbar" role="toolbar" aria-label="Camara 3D">
               <button type="button" class="s3d-cam is-active" data-view="perspectiva" aria-pressed="true" title="Perspectiva 3/4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg><span>3/4</span></button>
@@ -1113,8 +1117,8 @@ var P={
   hub_usb:{name:'pHub · Hub USB-C 7 en 1',cat:'Conectividad',price:26690,icon:'hub',dsEl:'dsi-hub'},
   organizador_prem:{name:'pBox · Organizador de cables',cat:'Orden',price:42839,icon:'org',dsEl:'dsi-organizer',stock:false,badge:'Sin stock'},
   luz_led:{name:'pGlow · Barra de luz para monitor',cat:'Iluminación',price:62999,icon:'light',dsEl:'dsi-lightbar,dsi-monitor',stock:false,badge:'Sin stock'},
-  reposamuñecas:{name:'pEase · Reposamuñecas ergonómico',cat:'Ergonomía',price:19949,icon:'wrist',dsEl:''},
-  almohadilla:{name:'pLumbar · Soporte lumbar',cat:'Ergonomía',price:13464,icon:'back',dsEl:'',stock:false,badge:'Sin stock'},
+  reposamuñecas:{name:'pEase · Reposamuñecas ergonómico',cat:'Ergonomía',price:19949,icon:'wrist',dsEl:'dsi-wrist-rest'},
+  almohadilla:{name:'pLumbar · Soporte lumbar',cat:'Ergonomía',price:13464,icon:'back',dsEl:'dsi-lumbar',stock:false,badge:'Sin stock'},
   standing_desk:{name:'pStanding · Escritorio eléctrico regulable',cat:'Mueble',price:443987,icon:'stand',dsEl:'dsi-standing-badge',stock:false,badge:'Sin stock'}
 };
 
@@ -1328,7 +1332,7 @@ function updatePreview(){
   // Toggle elements
   ['dsi-lightbar','dsi-monitor','dsi-monitor-stand','dsi-monitor-arm',
    'dsi-laptop','dsi-stand','dsi-stand-leg','dsi-keyboard','dsi-mousepad',
-   'dsi-mouse','dsi-hub','dsi-organizer','dsi-pens','dsi-chair','dsi-standing-badge'].forEach(function(id){
+   'dsi-wrist-rest','dsi-mouse','dsi-hub','dsi-organizer','dsi-pens','dsi-chair','dsi-lumbar','dsi-standing-badge'].forEach(function(id){
     var el=document.getElementById(id);
     if(!el)return;
     if(visible[id]){el.classList.remove('hidden-item');}
@@ -1336,11 +1340,29 @@ function updatePreview(){
   });
 
   // Count
-  var cnt=CONFIGURATOR_PRODUCT_IDS.filter(function(id){return !!cartState[id];}).length;
+  var cnt=FULL_CART_IDS.filter(function(id){return isProductSelected(id)&&getDsIds(id).length>0;}).length;
   document.getElementById('preview-count').textContent=cnt;
   if(window.Setup3D){window.Setup3D.setVisible(visible,{standing:!!visible['dsi-standing-badge']});}
   updateRadarChart();
 }
+
+function setSetupComparisonMode(mode){
+  if(mode!=='current'&&mode!=='primoffice')return;
+  document.querySelectorAll('[data-setup-state]').forEach(function(btn){
+    var active=btn.getAttribute('data-setup-state')===mode;
+    btn.classList.toggle('is-active',active);
+    btn.setAttribute('aria-pressed',active?'true':'false');
+  });
+  if(window.Setup3D&&typeof window.Setup3D.setMode==='function'){
+    window.Setup3D.setMode(mode);
+  }
+}
+
+document.querySelectorAll('[data-setup-state]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    setSetupComparisonMode(this.getAttribute('data-setup-state'));
+  });
+});
 
 function updateTotal(){
   var t=0;
@@ -1571,6 +1593,10 @@ function showResult(){
     document.getElementById('score-arc').style.strokeDashoffset=188.5-(r.score/18)*188.5;
   },350);
 
+  if(window.Setup3D&&typeof window.Setup3D.setDiagnosis==='function'){
+    window.Setup3D.setDiagnosis({answers:answers.slice()});
+  }
+  setSetupComparisonMode('current');
   renderCart(r.items,r.extras);
   updateTotal();
   updatePreview();

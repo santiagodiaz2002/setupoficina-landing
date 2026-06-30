@@ -8,6 +8,16 @@
    ===================================================================== */
 
 /* ---------- ESCENA 3D (reemplaza el preview 2D dentro del resultado) ---------- */
+.s3d-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin:0 0 .75rem;padding:4px;
+  border:1px solid rgba(255,255,255,.12);border-radius:11px;background:rgba(8,18,32,.48)}
+.s3d-comparison__btn{min-height:38px;padding:.55rem .75rem;border:1px solid transparent;border-radius:8px;
+  font:700 .76rem/1.2 inherit;color:rgba(255,255,255,.66);background:transparent;
+  transition:background .18s,border-color .18s,color .18s,box-shadow .18s,transform .15s}
+.s3d-comparison__btn:hover{color:#fff;background:rgba(255,255,255,.07)}
+.s3d-comparison__btn:active{transform:translateY(1px)}
+.s3d-comparison__btn.is-active{color:#fff;border-color:rgba(56,189,248,.58);
+  background:linear-gradient(135deg,rgba(3,105,161,.92),rgba(14,165,233,.72));box-shadow:0 5px 16px rgba(3,105,161,.26)}
+.s3d-comparison__btn:focus-visible{outline:3px solid rgba(56,189,248,.65);outline-offset:2px}
 .s3d-stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius-lg,20px);overflow:hidden;
   --s3d-photo-opacity:.82;--s3d-photo-scale:106%;
   background:
@@ -19,9 +29,12 @@
     linear-gradient(180deg,rgba(246,250,247,0) 0%,rgba(238,235,224,.04) 46%,rgba(221,211,190,.42) 64%,rgba(209,194,164,.96) 82%,rgba(209,194,164,1) 100%),
     url("../assets/images/comparacion/setup-despues.webp");
   background-repeat:no-repeat;background-position:center top;background-size:var(--s3d-photo-scale) auto;
-  opacity:var(--s3d-photo-opacity);filter:saturate(.98) contrast(.98) brightness(1.02);
+  opacity:var(--s3d-photo-opacity);filter:saturate(.98) contrast(.98) brightness(1.02);transition:opacity .18s ease;
   -webkit-mask-image:linear-gradient(180deg,#000 0 58%,rgba(0,0,0,.82) 64%,rgba(0,0,0,.18) 74%,transparent 84%);
   mask-image:linear-gradient(180deg,#000 0 58%,rgba(0,0,0,.82) 64%,rgba(0,0,0,.18) 74%,transparent 84%)}
+.s3d-stage[data-s3d-setup="current"]::before{background-image:
+    linear-gradient(180deg,rgba(246,250,247,0) 0%,rgba(238,235,224,.04) 46%,rgba(221,211,190,.42) 64%,rgba(209,194,164,.96) 82%,rgba(209,194,164,1) 100%),
+    url("../assets/images/comparacion/setup-antes.webp")}
 .s3d-stage[data-s3d-view="frontal"]{--s3d-photo-opacity:.46;--s3d-photo-scale:112%}
 .s3d-stage[data-s3d-view="frontal"]::before{
   -webkit-mask-image:linear-gradient(180deg,#000 0 44%,rgba(0,0,0,.48) 56%,transparent 72%);
@@ -31,7 +44,9 @@
 .s3d-stage[data-s3d-view="superior"]::before{
   -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.34) 0,transparent 30%);
   mask-image:linear-gradient(180deg,rgba(0,0,0,.34) 0,transparent 30%)}
-.s3d-host{position:absolute;inset:0;z-index:1}
+.s3d-host{position:absolute;inset:0;z-index:1;opacity:1;transform:scale(1);transform-origin:center;transition:opacity .18s ease,transform .18s ease}
+.s3d-stage.is-switching::before{opacity:.30}
+.s3d-stage.is-switching .s3d-host{opacity:.34;transform:scale(.992)}
 .s3d-host canvas{display:block;width:100%!important;height:100%!important;touch-action:none;outline:none;background:transparent}
 .s3d-toolbar{position:absolute;top:10px;right:10px;z-index:3;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 20px)}
 .s3d-cam{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:0 10px;border-radius:9px;
@@ -46,6 +61,9 @@
   color:rgba(230,246,253,.9);font-size:.85rem;font-weight:600}
 .s3d-spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(56,189,248,.22);border-top-color:var(--accent,#38bdf8);animation:s3dSpin .9s linear infinite}
 @keyframes s3dSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){
+  .s3d-stage::before,.s3d-host{transition:none}
+}
 .s3d-hint{position:absolute;left:10px;bottom:10px;z-index:3;margin:0;padding:6px 11px;border-radius:100px;
   font-size:.68rem;font-weight:600;color:rgba(240,250,255,.88);background:rgba(9,18,32,.66);
   border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);pointer-events:none}
