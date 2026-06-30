@@ -32,8 +32,9 @@
   var renderer, scene, camera, controls, host, toolbar, loaderEl, deskScene2D, stageEl, hintEl;
   var ready = false, initStarted = false, running = false, camFly = false;
   var objects = {}, deskTop, deskEdge, deskBeam, deskControl, standingFrame, surfaceAnchor, legL, legR, roomFloor, roomWall, roomBaseboard, roomPlant, roomArt;
-  var glowSpot, glowTarget, glowPool, hemiLight, ambientLight, keyLight, rimLight, fillLight, modeSwapTimer=0;
+  var glowSpot, glowTarget, glowPool, hemiLight, ambientLight, keyLight, rimLight, fillLight, modeSwapTimer=0, bulkSwapTimer=0;
   var activeView='perspectiva', cameraTweenToken=0, userAdjustedCamera=false;
+  var lastDesiredVisibility={}, productTransitionToken=0;
   var deskButtons = [], deskModeStanding = false;
   var DESK_SIT = 0.73, DESK_STAND = 1.08, MAT_TOP = 0.0022, curTopY = DESK_SIT;
   var DSI = ['dsi-chair','dsi-lumbar','dsi-monitor','dsi-monitor-base','dsi-monitor-stand','dsi-monitor-arm','dsi-laptop','dsi-stand','dsi-keyboard','dsi-wrist-rest','dsi-mousepad','dsi-mouse','dsi-hub','dsi-organizer','dsi-lightbar','dsi-context'];
@@ -249,8 +250,9 @@
   function bDeskContext(){
     var root=new THREE.Group();
     var cableM=surfaceMat(0x222832,'rubber',{r:0.86}), cableAlt=surfaceMat(0x56606c,'rubber',{r:0.82});
-    var paperM=surfaceMat(0xf0eadc,'paper',{r:0.97}), paperAlt=surfaceMat(0xd7e5ed,'paper',{r:0.96});
+    var paperM=surfaceMat(0xe4dccb,'paper',{r:0.97}), paperAlt=surfaceMat(0xc8dce7,'paper',{r:0.96});
     var chargerM=mat(0x343b44,{r:0.68,m:0.12});
+    var inkM=mat(0x8d98a3,{r:0.9}), plugM=mat(0xaeb5bb,{r:0.42,m:0.62});
 
     function group(name){ var g=new THREE.Group(); g.name=name; g.visible=false; root.add(g); return g; }
     function cable(parent,points,radius,material){
@@ -258,53 +260,59 @@
       var line=mesh(new THREE.TubeGeometry(curve,24,radius||0.004,8,false),material||cableM);
       line.castShadow=false; parent.add(line); return line;
     }
-    function paper(parent,x,z,ry,color){
-      var p=mesh(rbox(0.22,0.004,0.28,0.006),color||paperM); p.position.set(x,0.006,z); p.rotation.y=ry||0; parent.add(p);
-      var mark=box(0.14,0.001,0.006,mat(0x9eabb5,{r:0.9})); mark.position.set(x,0.009,z-0.055); mark.rotation.y=ry||0; mark.castShadow=false; parent.add(mark);
+    function paper(parent,x,z,ry,count,color){
+      var stack=new THREE.Group(); stack.position.set(x,0,z); stack.rotation.y=ry||0; parent.add(stack);
+      count=count||1;
+      for(var i=0;i<count;i++){
+        var p=mesh(rbox(0.18,0.0025,0.23,0.004),color||paperM);
+        p.position.set(i*0.004,0.004+i*0.0025,-i*0.003); p.rotation.y=rad(i*1.4); stack.add(p);
+      }
+      for(var line=0;line<3;line++){
+        var mark=box(0.105-line*0.012,0.001,0.004,inkM);
+        mark.position.set(-0.018,0.006+count*0.0025,-0.055+line*0.020); mark.castShadow=false; stack.add(mark);
+      }
     }
     function charger(parent,x,z,ry){
-      var c=mesh(rbox(0.11,0.035,0.075,0.012),chargerM); c.position.set(x,0.020,z); c.rotation.y=ry||0; parent.add(c);
+      var unit=new THREE.Group(); unit.position.set(x,0.003,z); unit.rotation.y=ry||0; parent.add(unit);
+      var c=mesh(rbox(0.10,0.032,0.068,0.011),chargerM); c.position.y=0.016; unit.add(c);
+      var seam=box(0.072,0.001,0.002,inkM); seam.position.set(0,0.033,0.010); seam.castShadow=false; unit.add(seam);
+      var plug=mesh(rbox(0.025,0.010,0.018,0.003),plugM); plug.position.set(0,0.014,-0.042); plug.castShadow=false; unit.add(plug);
+    }
+    function adapter(parent,x,z,ry){
+      var unit=new THREE.Group(); unit.position.set(x,0.004,z); unit.rotation.y=ry||0; parent.add(unit);
+      var body=mesh(rbox(0.062,0.020,0.043,0.007),chargerM); body.position.y=0.010; unit.add(body);
+      var tongue=mesh(rbox(0.021,0.008,0.015,0.002),plugM); tongue.position.set(0,0.010,-0.029); tongue.castShadow=false; unit.add(tongue);
+    }
+    function displacedKeyboard(parent,x,z,ry){
+      var unit=new THREE.Group(); unit.position.set(x,0.004,z); unit.rotation.y=ry||0; parent.add(unit);
+      var base=mesh(rbox(0.32,0.022,0.112,0.008),chargerM); base.position.y=0.011; unit.add(base);
+      for(var row=0;row<4;row++){
+        var keys=box(0.275,0.002,0.012,inkM); keys.position.set(0,0.023,-0.035+row*0.023); keys.castShadow=false; unit.add(keys);
+      }
+    }
+    function displacedMouse(parent,x,z,ry){
+      var unit=new THREE.Group(); unit.position.set(x,0.004,z); unit.rotation.y=ry||0; parent.add(unit);
+      var mouse=mesh(new THREE.SphereGeometry(0.035,14,10),chargerM); mouse.scale.set(0.78,0.45,1.15); mouse.position.y=0.016; unit.add(mouse);
     }
 
     var clean=group('context-clean');
     cable(clean,[[-0.42,0.008,-0.25],[-0.20,0.008,-0.31],[0.12,0.008,-0.31]],0.0035,cableAlt);
 
     var medium=group('context-medium');
-    cable(medium,[[-0.50,0.010,-0.03],[-0.30,0.010,0.08],[-0.08,0.010,-0.22]],0.004);
-    cable(medium,[[0.44,0.010,0.10],[0.28,0.010,-0.04],[0.50,-0.10,-0.36]],0.004,cableAlt);
-    cable(medium,[[-0.10,0.010,0.28],[0.12,0.010,0.23],[0.27,0.010,0.30]],0.0038);
-    paper(medium,0.46,0.18,rad(-10)); charger(medium,-0.54,0.22,rad(14));
+    paper(medium,0.46,0.18,rad(-9),2); paper(medium,0.24,0.28,rad(8),1,paperAlt);
+    charger(medium,-0.53,0.21,rad(12)); adapter(medium,0.50,-0.09,rad(-12));
+    displacedMouse(medium,0.34,0.29,rad(9));
 
     var messy=group('context-messy');
-    cable(messy,[[-0.60,0.012,-0.16],[-0.24,0.012,0.12],[0.28,0.012,-0.22],[0.60,0.012,0.20]],0.005);
-    cable(messy,[[-0.56,0.012,0.24],[-0.20,0.012,-0.18],[0.20,0.012,0.25],[0.55,0.012,-0.12]],0.0045,cableAlt);
-    cable(messy,[[-0.40,0.012,0.32],[-0.08,0.012,0.02],[0.36,0.012,0.30]],0.0045);
-    cable(messy,[[0.48,0.012,-0.26],[0.22,0.012,-0.03],[-0.36,0.012,-0.29]],0.0045,cableAlt);
-    cable(messy,[[-0.62,0.010,0.02],[-0.72,-0.12,0.34],[-0.64,-0.34,0.40]],0.005);
-    cable(messy,[[0.54,0.010,0.06],[0.68,-0.10,0.35],[0.58,-0.30,0.42]],0.005,cableAlt);
-    cable(messy,[[-0.18,0.010,-0.30],[-0.02,-0.12,-0.37],[0.18,-0.28,-0.38]],0.0045);
-    cable(messy,[[0.14,0.010,0.31],[-0.18,0.010,0.20],[-0.48,0.010,0.28]],0.004);
-    paper(messy,0.47,0.14,rad(-18)); paper(messy,-0.43,-0.04,rad(22),paperAlt); paper(messy,0.18,0.25,rad(8));
+    paper(messy,0.47,0.14,rad(-16),3); paper(messy,-0.44,-0.04,rad(20),2,paperAlt); paper(messy,0.15,0.29,rad(7),1);
     charger(messy,-0.55,0.20,rad(24)); charger(messy,0.52,-0.18,rad(-16));
-    var looseKeyboard=mesh(rbox(0.34,0.025,0.12,0.008),chargerM); looseKeyboard.position.set(-0.18,0.018,0.20); looseKeyboard.rotation.y=rad(17); messy.add(looseKeyboard);
-    var looseMouse=mesh(new THREE.SphereGeometry(0.035,14,10),chargerM); looseMouse.scale.set(0.78,0.45,1.15); looseMouse.position.set(0.42,0.028,0.27); messy.add(looseMouse);
+    adapter(messy,-0.37,-0.27,rad(18)); adapter(messy,0.46,0.29,rad(-8));
+    displacedKeyboard(messy,-0.20,0.26,rad(14)); displacedMouse(messy,0.40,0.29,rad(-11));
 
     var tidy=group('context-tidy');
     cable(tidy,[[-0.42,0.008,-0.25],[-0.12,0.008,-0.31],[0.32,0.008,-0.31]],0.0032,cableAlt);
 
-    var hub=group('context-hub');
-    cable(hub,[[-0.44,0.010,-0.02],[-0.08,0.010,-0.17],[0.53,0.010,-0.035]],0.0032,cableAlt);
-    cable(hub,[[0.03,0.010,0.18],[0.22,0.010,0.08],[0.53,0.010,-0.035]],0.0032,cableM);
-    cable(hub,[[0.33,0.010,0.20],[0.42,0.010,0.08],[0.53,0.010,-0.035]],0.0032,cableAlt);
-
-    var boxRoute=group('context-box');
-    cable(boxRoute,[[0.53,0.010,-0.035],[0.42,0.008,-0.29],[0.18,-0.20,-0.34],[0.02,-0.20,-0.13]],0.0038,cableM);
-
-    var hubBox=group('context-hub-box');
-    cable(hubBox,[[-0.44,0.010,-0.02],[-0.08,0.010,-0.17],[0.53,0.010,-0.035],[0.34,-0.08,-0.30],[0.02,-0.20,-0.13]],0.0035,cableAlt);
-    cable(hubBox,[[0.30,0.010,0.20],[0.42,0.010,0.08],[0.53,0.010,-0.035]],0.0032,cableM);
-
-    root.userData.cableCounts={clean:1,medium:3,messy:8,tidy:1,hub:3,box:1,hubBox:2};
+    root.userData.cableCounts={clean:1,medium:0,messy:0,tidy:1};
     return root;
   }
 
@@ -494,7 +502,7 @@
     var black=mat(0x111316,{m:0.22,r:0.46});
     var satin=mat(0x262a2d,{m:0.18,r:0.52});
     var pad=mat(0xb5b8b2,{m:0.04,r:0.82});
-    var slotM=mat(0xf1f3f5,{r:0.62,m:0.02});
+    var slotM=mat(0x050607,{r:0.78,m:0.04});
 
     function railBetween(a,b,w,d,material,radius){
       var dir=new THREE.Vector3().subVectors(b,a);
@@ -506,66 +514,52 @@
       return part;
     }
 
-    var baseL=mesh(rbox(0.026,0.010,0.255,0.010),black); baseL.position.set(-0.126,0.005,0); g.add(baseL);
-    var baseR=mesh(rbox(0.026,0.010,0.255,0.010),black); baseR.position.set(0.126,0.005,0); g.add(baseR);
-    var baseF=mesh(rbox(0.250,0.010,0.024,0.009),black); baseF.position.set(0,0.005,0.112); g.add(baseF);
-    var baseB=mesh(rbox(0.250,0.010,0.024,0.009),black); baseB.position.set(0,0.005,-0.112); g.add(baseB);
+    /* Base en U de 26 x 22 cm, rasgo principal de la referencia oficial. */
+    var baseL=mesh(rbox(0.028,0.011,0.230,0.010),black); baseL.position.set(-0.112,0.006,0); g.add(baseL);
+    var baseR=mesh(rbox(0.028,0.011,0.230,0.010),black); baseR.position.set(0.112,0.006,0); g.add(baseR);
+    var baseF=mesh(rbox(0.252,0.011,0.026,0.009),black); baseF.position.set(0,0.006,0.103); g.add(baseF);
+    var baseB=mesh(rbox(0.252,0.011,0.026,0.009),black); baseB.position.set(0,0.006,-0.103); g.add(baseB);
 
     for(var sx=-1;sx<=1;sx+=2){
-      var rear=mesh(rbox(0.020,0.122,0.025,0.010),black);
-      rear.position.set(sx*0.126,0.065,-0.088); g.add(rear);
-
-      var front=mesh(rbox(0.018,0.058,0.022,0.009),black);
-      front.position.set(sx*0.126,0.035,0.100); g.add(front);
-
-      var sideTop=railBetween(
-        new THREE.Vector3(sx*0.126,0.064,0.104),
-        new THREE.Vector3(sx*0.126,0.128,-0.086),
-        0.020,0.024,black,0.009
-      );
-      g.add(sideTop);
-
-      var sideInside=railBetween(
-        new THREE.Vector3(sx*0.112,0.063,0.101),
-        new THREE.Vector3(sx*0.112,0.124,-0.080),
-        0.010,0.014,satin,0.006
-      );
-      g.add(sideInside);
+      var rear=mesh(rbox(0.026,0.145,0.030,0.011),black);
+      rear.position.set(sx*0.108,0.078,-0.088); g.add(rear);
 
       var slot=mesh(rbox(0.005,0.040,0.012,0.006),slotM);
-      slot.position.set(sx*0.132,0.076,-0.080);
+      slot.position.set(sx*0.122,0.090,-0.079); slot.castShadow=false;
       g.add(slot);
 
+      /* Dos superficies anchas, no cuatro barras finas: silueta reconocible
+         y contacto paralelo con la notebook contextual. */
       var rail=railBetween(
-        new THREE.Vector3(sx*0.062,0.061,0.108),
-        new THREE.Vector3(sx*0.062,0.126,-0.096),
-        0.030,0.016,black,0.008
+        new THREE.Vector3(sx*0.072,0.107,0.108),
+        new THREE.Vector3(sx*0.072,0.155,-0.096),
+        0.062,0.014,black,0.009
       );
       g.add(rail);
 
       var railPad=railBetween(
-        new THREE.Vector3(sx*0.062,0.066,0.090),
-        new THREE.Vector3(sx*0.062,0.121,-0.083),
-        0.020,0.004,pad,0.004
+        new THREE.Vector3(sx*0.072,0.115,0.094),
+        new THREE.Vector3(sx*0.072,0.159,-0.078),
+        0.046,0.004,pad,0.004
       );
       railPad.castShadow=false;
       g.add(railPad);
 
-      var stop=mesh(rbox(0.052,0.016,0.014,0.006),black);
-      stop.position.set(sx*0.062,0.058,0.119);
-      stop.rotation.x=rad(11);
+      var stop=mesh(rbox(0.062,0.024,0.014,0.006),black);
+      stop.position.set(sx*0.072,0.111,0.120);
+      stop.rotation.x=rad(13);
       g.add(stop);
 
-      var stopFace=mesh(rbox(0.036,0.004,0.010,0.003),satin);
-      stopFace.position.set(sx*0.062,0.065,0.116);
-      stopFace.rotation.x=rad(11);
+      var stopFace=mesh(rbox(0.044,0.004,0.010,0.003),satin);
+      stopFace.position.set(sx*0.072,0.120,0.116);
+      stopFace.rotation.x=rad(13);
       stopFace.castShadow=false;
       g.add(stopFace);
     }
 
-    var rearBrace=mesh(rbox(0.198,0.014,0.020,0.007),black);
-    rearBrace.position.set(0,0.126,-0.104);
-    rearBrace.rotation.x=rad(11);
+    var rearBrace=mesh(rbox(0.218,0.014,0.020,0.007),black);
+    rearBrace.position.set(0,0.153,-0.104);
+    rearBrace.rotation.x=rad(13);
     g.add(rearBrace);
 
     return g;
@@ -1248,6 +1242,7 @@
     var value=diagnosisAnswers[index];
     return value===0||value===1||value===2?value:0;
   }
+  function visualChairType(){return comparisonMode==='primoffice'?0:diagnosisValue(4);}
 
   function configureLighting(glowOn,animated){
     if(!renderer||!hemiLight||!ambientLight||!keyLight||!rimLight||!fillLight) return;
@@ -1271,8 +1266,18 @@
     });
   }
 
-  function configureVisualContext(vis,animated){
-    var device=diagnosisValue(2), order=diagnosisValue(3), chairType=diagnosisValue(4);
+  function setContextOpacity(group,value){
+    if(!group)return;
+    group.traverse(function(node){
+      if(!node.isMesh||!node.material)return;
+      if(!node.userData.contextFadeMaterial){node.material=node.material.clone();node.material.transparent=true;node.userData.contextFadeMaterial=true;}
+      node.material.opacity=value;node.material.depthWrite=value>0.98;
+    });
+  }
+
+  function configureVisualContext(vis,animated,transition){
+    transition=transition||{};
+    var device=diagnosisValue(2), order=diagnosisValue(3), chairType=visualChairType();
     var chairNames=['chair-ergonomic','chair-basic','chair-dining'];
     var chairHolder=objects['dsi-chair'];
     if(chairHolder){
@@ -1287,20 +1292,30 @@
     var contextHolder=objects['dsi-context'];
     var cableCount=0;
     if(contextHolder){
-      ['context-clean','context-medium','context-messy','context-tidy','context-hub','context-box','context-hub-box'].forEach(function(name){
-        var group=contextHolder.getObjectByName(name); if(group) group.visible=false;
-      });
+      var contextNames=['context-clean','context-medium','context-messy','context-tidy'];
+      var targetContext='context-tidy';
       if(comparisonMode==='current'){
         var currentNames=['context-clean','context-medium','context-messy'];
-        var currentGroup=contextHolder.getObjectByName(currentNames[order]);
-        if(currentGroup) currentGroup.visible=true;
-        cableCount=[1,3,8][order];
+        targetContext=currentNames[order];
+        cableCount=[1,0,0][order];
       }else{
         var hasBox=!!vis['dsi-organizer'], hasHub=!!vis['dsi-hub'];
-        if(hasBox&&hasHub&&order>0){ var combined=contextHolder.getObjectByName('context-hub-box'); if(combined) combined.visible=true; cableCount=2; }
-        else if(hasBox){ var boxRoutes=contextHolder.getObjectByName('context-box'); if(boxRoutes) boxRoutes.visible=true; cableCount=1; }
-        else if(hasHub){ var hubRoutes=contextHolder.getObjectByName('context-hub'); if(hubRoutes) hubRoutes.visible=true; cableCount=3; }
-        else { var tidy=contextHolder.getObjectByName('context-tidy'); if(tidy) tidy.visible=true; cableCount=1; }
+        if(hasBox||hasHub){targetContext='';cableCount=0;}
+        else {targetContext='context-tidy';cableCount=1;}
+      }
+      var previousGroups=contextNames.map(function(name){return contextHolder.getObjectByName(name);}).filter(function(group){return group&&group.visible&&group.name!==targetContext;});
+      var targetGroup=contextHolder.getObjectByName(targetContext);
+      if(animated&&!reduce&&running&&!transition.bulk&&previousGroups.length&&targetGroup){
+        targetGroup.visible=true; setContextOpacity(targetGroup,0);
+        addTween(480,function(e){
+          setContextOpacity(targetGroup,e);
+          previousGroups.forEach(function(group){setContextOpacity(group,1-e);});
+        },function(){
+          setContextOpacity(targetGroup,1);
+          previousGroups.forEach(function(group){group.visible=false;setContextOpacity(group,1);});
+        });
+      }else{
+        contextNames.forEach(function(name){var group=contextHolder.getObjectByName(name);if(group){group.visible=name===targetContext;setContextOpacity(group,1);}});
       }
     }
 
@@ -1313,6 +1328,7 @@
       stageEl.setAttribute('data-s3d-laptop-position',vis['dsi-stand']?'elevated-stand':(vis['dsi-laptop']?'flat':'hidden'));
       stageEl.setAttribute('data-s3d-order',['clean','medium','messy'][order]);
       stageEl.setAttribute('data-s3d-chair',['ergonomic','basic','dining'][chairType]);
+      stageEl.setAttribute('data-s3d-diagnosed-chair',['ergonomic','basic','dining'][diagnosisValue(4)]);
       stageEl.setAttribute('data-s3d-cables',String(cableCount));
       stageEl.setAttribute('data-s3d-box',vis['dsi-organizer']?'true':'false');
       stageEl.setAttribute('data-s3d-hub',vis['dsi-hub']?'true':'false');
@@ -1355,7 +1371,7 @@
     } else if(id==='dsi-mouse'){
       y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
     } else if(id==='dsi-lumbar'){
-      var chair=diagnosisValue(4);
+      var chair=visualChairType();
       y = chair===0?0.79:(chair===1?0.76:0.75);
       z = chair===0?0.155:(chair===1?0.145:0.14);
     }
@@ -1385,8 +1401,34 @@
     if(!anim) render1();
   }
 
-  function applyVisible(vis,animated){
+  function setHolderScale(holder,factor){
+    var rest=holder.userData.restScale||new THREE.Vector3(1,1,1);
+    holder.scale.set(rest.x*factor,rest.y*factor,rest.z*factor);
+  }
+  function productHighlight(holder,color){
+    if(reduce||!scene||!holder) return;
+    var helper=new THREE.BoxHelper(holder,color||0x38bdf8); helper.material.transparent=true; helper.material.opacity=0.48; helper.renderOrder=8; scene.add(helper);
+    addTween(680,function(e){ helper.material.opacity=lerp(0.48,0,e); },function(){ scene.remove(helper); helper.geometry.dispose(); helper.material.dispose(); });
+  }
+  function animateHolder(id,show,duration){
+    var holder=objects[id]; if(!holder||id==='dsi-context') return;
+    var token=++productTransitionToken; holder.userData.transitionToken=token;
+    var targetScale=id==='dsi-monitor-base'?holder.scale.clone():(holder.userData.restScale||new THREE.Vector3(1,1,1)).clone();
+    function scaleTo(factor){holder.scale.set(targetScale.x*factor,targetScale.y*factor,targetScale.z*factor);}
+    if(show){
+      holder.visible=true; scaleTo(0.88);
+      addTween(duration,function(e){ if(holder.userData.transitionToken!==token)return; scaleTo(lerp(0.88,1,e)); },function(){ if(holder.userData.transitionToken===token)scaleTo(1); });
+      if(id!=='dsi-monitor'&&id!=='dsi-monitor-base'&&id!=='dsi-laptop'&&id!=='dsi-chair') productHighlight(holder,0x38bdf8);
+    }else{
+      addTween(duration,function(e){ if(holder.userData.transitionToken!==token)return; scaleTo(lerp(1,0.88,e)); },function(){
+        if(holder.userData.transitionToken!==token)return; holder.visible=false; scaleTo(1); placeAll(true);
+      });
+    }
+  }
+
+  function applyVisible(vis,animated,transition){
     vis=Object.assign({},vis||{});
+    transition=transition||{};
 
     /* Mantener coherencia sin inventar productos:
        - El monitor solo aparece si fue seleccionado desde el carrito.
@@ -1398,6 +1440,10 @@
     if(vis['dsi-monitor-arm']){
       vis['dsi-monitor-stand']=false;
       vis['dsi-monitor-base']=false;
+    }else if(vis['dsi-monitor']&&!vis['dsi-monitor-stand']){
+      /* Si pArm se retira, el monitor vuelve a una base coherente incluso
+         cuando el diagnostico original era una notebook. */
+      vis['dsi-monitor-base']=true;
     }
     if(!vis['dsi-monitor']){
       vis['dsi-lightbar']=false;
@@ -1409,9 +1455,24 @@
       vis['dsi-chair']=true;
     }
 
-    DSI.forEach(function(id){ if(objects[id]) objects[id].visible=!!vis[id]; });
-    configureVisualContext(vis,animated);
-    placeAll(false);
+    var changed=DSI.filter(function(id){return !!lastDesiredVisibility[id]!==!!vis[id];});
+    var bulk=!!transition.bulk||!animated||reduce||!running;
+    if(bulk){
+      DSI.forEach(function(id){ if(objects[id]){objects[id].visible=!!vis[id];setHolderScale(objects[id],1);} });
+    }else{
+      DSI.forEach(function(id){
+        var holder=objects[id]; if(!holder)return;
+        if(vis[id]) holder.visible=true;
+        else if(changed.indexOf(id)===-1) holder.visible=false;
+      });
+    }
+    configureVisualContext(vis,animated,transition);
+    placeAll(!bulk&&changed.length>0);
+    if(!bulk){
+      changed.forEach(function(id){animateHolder(id,!!vis[id],vis[id]?560:430);});
+    }
+    lastDesiredVisibility=Object.assign({},vis);
+    if(stageEl&&transition.productIds&&transition.productIds.length)stageEl.setAttribute('data-s3d-last-products',transition.productIds.join(','));
   }
 
   function makeWoodFloorMaterial(){
@@ -1698,6 +1759,7 @@
       holder.userData.draggable=cfg.draggable!==false;
       holder.add(cfg.build());
       if(id==='dsi-hub') holder.scale.setScalar(cfg.scale);
+      holder.userData.restScale=holder.scale.clone();
       holder.visible=false; objects[id]=holder;
       if(id==='dsi-chair'){ scene.add(holder); }
       else if(id==='dsi-lumbar'&&objects['dsi-chair']){ objects['dsi-chair'].add(holder); }
@@ -2153,9 +2215,9 @@ function stepSmoothZoom(){
     if(stageEl) stageEl.setAttribute('data-s3d-setup',comparisonMode);
     applyFallbackVisible(state.vis,!!state.opts.standing);
     if(!ready) return;
-    applyVisible(state.vis,!!animated);
-    setDeskMode(!!state.opts.standing,!!animated);
     frameRequest=frameRequest||{};
+    applyVisible(state.vis,!!animated,frameRequest);
+    setDeskMode(!!state.opts.standing,!!animated);
     if(frameRequest.force){ autoFrame(!!animated,frameRequest.reason||'content',activeView); }
     else if(comparisonMode==='primoffice'&&importantChangeOutsideFrame(frameRequest.changedIds)){ autoFrame(!!animated,'important-product',activeView); }
   }
@@ -2167,7 +2229,7 @@ function stepSmoothZoom(){
       return Number.isInteger(answer)&&answer>=0&&answer<=2?answer:null;
     });
     pending=!ready;
-    renderComparison(false,{force:true,reason:'diagnosis'});
+    renderComparison(false,{force:true,reason:'diagnosis',bulk:true});
   }
 
   function setMode(mode){
@@ -2175,11 +2237,11 @@ function stepSmoothZoom(){
     if(mode===comparisonMode){ renderComparison(false); return true; }
     comparisonMode=mode;
     pending=!ready;
-    if(!ready||reduce||!stageEl){ renderComparison(false,{force:true,reason:'mode'}); return true; }
+    if(!ready||reduce||!stageEl){ renderComparison(false,{force:true,reason:'mode',bulk:true}); return true; }
     if(modeSwapTimer) window.clearTimeout(modeSwapTimer);
     stageEl.classList.add('is-switching');
     modeSwapTimer=window.setTimeout(function(){
-      renderComparison(true,{force:true,reason:'mode'});
+      renderComparison(true,{force:true,reason:'mode',bulk:true});
       window.requestAnimationFrame(function(){ stageEl.classList.remove('is-switching'); });
       modeSwapTimer=0;
     },90);
@@ -2193,7 +2255,7 @@ function stepSmoothZoom(){
     var sb=$('dsi-standing-badge'); standing=!!(sb && !sb.classList.contains('hidden-item'));
     primOfficeState={vis:vis,opts:{standing:standing}};
     hasPrimOfficeState=true;
-    renderComparison(false,{force:true,reason:'refresh'});
+    renderComparison(false,{force:true,reason:'refresh',bulk:true});
   }
   function setVisible(vis,opts){
     var nextVis=Object.assign({},vis||{}), nextOpts=Object.assign({},opts||{}), previous=primOfficeState;
@@ -2202,8 +2264,13 @@ function stepSmoothZoom(){
     primOfficeState={vis:nextVis,opts:nextOpts};
     hasPrimOfficeState=true;
     pending=!ready;
-    var bulkChange=changedIds.length>=3;
-    renderComparison(true,{force:comparisonMode==='primoffice'&&(standingChanged||bulkChange),reason:standingChanged?'standing':(bulkChange?'preset':'cart'),changedIds:changedIds});
+    var bulkChange=!!nextOpts.bulk||changedIds.length>=3;
+    var request={force:comparisonMode==='primoffice'&&(standingChanged||bulkChange),reason:standingChanged?'standing':(nextOpts.preset?'preset':(bulkChange?'preset':'cart')),changedIds:changedIds,bulk:bulkChange,productIds:nextOpts.changedProductIds||[],changeType:nextOpts.changeType||''};
+    if(bulkChange&&comparisonMode==='primoffice'&&ready&&!reduce&&stageEl){
+      if(bulkSwapTimer)window.clearTimeout(bulkSwapTimer);
+      stageEl.classList.add('is-switching');
+      bulkSwapTimer=window.setTimeout(function(){renderComparison(true,request);window.requestAnimationFrame(function(){stageEl.classList.remove('is-switching');});bulkSwapTimer=0;},90);
+    }else renderComparison(true,request);
   }
   var pending=false;
 
@@ -2213,7 +2280,7 @@ function stepSmoothZoom(){
     if(stageEl) stageEl.removeAttribute('hidden');
     if(loaderEl) loaderEl.style.display='none';
     if(toolbar) toolbar.style.display='';
-    if(pending){ renderComparison(false,{force:true,reason:'reveal'}); pending=false; }
+    if(pending){ renderComparison(false,{force:true,reason:'reveal',bulk:true}); pending=false; }
   }
   function fallback(){
     if(stageEl) stageEl.setAttribute('hidden','');

@@ -852,6 +852,7 @@
             <button type="button" class="s3d-comparison__btn is-active" data-setup-state="current" aria-pressed="true">Tu setup actual</button>
             <button type="button" class="s3d-comparison__btn" data-setup-state="primoffice" aria-pressed="false">Con PrimOffice</button>
           </div>
+          <div class="s3d-feedback" id="s3dFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
           <div class="s3d-stage" id="s3dStage" hidden>
             <div class="s3d-toolbar" id="s3dToolbar" role="toolbar" aria-label="Camara 3D">
               <button type="button" class="s3d-cam is-active" data-view="perspectiva" aria-pressed="true" title="Perspectiva 3/4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg><span>3/4</span></button>
@@ -1231,6 +1232,29 @@ renderQ(0);
 // ── RADAR DINÁMICO: ACTUAL VS CONFIGURACIÓN ACTIVA ─────────────────
 var RADAR_AXES=['Ergonomía','Comodidad','Postura','Orden','Foco','Energía'];
 var radarDisplay=null,radarTarget=null,radarAnim=0,radarResizeBound=false;
+var radarHighlightTimer=0,setupFeedbackTimer=0,pendingSetupChange=null;
+var RADAR_PRODUCT_IMPACTS={
+  silla:[[0,16],[1,24],[2,20],[5,6]],
+  almohadilla:[[1,10],[2,10]],
+  soporte_monitor:[[0,16],[2,21],[1,5]],
+  soporte_notebook:[[0,13],[2,17]],
+  mouse_vertical:[[0,7],[1,13],[4,4]],
+  teclado_mec:[[1,9],[4,5]],
+  mousepad_xxl:[[1,6],[3,7],[4,4]],
+  organizador_prem:[[3,22],[4,9]],
+  hub_usb:[[3,11],[4,6]],
+  luz_led:[[4,10],[5,16]],
+  standing_desk:[[0,9],[1,8],[5,13]],
+  reposamuñecas:[[1,7]],
+  asesoria:[[0,5],[2,5],[3,5],[4,5],[5,5]]
+};
+var RADAR_PRODUCT_GROUPS={
+  silla:['silla'],almohadilla:['almohadilla'],soporte_monitor:['soporte_monitor','soporte_dual'],soporte_notebook:['soporte_notebook'],
+  mouse_vertical:['mouse_ergo','mouse_vertical','mouse_trackball'],teclado_mec:['teclado','teclado_mec'],mousepad_xxl:['mousepad_xxl'],
+  organizador_prem:['organizador','organizador_prem'],hub_usb:['hub_usb','hub_usb_pro'],luz_led:['luz_led'],standing_desk:['standing_desk'],
+  reposamuñecas:['reposamuñecas'],asesoria:['asesoria']
+};
+var RADAR_PRODUCT_CANONICAL={soporte_dual:'soporte_monitor',mouse_ergo:'mouse_vertical',mouse_trackball:'mouse_vertical',teclado:'teclado_mec',organizador:'organizador_prem',hub_usb_pro:'hub_usb'};
 
 function radarClamp(v){return Math.max(8,Math.min(96,Math.round(v)));}
 function radarCurrentValues(){
@@ -1250,22 +1274,15 @@ function radarActiveProducts(){
   Object.keys(extrasState).forEach(function(id){if(extrasState[id])a[id]=true;});
   return a;
 }
+function radarImpactForProduct(id){return RADAR_PRODUCT_IMPACTS[RADAR_PRODUCT_CANONICAL[id]||id]||[];}
+function radarImpactEntries(active){
+  return Object.keys(RADAR_PRODUCT_IMPACTS).filter(function(key){
+    return (RADAR_PRODUCT_GROUPS[key]||[key]).some(function(id){return !!active[id];});
+  }).map(function(key){return{key:key,impacts:RADAR_PRODUCT_IMPACTS[key]};});
+}
 function radarSelectedValues(){
   var v=radarCurrentValues().slice(),a=radarActiveProducts();
-  function plus(i,n){v[i]+=n;}
-  if(a.silla){plus(0,16);plus(1,24);plus(2,20);plus(5,6);}
-  if(a.almohadilla){plus(1,10);plus(2,10);}
-  if(a.soporte_monitor||a.soporte_dual){plus(0,16);plus(2,21);plus(1,5);}
-  if(a.soporte_notebook){plus(0,13);plus(2,17);}
-  if(a.mouse_ergo||a.mouse_vertical||a.mouse_trackball){plus(0,7);plus(1,13);plus(4,4);}
-  if(a.teclado||a.teclado_mec){plus(1,9);plus(4,5);}
-  if(a.mousepad_xxl){plus(1,6);plus(3,7);plus(4,4);}
-  if(a.organizador||a.organizador_prem){plus(3,22);plus(4,9);}
-  if(a.hub_usb||a.hub_usb_pro){plus(3,11);plus(4,6);}
-  if(a.luz_led){plus(4,10);plus(5,16);}
-  if(a.standing_desk){plus(0,9);plus(1,8);plus(5,13);}
-  if(a.reposamuñecas){plus(1,7);}
-  if(a.asesoria){plus(0,5);plus(2,5);plus(3,5);plus(4,5);plus(5,5);}
+  radarImpactEntries(a).forEach(function(entry){entry.impacts.forEach(function(impact){v[impact[0]]+=impact[1];});});
   return v.map(radarClamp);
 }
 function radarPoint(cx,cy,r,i,n){var a=-Math.PI/2+Math.PI*2*i/n;return{x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};}
@@ -1288,10 +1305,41 @@ function radarDraw(){
   ctx.font='600 12px Open Sans, sans-serif';ctx.fillStyle='rgba(255,255,255,.78)';ctx.textBaseline='middle';
   RADAR_AXES.forEach(function(label,i){var p=radarPoint(cx,cy,r+28,i,n);ctx.textAlign=Math.abs(p.x-cx)<8?'center':(p.x>cx?'left':'right');ctx.fillText(label,p.x,p.y);});
 }
-function radarSummary(cur,sel){var el=document.getElementById('radarSummary');if(!el)return;el.innerHTML=RADAR_AXES.map(function(label,i){var d=Math.max(0,sel[i]-cur[i]);return '<div class="radar-summary__item"><span class="radar-summary__name">'+label+'</span><strong class="radar-summary__value">+'+d+' pts</strong></div>';}).join('');}
-function updateRadarChart(){
+function radarAxesForProducts(ids){
+  var axes={};(ids||[]).forEach(function(id){radarImpactForProduct(id).forEach(function(impact){axes[impact[0]]=true;});});
+  return Object.keys(axes).map(Number);
+}
+function radarMainAreas(ids,limit){
+  var totals=new Array(RADAR_AXES.length).fill(0);
+  (ids||[]).forEach(function(id){radarImpactForProduct(id).forEach(function(impact){totals[impact[0]]+=impact[1];});});
+  return totals.map(function(value,index){return{value:value,index:index};}).filter(function(item){return item.value>0;}).sort(function(a,b){return b.value-a.value;}).slice(0,limit||4).map(function(item){return RADAR_AXES[item.index].toLowerCase();});
+}
+function setupProductLabel(id){var product=P[id];return product?product.name.split(' · ')[0]:id;}
+function showSetupFeedback(message,kind){
+  var el=document.getElementById('s3dFeedback');if(!el)return;
+  if(setupFeedbackTimer)clearTimeout(setupFeedbackTimer);
+  el.textContent=message;el.setAttribute('data-kind',kind||'info');el.classList.remove('is-visible');
+  requestAnimationFrame(function(){el.classList.add('is-visible');});
+  setupFeedbackTimer=setTimeout(function(){el.classList.remove('is-visible');},3000);
+}
+function showProductFeedback(id,selected){
+  var impacts=radarImpactForProduct(id).slice().sort(function(a,b){return b[1]-a[1];});
+  var detail=impacts.map(function(impact){return RADAR_AXES[impact[0]]+' '+(selected?'+':'−')+impact[1];}).join(' · ');
+  showSetupFeedback(setupProductLabel(id)+' '+(selected?'agregado':'quitado')+(detail?' · '+detail:''),selected?'add':'remove');
+}
+function showPresetFeedback(name){
+  var selected=FULL_CART_IDS.filter(isProductSelected),areas=radarMainAreas(selected,4);
+  showSetupFeedback('Setup '+name.charAt(0).toUpperCase()+name.slice(1)+' aplicado · '+selected.length+' productos seleccionados'+(areas.length?' · Mejoras principales: '+areas.join(', '):''),'preset');
+}
+function radarSummary(cur,sel,highlightAxes){
+  var el=document.getElementById('radarSummary');if(!el)return;var active={};(highlightAxes||[]).forEach(function(i){active[i]=true;});
+  el.innerHTML=RADAR_AXES.map(function(label,i){var d=Math.max(0,sel[i]-cur[i]);return '<div class="radar-summary__item'+(active[i]?' is-changed':'')+'"><span class="radar-summary__name">'+label+'</span><strong class="radar-summary__value">+'+d+' pts</strong></div>';}).join('');
+  if(radarHighlightTimer)clearTimeout(radarHighlightTimer);
+  if(highlightAxes&&highlightAxes.length)radarHighlightTimer=setTimeout(function(){el.querySelectorAll('.is-changed').forEach(function(item){item.classList.remove('is-changed');});},900);
+}
+function updateRadarChart(highlightAxes){
   if(!document.getElementById('radarPanel'))return;
-  var target={current:radarCurrentValues(),selected:radarSelectedValues()};radarSummary(target.current,target.selected);
+  var target={current:radarCurrentValues(),selected:radarSelectedValues()};radarSummary(target.current,target.selected,highlightAxes);
   if(!radarResizeBound&&'ResizeObserver' in window){var c=document.getElementById('setupRadar');if(c){new ResizeObserver(radarDraw).observe(c);radarResizeBound=true;}}
   if(!radarDisplay){radarDisplay={current:target.current.slice(),selected:target.selected.slice()};radarDraw();return;}
   var from={current:radarDisplay.current.slice(),selected:radarDisplay.selected.slice()};radarTarget=target;var t0=performance.now();if(radarAnim)cancelAnimationFrame(radarAnim);
@@ -1308,7 +1356,8 @@ function getDsIds(id){
   return p.dsEl.split(',').filter(function(x){return x;});
 }
 
-function updatePreview(){
+function updatePreview(change){
+  change=change||pendingSetupChange;pendingSetupChange=null;
   // Collect all active product ids from cart + extras
   var active={};
   Object.keys(cartState).forEach(function(id){if(cartState[id])active[id]=true;});
@@ -1342,8 +1391,11 @@ function updatePreview(){
   // Count
   var cnt=FULL_CART_IDS.filter(function(id){return isProductSelected(id)&&getDsIds(id).length>0;}).length;
   document.getElementById('preview-count').textContent=cnt;
-  if(window.Setup3D){window.Setup3D.setVisible(visible,{standing:!!visible['dsi-standing-badge']});}
-  updateRadarChart();
+  var changedProductIds=change?(change.productIds||[change.productId].filter(Boolean)):[];
+  if(window.Setup3D){window.Setup3D.setVisible(visible,{standing:!!visible['dsi-standing-badge'],changedProductIds:changedProductIds,bulk:!!(change&&change.preset),preset:change&&change.preset||'',changeType:change&&change.selected===false?'remove':'add'});}
+  updateRadarChart(radarAxesForProducts(changedProductIds));
+  if(change&&change.preset)showPresetFeedback(change.preset);
+  else if(change&&change.productId)showProductFeedback(change.productId,!!change.selected);
 }
 
 function setSetupComparisonMode(mode){
@@ -1355,6 +1407,9 @@ function setSetupComparisonMode(mode){
   });
   if(window.Setup3D&&typeof window.Setup3D.setMode==='function'){
     window.Setup3D.setMode(mode);
+  }
+  if(mode==='primoffice'&&Array.isArray(FULL_CART_IDS)){
+    updateRadarChart(radarAxesForProducts(FULL_CART_IDS.filter(isProductSelected)));
   }
 }
 
@@ -1488,7 +1543,9 @@ function applyComboPreset(name){
 
 document.querySelectorAll('[data-combo-preset]').forEach(function(btn){
   btn.addEventListener('click',function(){
-    applyComboPreset(this.getAttribute('data-combo-preset'));
+    var name=this.getAttribute('data-combo-preset'),target=COMBO_PRESETS[name]||[];
+    pendingSetupChange={preset:name,productIds:FULL_CART_IDS.filter(function(id){return isProductSelected(id)!==(target.indexOf(id)!==-1);})};
+    applyComboPreset(name);
   });
 });
 
@@ -1538,7 +1595,7 @@ function renderCart(items,extras){
     row.querySelector('input').addEventListener('change',function(){
       setCartRowState(id,this.checked);
       updateTotal();
-      updatePreview();
+      updatePreview({productId:id,selected:this.checked});
       updatePresetButtons();
       scheduleLeadCartUpdate('cart_change');
     });
@@ -1567,7 +1624,7 @@ function renderCart(items,extras){
     row.querySelector('input').addEventListener('change',function(){
       setCartRowState(id,this.checked);
       updateTotal();
-      updatePreview();
+      updatePreview({productId:id,selected:this.checked});
       updatePresetButtons();
       scheduleLeadCartUpdate('cart_change');
     });
