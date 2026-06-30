@@ -1043,7 +1043,7 @@
     'dsi-mousepad':      {x: 0.03, y: 0.00,  z: 0.12, rx:0, ry:0},
     'dsi-mouse':         {x: 0.30, y: 0.00,  z: 0.20, rx:0, ry:0},    
     'dsi-hub':           {x: 0.53, y: 0.00,  z:-0.035, rx:0, ry:0},
-    'dsi-organizer':     {x: 0.00, y:-0.207, z: 0.215, rx:0, ry:0},
+    'dsi-organizer':     {x: 0.00, y:-0.207, z:-0.10,  rx:0, ry:0},
     'dsi-lightbar':      {x: 0.00, y: 0.50,  z:-0.12, rx:0, ry:0},
     'dsi-chair':         {x: 0.00, y: 0.00,  z: 0.95, rx:0, ry:0}
   };
@@ -1233,63 +1233,63 @@
 
     for(var sx=-1;sx<=1;sx+=2){
       var plate=mesh(rbox(0.30,0.018,0.42,0.006),black);
-      plate.position.set(sx*0.62,-0.064,-0.020);
+      plate.position.set(sx*0.62,-0.049,-0.020);
       g.add(plate);
 
       var cap=mesh(rbox(0.15,0.032,0.12,0.008),gun);
-      cap.position.set(sx*0.62,-0.095,-0.265);
+      cap.position.set(sx*0.62,-0.080,-0.265);
       g.add(cap);
     }
 
     var railOuter=mesh(rbox(1.18,0.046,0.052,0.008),gun);
-    railOuter.position.set(0,-0.127,-0.315);
+    railOuter.position.set(0,-0.112,-0.315);
     g.add(railOuter);
 
     var railSleeve=mesh(rbox(0.38,0.056,0.064,0.008),rail);
-    railSleeve.position.set(0,-0.126,-0.315);
+    railSleeve.position.set(0,-0.111,-0.315);
     g.add(railSleeve);
 
     var railSeam=box(0.012,0.058,0.068,black);
-    railSeam.position.set(0.22,-0.126,-0.315);
+    railSeam.position.set(0.22,-0.111,-0.315);
     g.add(railSeam);
 
     var controlBox=mesh(rbox(0.25,0.036,0.095,0.008),black);
-    controlBox.position.set(0.16,-0.168,-0.305);
+    controlBox.position.set(0.16,-0.153,-0.305);
     g.add(controlBox);
 
     var motor=mesh(new THREE.CylinderGeometry(0.035,0.038,0.23,18),black);
-    motor.position.set(0.58,-0.185,-0.270);
+    motor.position.set(0.58,-0.170,-0.270);
     g.add(motor);
 
     var motorCase=mesh(rbox(0.070,0.180,0.074,0.012),black);
-    motorCase.position.set(0.625,-0.170,-0.270);
+    motorCase.position.set(0.625,-0.155,-0.270);
     g.add(motorCase);
 
     var cable=mesh(new THREE.CylinderGeometry(0.004,0.004,0.76,8),mat(COL.cable,{r:0.68}));
     cable.rotation.z=Math.PI/2;
-    cable.position.set(-0.12,-0.166,-0.348);
+    cable.position.set(-0.12,-0.151,-0.348);
     g.add(cable);
 
     var cableKnob=mesh(new THREE.SphereGeometry(0.014,12,8),black);
-    cableKnob.position.set(-0.48,-0.166,-0.348);
+    cableKnob.position.set(-0.48,-0.151,-0.348);
     g.add(cableKnob);
 
     var keypadShell=mesh(rbox(0.150,0.026,0.076,0.008),shell);
-    keypadShell.position.set(0.555,-0.079,0.390);
+    keypadShell.position.set(0.555,-0.064,0.390);
     g.add(keypadShell);
 
     var keypadFace=mesh(rbox(0.066,0.024,0.006,0.003),black);
-    keypadFace.position.set(0.520,-0.079,0.432);
+    keypadFace.position.set(0.520,-0.064,0.432);
     g.add(keypadFace);
 
     var display=box(0.018,0.010,0.004,mat(0x0e1114,{e:0x162d36,ei:0.45,r:0.5}));
-    display.position.set(0.498,-0.079,0.436);
+    display.position.set(0.498,-0.064,0.436);
     g.add(display);
 
     for(var i=0;i<3;i++){
       var btn=mesh(new THREE.CylinderGeometry(0.0038,0.0038,0.004,10),button);
       btn.rotation.x=Math.PI/2;
-      btn.position.set(0.516+i*0.014,-0.079,0.437);
+      btn.position.set(0.516+i*0.014,-0.064,0.437);
       g.add(btn);
     }
 
@@ -1356,11 +1356,11 @@
     surfaceAnchor=new THREE.Object3D(); surfaceAnchor.position.y=curTopY; scene.add(surfaceAnchor);
     deskTop=mesh(rbox(1.5,0.04,0.72,0.012),mat(COL.surface,{r:0.6,m:0.04})); deskTop.position.y=-0.02; surfaceAnchor.add(deskTop);
     deskEdge=mesh(rbox(1.52,0.012,0.74,0.012),mat(COL.edge,{r:0.7})); deskEdge.position.y=-0.045; deskEdge.castShadow=false; surfaceAnchor.add(deskEdge);
-    deskBeam=box(1.18,0.05,0.07,mat(COL.frame,{m:0.6,r:0.4})); deskBeam.position.set(0,-0.075,-0.30); surfaceAnchor.add(deskBeam);
-    deskControl=mesh(rbox(0.11,0.022,0.055,0.006),mat(COL.frameDark,{m:0.4,r:0.5})); deskControl.position.set(0.5,-0.07,0.3); surfaceAnchor.add(deskControl);
-    var b1=box(0.014,0.006,0.014,mat(COL.accent,{e:COL.accent,ei:0.5})); b1.position.set(0.476,-0.057,0.3); surfaceAnchor.add(b1);
-    var b2=box(0.014,0.006,0.014,mat(0x222a34)); b2.position.set(0.5,-0.057,0.3); surfaceAnchor.add(b2);
-    deskButtons=[b1,b2];
+    /* Escritorio base limpio: sin viga trasera ni control genérico.
+       Esos elementos no pertenecen a ningún producto seleccionado. */
+    deskBeam=null;
+    deskControl=null;
+    deskButtons=[];
     standingFrame=makeStandingFrame(); standingFrame.visible=false; surfaceAnchor.add(standingFrame);
 
     legL=makeLeg(); legR=makeLeg(); scene.add(legL,legR); setLegs();
