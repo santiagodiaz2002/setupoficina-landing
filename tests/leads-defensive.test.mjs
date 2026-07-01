@@ -231,6 +231,8 @@ function createTimerHarness() {
 
   vm.createContext(context);
   vm.runInContext([
+    extractVarLiteral(html, 'CONFIGURATOR_PRODUCT_IDS'),
+    extractVarLiteral(html, 'ADDITIONAL_PRODUCT_IDS'),
     extractVarLiteral(html, 'FULL_CART_IDS'),
     extractVarLiteral(html, 'COMBO_PRESETS'),
     extractFunction(html, 'clonePayload'),
