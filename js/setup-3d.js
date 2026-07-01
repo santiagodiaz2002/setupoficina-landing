@@ -229,19 +229,94 @@
   /* pEase - reposamunecas acolchado delante del teclado. */
   function bWristRest(){
     var g=new THREE.Group();
-    var cushion=surfaceMat(0x263746,'fabric',{r:0.94}), base=surfaceMat(0x151c24,'rubber',{r:0.84});
-    var lower=mesh(rbox(0.39,0.022,0.070,0.018),base); lower.position.y=0.011; g.add(lower);
-    var pad=mesh(rbox(0.38,0.040,0.064,0.024),cushion); pad.position.set(0,0.028,0.002); pad.scale.z=0.95; g.add(pad);
+    var baseM=surfaceMat(0x090b0d,'rubber',{r:0.90});
+    var rimM=surfaceMat(0x15181b,'rubber',{r:0.80});
+    var topM=surfaceMat(0x202428,'rubber',{r:0.76});
+    var reliefM=mat(0x343a40,{r:0.58,m:0.02});
+
+    var base=mesh(rbox(0.46,0.007,0.088,0.026),baseM);
+    base.position.y=0.0035; g.add(base);
+
+    var rim=mesh(rbox(0.45,0.026,0.082,0.026),rimM);
+    rim.position.y=0.017; g.add(rim);
+
+    var top=mesh(rbox(0.416,0.012,0.056,0.018),topM);
+    top.position.y=0.030; top.castShadow=false; g.add(top);
+
+    /* Campo de celdas hexagonales poco profundas, construido como relieve
+       real para que se lea en perspectiva y no dependa de una textura. */
+    var hexGeo=new THREE.CylinderGeometry(0.0086,0.0086,0.0038,6);
+    for(var row=0;row<4;row++){
+      var z=-0.021+row*0.014;
+      for(var col=0;col<19;col++){
+        var x=-0.188+col*0.021+(row%2?0.0105:0);
+        if(Math.abs(x)>0.195)continue;
+        var cell=mesh(hexGeo,reliefM);
+        cell.position.set(x,0.0375,z); cell.rotation.y=rad(30); cell.castShadow=false; g.add(cell);
+      }
+    }
     return g;
   }
 
-  /* pLumbar - almohadilla acolchada sobre el respaldo contextual. */
+  /* pLumbar - soporte lumbar abierto de malla sobre el respaldo contextual. */
   function bLumbar(){
     var g=new THREE.Group();
-    var cushion=surfaceMat(0x263746,'leather',{r:0.72}), strap=surfaceMat(0x111820,'fabric',{r:0.88});
-    var pad=mesh(rbox(0.34,0.19,0.075,0.055),cushion); pad.scale.set(1,1,0.82); g.add(pad);
-    for(var sy=-1;sy<=1;sy+=2){
-      var band=mesh(rbox(0.37,0.022,0.018,0.008),strap); band.position.set(0,sy*0.062,0.028); g.add(band);
+    var frameM=surfaceMat(0x14181c,'rubber',{r:0.82});
+    var strapM=surfaceMat(0x1b2025,'fabric',{r:0.94});
+    var panelM=surfaceMat(0x20262c,'rubber',{r:0.80});
+    var nodeM=mat(0x101419,{r:0.62,m:0.03});
+
+    function bowedZ(x,y){
+      var nx=Math.min(1,Math.abs(x)/0.18), ny=Math.min(1,Math.abs(y)/0.16);
+      return -0.058*(1-nx*nx)*(0.86+0.14*(1-ny*ny));
+    }
+
+    var framePoints=[
+      new THREE.Vector3(-0.18,-0.145,0.004),new THREE.Vector3(-0.20,-0.045,0.002),
+      new THREE.Vector3(-0.19,0.105,0.001),new THREE.Vector3(-0.13,0.158,-0.014),
+      new THREE.Vector3(0,0.172,-0.034),new THREE.Vector3(0.13,0.158,-0.014),
+      new THREE.Vector3(0.19,0.105,0.001),new THREE.Vector3(0.20,-0.045,0.002),
+      new THREE.Vector3(0.18,-0.145,0.004),new THREE.Vector3(0,-0.164,-0.030)
+    ];
+    var frameCurve=new THREE.CatmullRomCurve3(framePoints,true,'catmullrom',0.18);
+    var frame=mesh(new THREE.TubeGeometry(frameCurve,80,0.011,8,true),frameM);
+    g.add(frame);
+
+    /* Malla abierta: una superficie casi transparente mas su reticula
+       triangulada, ambas curvadas hacia adelante en el centro. */
+    var meshGeo=new THREE.PlaneGeometry(0.34,0.285,12,14);
+    var positions=meshGeo.attributes.position;
+    for(var i=0;i<positions.count;i++){
+      var px=positions.getX(i), py=positions.getY(i);
+      positions.setZ(i,bowedZ(px,py));
+    }
+    positions.needsUpdate=true; meshGeo.computeVertexNormals();
+    var veilM=new THREE.MeshStandardMaterial({color:0x202830,roughness:0.92,metalness:0,transparent:true,opacity:0.12,side:THREE.DoubleSide,depthWrite:false});
+    var gridM=new THREE.MeshStandardMaterial({color:0x59636d,roughness:0.90,metalness:0,transparent:true,opacity:0.42,side:THREE.DoubleSide,wireframe:true,depthWrite:false});
+    var veil=mesh(meshGeo,veilM); veil.castShadow=false; veil.renderOrder=2; g.add(veil);
+    var grid=mesh(meshGeo.clone(),gridM); grid.castShadow=false; grid.renderOrder=3; g.add(grid);
+
+    /* Correas por detras de la malla, visibles a traves de la abertura. */
+    var horizontal=mesh(rbox(0.39,0.026,0.009,0.008),strapM);
+    horizontal.position.set(0,-0.010,0.009); horizontal.castShadow=false; g.add(horizontal);
+    var vertical=mesh(rbox(0.026,0.305,0.009,0.008),strapM);
+    vertical.position.set(0,0,0.009); vertical.castShadow=false; g.add(vertical);
+
+    /* Panel central abierto con nodulos de masaje en relieve. */
+    var panelZ=-0.064;
+    var sideL=mesh(rbox(0.014,0.218,0.018,0.008),panelM); sideL.position.set(-0.069,0,panelZ); g.add(sideL);
+    var sideR=mesh(rbox(0.014,0.218,0.018,0.008),panelM); sideR.position.set(0.069,0,panelZ); g.add(sideR);
+    var panelTop=mesh(rbox(0.138,0.014,0.018,0.008),panelM); panelTop.position.set(0,0.102,panelZ); g.add(panelTop);
+    var panelBottom=mesh(rbox(0.138,0.014,0.018,0.008),panelM); panelBottom.position.set(0,-0.102,panelZ); g.add(panelBottom);
+
+    var nodeGeo=new THREE.SphereGeometry(0.008,8,5);
+    for(var ny=0;ny<6;ny++){
+      for(var nx=0;nx<4;nx++){
+        var node=mesh(nodeGeo,nodeM);
+        node.scale.z=0.55;
+        node.position.set(-0.045+nx*0.030,-0.075+ny*0.030,panelZ-0.012);
+        node.castShadow=false; g.add(node);
+      }
     }
     return g;
   }
