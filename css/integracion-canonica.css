@@ -28,14 +28,14 @@
 @keyframes s3dRadarPulse{0%,100%{border-color:rgba(255,255,255,.08);transform:translateX(0)}35%{border-color:rgba(56,189,248,.66);background:rgba(56,189,248,.12);transform:translateX(3px)}}
 .s3d-stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius-lg,20px);overflow:hidden;
   background:
-    radial-gradient(70% 58% at 50% 42%,rgba(255,255,255,.16),transparent 78%),
-    linear-gradient(180deg,#e5ebe7 0%,#dce3dd 58%,#cbbd9f 100%);
+    radial-gradient(72% 62% at 48% 42%,rgba(255,255,255,.18),transparent 80%),
+    linear-gradient(180deg,#e3e7e2 0%,#d5dad4 100%);
   border:1px solid rgba(255,255,255,.08);margin-bottom:.75rem;isolation:isolate}
 .s3d-stage::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(ellipse at center,transparent 54%,rgba(30,41,38,.10) 100%),
-    linear-gradient(180deg,rgba(255,255,255,.06),rgba(80,69,49,.035));
-  opacity:.62;transition:opacity .18s ease}
+    radial-gradient(ellipse at center,transparent 56%,rgba(30,41,38,.09) 100%),
+    linear-gradient(180deg,rgba(255,255,255,.05),rgba(54,62,58,.025));
+  opacity:.48;transition:opacity .18s ease}
 .s3d-host{position:absolute;inset:0;z-index:1;opacity:1;transform:scale(1);transform-origin:center;transition:opacity .18s ease,transform .18s ease}
 .s3d-stage.is-switching::before{opacity:.30}
 .s3d-stage.is-switching .s3d-host{opacity:.34;transform:scale(.992)}
