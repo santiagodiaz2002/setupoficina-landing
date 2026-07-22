@@ -19,7 +19,7 @@ body{background:transparent!important}
   background:
     radial-gradient(120% 95% at 50% -12%, #163463 0%, #0d1f3f 42%, #081229 72%, #060d1d 100%);
 }
-#pv-canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+#pv-canvas{display:none}
 
 /* ---------- SECCIONES OSCURAS: dejar ver la atmósfera ---------- */
 .hero,.quiz-section,.cta-section,footer{background:transparent!important}

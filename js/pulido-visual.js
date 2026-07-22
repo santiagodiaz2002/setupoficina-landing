@@ -15,7 +15,15 @@
   try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   try { fine = window.matchMedia('(pointer:fine)').matches && window.innerWidth >= 992; } catch (e) {}
 
-  function run() { initBackground(); setupReveal(); }
+  function run() { ensureStaticBackground(); setupReveal(); }
+
+  function ensureStaticBackground() {
+    if (document.getElementById('pv-bg')) return;
+    var bg = document.createElement('div');
+    bg.id = 'pv-bg';
+    bg.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(bg, document.body.firstChild);
+  }
 
   /* ==================================================================
      ATMÓSFERA GLOBAL (canvas)

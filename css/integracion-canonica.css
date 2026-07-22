@@ -137,7 +137,7 @@
    ===================================================================== */
 @media (min-width: 901px){
   /* El resultado rompe el ancho del wrapper (720px) para dar protagonismo al 3D */
-  #quiz-result{position:relative;left:50%;width:min(1100px, calc(100vw - 3rem));margin-left:calc(min(1100px, 100vw - 3rem) * -0.5)}
+  #quiz-result{position:relative;left:50%;width:min(1240px, calc(100vw - 2.5rem));margin-left:calc(min(1240px, 100vw - 2.5rem) * -0.5)}
   .result-layout{grid-template-columns:1.4fr 1fr;gap:1.75rem;align-items:start}
   .desk-preview{top:88px}                 /* sticky ya viene del canónico */
   .s3d-stage,.desk-scene{aspect-ratio:auto;height:clamp(520px, 54vh, 620px)}

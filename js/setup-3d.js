@@ -1469,9 +1469,9 @@
     } else if(id==='dsi-mouse'){
       y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
     } else if(id==='dsi-chair'){
-      x = comparisonMode==='current'?0.06:0;
-      z = comparisonMode==='current'?0.98:0.94;
-      ry = comparisonMode==='current'?rad(-2):0;
+      x = comparisonMode==='current'?0.06:-0.34;
+      z = comparisonMode==='current'?0.98:1.06;
+      ry = comparisonMode==='current'?rad(-2):rad(9);
     } else if(id==='dsi-lumbar'){
       var chair=visualChairType();
       y = chair===0?0.79:(chair===1?0.76:0.75);

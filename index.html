@@ -419,8 +419,8 @@
     .hidden{display:none!important;}
     .text-center{text-align:center;}
   </style>
-  <link rel="stylesheet" href="./css/integracion-canonica.css" />
-  <link rel="stylesheet" href="./css/pulido-visual.css" />
+  <link rel="stylesheet" href="./css/integracion-canonica.css?v=comercial-1" />
+  <link rel="stylesheet" href="./css/pulido-visual.css?v=static-bg-1" />
   <link rel="stylesheet" href="./css/comparacion-antes-despues.css" />
   <script type="importmap">
   {
@@ -433,14 +433,13 @@
 
   <style>
     /* Layout final del resultado:
-       bloque superior = configurador + radar; bloque inferior = carrito */
+       configurador + radar + carrito conviven como una sola herramienta */
     #quiz-result .result-layout{
       display:grid;
-      grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);
+      grid-template-columns:minmax(0,1.06fr) minmax(310px,.78fr) minmax(318px,.66fr);
       grid-template-areas:
-        "preview radar"
-        "cart    cart";
-      gap:1.35rem;
+        "preview radar cart";
+      gap:1.05rem;
       align-items:stretch;
     }
     #quiz-result .desk-preview{
@@ -453,6 +452,12 @@
     #quiz-result .cart-wrapper{
       grid-area:cart;
       min-width:0;
+      height:100%;
+      max-height:clamp(560px,68vh,700px);
+      display:flex;
+      flex-direction:column;
+      align-self:stretch;
+      overflow:hidden;
     }
     #quiz-result .cart-wrapper.is-highlighted{
       animation:cart-focus-pulse 900ms ease;
@@ -489,7 +494,7 @@
       gap:.65rem;
     }
     #quiz-result .radar-canvas{
-      height:300px;
+      height:260px;
     }
     #quiz-result .radar-summary{
       display:grid;
@@ -510,6 +515,90 @@
       margin-top:.1rem;
       font-size:.7rem;
     }
+    #quiz-result .cart-header{
+      padding:.9rem 1rem;
+      flex-shrink:0;
+    }
+    #quiz-result .cart-header__note{
+      font-size:.68rem;
+      line-height:1.35;
+    }
+    #quiz-result .cart-product-section{
+      flex:1 1 auto;
+      min-height:0;
+      overflow:auto;
+    }
+    #quiz-result .cart-extra-section{
+      flex:0 0 auto;
+      max-height:190px;
+      overflow:auto;
+      padding:.75rem .9rem;
+    }
+    #quiz-result .cart-footer{
+      flex-shrink:0;
+      padding:.9rem 1rem;
+    }
+    #quiz-result .cart-total__value{
+      font-size:1.35rem;
+    }
+    #quiz-result .cart-actions{
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:.55rem;
+    }
+    #quiz-result .cart-actions .btn-cart{
+      width:100%;
+      justify-content:center;
+      padding:.78rem .9rem;
+      font-size:.86rem;
+      min-height:44px;
+    }
+    .btn-cart--store{
+      background:var(--cta);
+      box-shadow:0 4px 16px rgba(3,105,161,.25);
+    }
+    .btn-cart--store[aria-disabled="true"]{
+      background:#64748B;
+      box-shadow:none;
+      cursor:not-allowed;
+    }
+    .btn-cart--store[aria-disabled="true"]:hover{
+      transform:none;
+      box-shadow:none;
+    }
+    .cart-commerce-status{
+      width:100%;
+      margin:.7rem 0 0;
+      padding:.65rem .75rem;
+      border-radius:10px;
+      border:1px solid rgba(3,105,161,.16);
+      background:rgba(3,105,161,.06);
+      color:var(--dark-3);
+      font-size:.72rem;
+      line-height:1.45;
+    }
+    .cart-commerce-status[hidden]{
+      display:none;
+    }
+    .cart-commerce-status[data-kind="warning"]{
+      border-color:rgba(245,158,11,.30);
+      background:rgba(245,158,11,.10);
+    }
+    @media(min-width:901px) and (max-width:1180px){
+      #quiz-result .result-layout{
+        grid-template-columns:minmax(0,1.08fr) minmax(320px,.82fr);
+        grid-template-areas:
+          "preview cart"
+          "radar   cart";
+      }
+      #quiz-result .cart-wrapper{
+        max-height:none;
+      }
+      #quiz-result .radar-canvas{
+        height:230px;
+      }
+    }
     @media(max-width:900px){
       #quiz-result .result-layout{
         grid-template-columns:1fr;
@@ -521,6 +610,15 @@
       #quiz-result .radar-canvas{
         height:335px;
       }
+      #quiz-result .cart-wrapper{
+        max-height:none;
+        display:block;
+      }
+      #quiz-result .cart-product-section,
+      #quiz-result .cart-extra-section{
+        max-height:none;
+        overflow:visible;
+      }
     }
   </style>
 
@@ -530,6 +628,11 @@
     #quiz-result .cart-item{
       gap:.68rem;
       padding:.68rem .92rem;
+      display:grid;
+      grid-template-columns:19px 32px minmax(0,1fr);
+      align-items:center;
+      column-gap:.55rem;
+      row-gap:.18rem;
     }
     #quiz-result .cart-item__check{
       width:19px;
@@ -548,6 +651,7 @@
     #quiz-result .cart-item__name{
       font-size:.79rem;
       line-height:1.28;
+      overflow-wrap:anywhere;
     }
     #quiz-result .cart-item__category{
       font-size:.66rem;
@@ -558,11 +662,30 @@
       letter-spacing:.28px;
     }
     #quiz-result .cart-item__price{
+      grid-column:3;
+      justify-self:start;
       font-size:.82rem;
     }
     #quiz-result .cart-item__badge{
+      grid-column:3;
+      justify-self:start;
       font-size:.56rem;
       padding:.16rem .38rem;
+    }
+    #quiz-result .cart-extra-item{
+      display:grid;
+      grid-template-columns:18px 32px minmax(0,1fr);
+      align-items:center;
+      column-gap:.55rem;
+      row-gap:.18rem;
+    }
+    #quiz-result .cart-extra-item__label{
+      overflow-wrap:anywhere;
+    }
+    #quiz-result .cart-extra-item__price{
+      grid-column:3;
+      justify-self:start;
+      font-size:.76rem;
     }
 
   </style>
@@ -906,10 +1029,15 @@
               <div class="cart-total__value"><span class="cart-total__currency">$</span><span id="cart-total-value">0</span> <span style="font-size:.75rem;font-weight:400;color:var(--text-muted)">ARS</span></div>
             </div>
             <div class="cart-actions">
-              <button class="btn-cart btn-cart--whatsapp" onclick="sendWhatsApp()">
+              <button class="btn-cart btn-cart--store" type="button" id="storeCheckoutBtn" aria-disabled="true" onclick="requestStoreCheckout()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6h15l-1.5 9h-12zM6 6 5 2H2M9 20h.01M18 20h.01" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Compra online
+              </button>
+              <button class="btn-cart btn-cart--whatsapp" type="button" onclick="sendWhatsApp()">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 Pedir por WhatsApp
               </button>
+              <p class="cart-commerce-status" id="cart-commerce-status" role="status" aria-live="polite" hidden></p>
             </div>
           </div>
         </div>
@@ -959,7 +1087,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pEase · Reposamuñecas ergonómico</li>
         </ul>
         <div class="combo-card__actions">
-          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="starter" data-combo-action="purchase">Quiero este combo</button>
+          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="starter" data-combo-action="purchase">Quiero mi combo</button>
           <button type="button" class="combo-btn combo-btn--whatsapp" data-combo-preset="starter" data-combo-action="whatsapp">Pedir por WhatsApp</button>
         </div>
       </div>
@@ -981,7 +1109,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pLumbar · Soporte lumbar</li>
         </ul>
         <div class="combo-card__actions">
-          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="pro" data-combo-action="purchase">Quiero este combo</button>
+          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="pro" data-combo-action="purchase">Quiero mi combo</button>
           <button type="button" class="combo-btn combo-btn--whatsapp" data-combo-preset="pro" data-combo-action="whatsapp">Pedir por WhatsApp</button>
         </div>
       </div>
@@ -1003,7 +1131,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pStanding · Escritorio eléctrico regulable</li>
         </ul>
         <div class="combo-card__actions">
-          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="epic" data-combo-action="purchase">Quiero este combo</button>
+          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="epic" data-combo-action="purchase">Quiero mi combo</button>
           <button type="button" class="combo-btn combo-btn--whatsapp" data-combo-preset="epic" data-combo-action="whatsapp">Pedir por WhatsApp</button>
         </div>
       </div>
@@ -1256,7 +1384,7 @@ function radarDraw(){
   var dpr=Math.min(window.devicePixelRatio||1,2);
   if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);}
   var ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
-  var cx=w/2,cy=h/2+3,r=Math.min(w*.30,h*.34,150),n=RADAR_AXES.length;
+  var cx=w/2,cy=h/2+3,labelOffset=Math.max(16,Math.min(24,w*.055)),r=Math.min(w*.25,h*.34,140),n=RADAR_AXES.length;
   ctx.lineWidth=1;
   [20,40,60,80,100].forEach(function(l){ctx.beginPath();for(var i=0;i<n;i++){var p=radarPoint(cx,cy,r*l/100,i,n);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);}ctx.closePath();ctx.strokeStyle='rgba(226,232,240,.15)';ctx.stroke();});
   for(var i=0;i<n;i++){var p=radarPoint(cx,cy,r,i,n);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p.x,p.y);ctx.strokeStyle='rgba(226,232,240,.16)';ctx.stroke();}
@@ -1264,8 +1392,8 @@ function radarDraw(){
   radarPoly(ctx,cur,cx,cy,r,'rgba(148,163,184,.18)','rgba(203,213,225,.74)',2);
   radarPoly(ctx,sel,cx,cy,r,'rgba(56,189,248,.22)','#38BDF8',2.4);
   radarDots(ctx,cur,cx,cy,r,'#CBD5E1',3.2);radarDots(ctx,sel,cx,cy,r,'#38BDF8',4);
-  ctx.font='600 12px Open Sans, sans-serif';ctx.fillStyle='rgba(255,255,255,.78)';ctx.textBaseline='middle';
-  RADAR_AXES.forEach(function(label,i){var p=radarPoint(cx,cy,r+28,i,n);ctx.textAlign=Math.abs(p.x-cx)<8?'center':(p.x>cx?'left':'right');ctx.fillText(label,p.x,p.y);});
+  ctx.font='600 '+(w<360?11:12)+'px Open Sans, sans-serif';ctx.fillStyle='rgba(255,255,255,.78)';ctx.textBaseline='middle';
+  RADAR_AXES.forEach(function(label,i){var p=radarPoint(cx,cy,r+labelOffset,i,n);ctx.textAlign=Math.abs(p.x-cx)<8?'center':(p.x>cx?'left':'right');ctx.fillText(label,p.x,p.y);});
 }
 function radarAxesForProducts(ids){
   var axes={};(ids||[]).forEach(function(id){radarImpactForProduct(id).forEach(function(impact){axes[impact[0]]=true;});});
@@ -1493,6 +1621,25 @@ var PRIMOFFICE_COMBO_URLS={
   epic:'https://www.primoffice.com.ar/combo-epic/'
 };
 
+var PRIMOFFICE_CART_ADAPTER={
+  enabled:false,
+  missing:'endpoint o bridge de Tiendanube para agregar multiples variantes al carrito y confirmar el resultado',
+  configTarget:'PRIMOFFICE_STORE_PRODUCTS + PRIMOFFICE_CART_ADAPTER'
+};
+
+var COMBO_DISPLAY_NAMES={starter:'Starter',pro:'Pro',epic:'Epic'};
+
+function isCanonicalComboName(name){
+  return Object.prototype.hasOwnProperty.call(COMBO_PRESETS,name);
+}
+
+function requireComboPreset(name){
+  if(isCanonicalComboName(name))return name;
+  console.warn('[combo] Preset rechazado:',name);
+  showCommerceStatus('No se pudo aplicar el combo: el nivel no es Starter, Pro ni Epic.','warning');
+  return '';
+}
+
 function presetMatches(name){
   var ids=COMBO_PRESETS[name]||[];
   return FULL_CART_IDS.every(function(id){
@@ -1515,7 +1662,7 @@ function updatePresetButtons(activeName){
 }
 
 function comboDisplayName(name){
-  return name?name.charAt(0).toUpperCase()+name.slice(1):'personalizado';
+  return COMBO_DISPLAY_NAMES[name]||'personalizado';
 }
 
 function activeComboPresetName(){
@@ -1534,7 +1681,65 @@ function preparedComboLabel(){
   return tier&&tier.textContent?tier.textContent.replace(' recomendado',''):'Setup personalizado';
 }
 
+function formatMoney(value){
+  return Number(value||0).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+
+function getStoreInfo(id){
+  return PRIMOFFICE_STORE_PRODUCTS[id]||null;
+}
+
+function getSelectedCartLines(){
+  return FULL_CART_IDS.filter(function(id){return isProductSelected(id)&&P[id];}).map(function(id){
+    return {id:id,product:P[id],store:getStoreInfo(id),quantity:1};
+  });
+}
+
+function hideCommerceStatus(){
+  var el=document.getElementById('cart-commerce-status');if(!el)return;
+  el.textContent='';
+  el.setAttribute('hidden','');
+}
+
+function showCommerceStatus(message,kind){
+  var el=document.getElementById('cart-commerce-status');if(!el)return;
+  el.textContent=message||'';
+  el.setAttribute('data-kind',kind||'info');
+  if(message)el.removeAttribute('hidden');
+  else el.setAttribute('hidden','');
+}
+
+function selectedAvailabilitySummary(lines){
+  var available=0,unavailable=0;
+  lines.forEach(function(line){
+    if(line.store&&line.store.available!==false)available++;
+    else unavailable++;
+  });
+  return {available:available,unavailable:unavailable,total:lines.length};
+}
+
+function cartAdapterMessage(comboName,lines){
+  var s=selectedAvailabilitySummary(lines);
+  var label=comboName?'Setup '+comboDisplayName(comboName):preparedComboLabel();
+  return label+' preparado en el carrito interno. Compra online directa pendiente: falta '+PRIMOFFICE_CART_ADAPTER.missing+'. WhatsApp queda listo con SKUs, variantes, IDs y enlaces reales de '+s.total+' productos.';
+}
+
+function requestStoreCheckout(){
+  var lines=getSelectedCartLines();
+  if(!lines.length){
+    showCommerceStatus('Selecciona al menos un producto antes de avanzar con la compra online.','warning');
+    return false;
+  }
+  showCommerceStatus(cartAdapterMessage(activeComboPresetName(),lines),'warning');
+  clearTimeout(pqLeadSession.cartUpdateTimer);
+  submitLeadUpdate('purchase_click');
+  return false;
+}
+window.requestStoreCheckout=requestStoreCheckout;
+
 function ensureComboResultVisible(name){
+  name=requireComboPreset(name);
+  if(!name)return false;
   var qr=document.getElementById('quiz-result');if(!qr)return;
   var hasRows=document.querySelector('[data-cart-product],[data-extra-product]');
   if(!hasRows)renderCart(COMBO_PRESETS[name]||[],[]);
@@ -1553,12 +1758,14 @@ function ensureComboResultVisible(name){
     qr.classList.remove('hidden');
     qr.style.opacity='1';
   }
+  return true;
 }
 
 var cartHighlightTimer=0;
 function highlightCustomCart(){
   var cart=document.getElementById('customCart');if(!cart)return;
-  try{cart.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){cart.scrollIntoView();}
+  var tool=document.getElementById('quiz-result')||cart;
+  try{tool.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){tool.scrollIntoView();}
   cart.classList.remove('is-highlighted');
   void cart.offsetWidth;
   cart.classList.add('is-highlighted');
@@ -1567,8 +1774,9 @@ function highlightCustomCart(){
 }
 
 function applyComboPreset(name){
+  name=requireComboPreset(name);
+  if(!name)return false;
   var ids=COMBO_PRESETS[name];
-  if(!ids)return;
   FULL_CART_IDS.forEach(function(id){
     setCartRowState(id,ids.indexOf(id)!==-1);
   });
@@ -1576,29 +1784,36 @@ function applyComboPreset(name){
   updatePreview();
   updatePresetButtons(name);
   scheduleLeadCartUpdate('cart_change');
+  return true;
 }
 
 function prepareComboPreset(name){
-  var target=COMBO_PRESETS[name]||[];if(!target.length)return;
+  name=requireComboPreset(name);
+  if(!name)return false;
+  var target=COMBO_PRESETS[name]||[];if(!target.length)return false;
   var changed=FULL_CART_IDS.filter(function(id){return isProductSelected(id)!==(target.indexOf(id)!==-1);});
-  ensureComboResultVisible(name);
+  if(ensureComboResultVisible(name)===false)return false;
   pendingSetupChange={preset:name,productIds:changed.length?changed:target.slice()};
-  applyComboPreset(name);
+  if(!applyComboPreset(name))return false;
+  setSetupComparisonMode('primoffice');
   highlightCustomCart();
+  showCommerceStatus('Setup '+comboDisplayName(name)+' listo: revisa el carrito interno o continua por WhatsApp con el detalle completo.','info');
+  return true;
 }
 
 function buyComboInPrimOffice(comboId){
-  var url=PRIMOFFICE_COMBO_URLS[comboId];
-  if(!url)return;
-  prepareComboPreset(comboId);
-  window.open(url,'_blank','noopener');
+  comboId=requireComboPreset(comboId);
+  if(!comboId)return false;
+  if(!prepareComboPreset(comboId))return false;
+  showCommerceStatus(cartAdapterMessage(comboId,getSelectedCartLines()),'warning');
   clearTimeout(pqLeadSession.cartUpdateTimer);
   submitLeadUpdate('purchase_click');
+  return false;
 }
 window.buyComboInPrimOffice=buyComboInPrimOffice;
 
 function requestComboWhatsApp(name){
-  prepareComboPreset(name);
+  if(!prepareComboPreset(name))return;
   window.sendWhatsApp();
 }
 
@@ -1646,7 +1861,7 @@ function renderCart(items,extras){
     row.style.cursor='pointer';
     row.setAttribute('data-cart-product',id);
 
-    var statusText=p.stock===false?'Sin stock':(isRecommended?'Recomendado':'Disponible');
+    var statusText=p.stock===false?'No disponible':(isRecommended?'Recomendado':'Disponible');
     row.innerHTML=
       '<input type="checkbox" class="cart-item__check"'+(cartState[id]?' checked':'')+'>'+
       '<div class="cart-item__icon" style="background:'+bg+';color:'+col+'">'+svgIcon(p.icon)+'</div>'+
@@ -1656,6 +1871,7 @@ function renderCart(items,extras){
 
     row.querySelector('input').addEventListener('change',function(){
       setCartRowState(id,this.checked);
+      hideCommerceStatus();
       updateTotal();
       updatePreview({productId:id,selected:this.checked});
       updatePresetButtons();
@@ -1675,7 +1891,7 @@ function renderCart(items,extras){
     row.className='cart-extra-item'+(extrasState[id]?' selected':'');
     row.setAttribute('data-extra-product',id);
 
-    var statusText=p.stock===false?'Sin stock':(isRecommended?'Recomendado':'Disponible');
+    var statusText=p.stock===false?'No disponible':(isRecommended?'Recomendado':'Disponible');
     row.innerHTML=
       '<input type="checkbox"'+(extrasState[id]?' checked':'')+'>'+
       '<div class="cart-item__icon" style="background:'+bg+';color:'+col+'">'+svgIcon(p.icon)+'</div>'+
@@ -1685,6 +1901,7 @@ function renderCart(items,extras){
 
     row.querySelector('input').addEventListener('change',function(){
       setCartRowState(id,this.checked);
+      hideCommerceStatus();
       updateTotal();
       updatePreview({productId:id,selected:this.checked});
       updatePresetButtons();
@@ -1715,10 +1932,10 @@ function showResult(){
   if(window.Setup3D&&typeof window.Setup3D.setDiagnosis==='function'){
     window.Setup3D.setDiagnosis({answers:answers.slice()});
   }
-  setSetupComparisonMode('current');
   renderCart(r.items,r.extras);
   updateTotal();
   updatePreview();
+  setSetupComparisonMode('primoffice');
 
   // Progress bar full
   pBar.style.width='100%'; pWrap.setAttribute('aria-valuenow',100);
@@ -1841,7 +2058,7 @@ function buildLeadUpdatePayload(eventType){
   base.eventType=eventType||'cart_change';
   base.odooLeadId=pqLeadSession.odooLeadId||base.odooLeadId||null;
   base.configuration=Object.assign({},base.configuration||{},cart,{
-    finalSelection:eventType==='whatsapp_click',
+    finalSelection:eventType==='whatsapp_click'||eventType==='purchase_click',
     lastInteraction:eventType||'cart_change'
   });
 
@@ -1873,7 +2090,7 @@ function submitLeadUpdate(eventType){
   var payload=buildLeadUpdatePayload(eventType);
   var signature=getCartUpdateSignature(payload);
 
-  if(eventType!=='whatsapp_click' && signature===pqLeadSession.lastCartSignature){
+  if(eventType!=='whatsapp_click' && eventType!=='purchase_click' && signature===pqLeadSession.lastCartSignature){
     return Promise.resolve({ok:true,skipped:true,reason:'Sin cambios de carrito'});
   }
 
@@ -1949,39 +2166,57 @@ function getWhatsAppNumber(){
 function openWhatsAppMessage(message){
   window.open('https://wa.me/'+getWhatsAppNumber()+'?text='+encodeURIComponent(message),'_blank','noopener');
 }
+var externalActionInFlight=false;
 function openExternalAfterLeadUpdate(eventType,openFn){
+  if(externalActionInFlight)return Promise.resolve({ok:false,skipped:true,reason:'external_action_in_flight'});
+  externalActionInFlight=true;
+  function release(){setTimeout(function(){externalActionInFlight=false;},900);}
+  function safeOpen(result){try{openFn(result);}finally{release();}}
   clearTimeout(pqLeadSession.cartUpdateTimer);
-  return submitLeadUpdate(eventType).then(openFn).catch(function(err){
+  return submitLeadUpdate(eventType).then(function(result){
+    safeOpen(result);
+    return result;
+  }).catch(function(err){
     console.warn('[lead] No se pudo actualizar antes de abrir el destino externo.',err);
-    openFn();
+    safeOpen({ok:false,error:String((err&&err.message)||err)});
+    return{ok:false,error:String((err&&err.message)||err)};
   });
 }
 window.sendQuickWhatsApp=function(){
   openWhatsAppMessage('¡Hola, PrimOffice! 👋 Vi la landing de Setup Oficina y quiero consultar por un setup personalizado.');
 };
+function whatsAppProductLine(line,index){
+  var p=line.product,store=line.store,parts=[];
+  parts.push((index+1)+'. '+line.quantity+' x '+p.name);
+  if(p.price>0)parts.push('$'+formatMoney(p.price)+' ARS');
+  if(store){
+    if(store.variant)parts.push('Variante: '+store.variant);
+    if(store.sku)parts.push('SKU: '+store.sku);
+    if(store.productId)parts.push('Producto ID: '+store.productId);
+    if(store.variantId)parts.push('Variante ID: '+store.variantId);
+    if(store.available===false)parts.push('Estado tienda: sin stock');
+  }else{
+    parts.push('Sin ID de tienda configurado');
+  }
+  var text=parts.join(' | ');
+  if(store&&store.url)text+='\n   Link: '+store.url;
+  return text;
+}
 window.sendWhatsApp=function(){
-  var lines=['¡Hola, PrimOffice! 👋 Hice el test ergonómico y me armó este carrito:',''];
+  var selected=getSelectedCartLines();
+  if(!selected.length){
+    showCommerceStatus('Selecciona al menos un producto para continuar por WhatsApp.','warning');
+    return Promise.resolve({ok:false,skipped:true,reason:'empty_cart'});
+  }
+  var lines=['¡Hola, PrimOffice! Hice el test ergonómico y me armó este carrito:',''];
   lines.push('*Combo preparado:* '+preparedComboLabel(),'');
   lines.push('*Productos seleccionados:*');
-  var total=0;
-  Object.keys(cartState).forEach(function(id){
-    if(cartState[id]&&P[id]){
-      var p=P[id];
-      lines.push('  ✅ '+p.name+(p.price>0?' — $'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'):''));
-      total+=p.price;
-    }
+  selected.forEach(function(line,index){
+    lines.push(whatsAppProductLine(line,index));
   });
-  var hasE=false;
-  Object.keys(extrasState).forEach(function(id){
-    if(extrasState[id]&&P[id]){
-      if(!hasE){lines.push('','*Productos adicionales:*');hasE=true;}
-      var p=P[id];
-      lines.push('  ➕ '+p.name+' — $'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'));
-      total+=p.price;
-    }
-  });
-  lines.push('','*Total estimado: $'+total.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' ARS*','','¿Me podés confirmar disponibilidad y entrega en 24 h? ¡Gracias!');
-  openExternalAfterLeadUpdate('whatsapp_click',function(){
+  var cfg=getCurrentCartConfiguration();
+  lines.push('','*Total estimado: $'+formatMoney(cfg.estimatedTotal)+' ARS*','','¿Me podés confirmar disponibilidad, alternativas sin stock y entrega en 24 h? Gracias.');
+  return openExternalAfterLeadUpdate('whatsapp_click',function(){
     openWhatsAppMessage(lines.join('\n'));
   });
 };
@@ -2000,10 +2235,10 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
 
 })();
 </script>
-<script defer src="./js/pulido-visual.js"></script>
+<script defer src="./js/pulido-visual.js?v=static-bg-1"></script>
 <script defer src="./js/comparacion-antes-despues.js"></script>
 <script type="module" src="./js/config/app-config.js?v=d1-leads-2"></script>
 <script type="module" src="./js/services/leads-service.js?v=productos-separados-1"></script>
-<script type="module" src="./js/setup-3d.js"></script>
+<script type="module" src="./js/setup-3d.js?v=comercial-1"></script>
 </body>
 </html>
