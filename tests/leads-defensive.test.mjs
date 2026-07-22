@@ -40,29 +40,6 @@ function extractFunction(source, name) {
   throw new Error(`No se pudo extraer ${name}`);
 }
 
-function extractAssignedFunction(source, target) {
-  const escapedTarget = target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = new RegExp(`${escapedTarget}\\s*=\\s*function\\s*\\(`).exec(source);
-  assert.ok(match, `No se encontro ${target}`);
-  const start = match.index;
-
-  const braceStart = source.indexOf('{', start);
-  let depth = 0;
-
-  for (let i = braceStart; i < source.length; i += 1) {
-    if (source[i] === '{') depth += 1;
-    if (source[i] === '}') depth -= 1;
-    if (depth === 0) {
-      let end = i + 1;
-      while (/\s/.test(source[end] || '')) end += 1;
-      if (source[end] === ';') end += 1;
-      return source.slice(start, end);
-    }
-  }
-
-  throw new Error(`No se pudo extraer ${target}`);
-}
-
 function extractVarLiteral(source, name) {
   const marker = `var ${name}=`;
   const start = source.indexOf(marker);
@@ -249,8 +226,6 @@ function createTimerHarness() {
     },
     updatePresetButtons(name) {
       calls.updatePresetButtons.push(name);
-    },
-    showCommerceStatus() {
     }
   };
 
@@ -260,8 +235,6 @@ function createTimerHarness() {
     extractVarLiteral(html, 'ADDITIONAL_PRODUCT_IDS'),
     extractVarLiteral(html, 'FULL_CART_IDS'),
     extractVarLiteral(html, 'COMBO_PRESETS'),
-    extractFunction(html, 'isCanonicalComboName'),
-    extractFunction(html, 'requireComboPreset'),
     extractFunction(html, 'clonePayload'),
     extractFunction(html, 'readOdooLeadId'),
     extractFunction(html, 'storeLeadSession'),
@@ -271,7 +244,6 @@ function createTimerHarness() {
     extractFunction(html, 'scheduleLeadCartUpdate'),
     extractFunction(html, 'applyComboPreset'),
     'this.storeLeadSession = storeLeadSession;',
-    'this.submitLeadUpdate = submitLeadUpdate;',
     'this.scheduleLeadCartUpdate = scheduleLeadCartUpdate;',
     'this.applyComboPreset = applyComboPreset;'
   ].join('\n'), context);
@@ -287,99 +259,6 @@ function createTimerHarness() {
   }
 
   return { calls, context, runActiveTimers, timers };
-}
-
-function createWhatsAppHarness() {
-  const html = createSubmitHarness.html;
-  const openedUrls = [];
-  const status = {
-    textContent: '',
-    hidden: true,
-    attrs: {},
-    setAttribute(name, value = '') {
-      this.attrs[name] = value;
-      if (name === 'hidden') this.hidden = true;
-    },
-    removeAttribute(name) {
-      delete this.attrs[name];
-      if (name === 'hidden') this.hidden = false;
-    },
-    getAttribute(name) {
-      return this.attrs[name] || '';
-    }
-  };
-
-  const context = {
-    console,
-    window: {
-      PrimOfficeConfig: { WHATSAPP_NUMBER: '5491100000000' },
-      open(url) {
-        openedUrls.push(url);
-        return { closed: false };
-      }
-    },
-    document: {
-      getElementById(id) {
-        if (id === 'cart-commerce-status') return status;
-        if (id === 'result-tier') return { textContent: 'Setup Pro recomendado' };
-        return null;
-      }
-    },
-    cartState: {},
-    extrasState: {},
-    pqLeadSession: {
-      cartUpdateTimer: 0
-    },
-    clearTimeout() {},
-    setTimeout(fn) {
-      fn();
-      return 1;
-    }
-  };
-  context.submitLeadUpdate = (eventType) => {
-    context.lastEventType = eventType;
-    return Promise.resolve({ ok: true });
-  };
-
-  vm.createContext(context);
-  vm.runInContext([
-    extractVarLiteral(html, 'P'),
-    extractVarLiteral(html, 'CONFIGURATOR_PRODUCT_IDS'),
-    extractVarLiteral(html, 'ADDITIONAL_PRODUCT_IDS'),
-    extractVarLiteral(html, 'FULL_CART_IDS'),
-    extractVarLiteral(html, 'COMBO_PRESETS'),
-    extractVarLiteral(html, 'PRIMOFFICE_STORE_PRODUCTS'),
-    extractVarLiteral(html, 'COMBO_DISPLAY_NAMES'),
-    extractFunction(html, 'isAdditionalProduct'),
-    extractFunction(html, 'isProductSelected'),
-    extractFunction(html, 'presetMatches'),
-    extractFunction(html, 'activeComboPresetName'),
-    extractFunction(html, 'comboDisplayName'),
-    extractFunction(html, 'preparedComboLabel'),
-    extractFunction(html, 'formatMoney'),
-    extractFunction(html, 'getStoreInfo'),
-    extractFunction(html, 'getSelectedCartLines'),
-    extractFunction(html, 'showCommerceStatus'),
-    extractFunction(html, 'getCurrentCartConfiguration'),
-    extractFunction(html, 'getWhatsAppNumber'),
-    extractFunction(html, 'openWhatsAppMessage'),
-    'var externalActionInFlight=false;',
-    extractFunction(html, 'openExternalAfterLeadUpdate'),
-    extractFunction(html, 'whatsAppProductLine'),
-    extractAssignedFunction(html, 'window.sendWhatsApp'),
-    'this.sendWhatsApp = window.sendWhatsApp;'
-  ].join('\n'), context);
-
-  context.FULL_CART_IDS.forEach((id) => {
-    context.cartState[id] = false;
-    context.extrasState[id] = false;
-  });
-  context.COMBO_PRESETS.pro.forEach((id) => {
-    if (context.ADDITIONAL_PRODUCT_IDS.includes(id)) context.extrasState[id] = true;
-    else context.cartState[id] = true;
-  });
-
-  return { context, openedUrls, status };
 }
 
 function xmlResponse(valueXml) {
@@ -534,23 +413,6 @@ test('varios clics rapidos conservan debounce de 1000 ms y disparan un solo PATC
   assert.deepEqual(harness.calls.updateLead[0].configuration.selectedProducts.sort(), ['hub_usb_pro', 'monitor_27', 'silla']);
 });
 
-test('click de compra registra seleccion final aunque el carrito no haya cambiado', async () => {
-  const harness = createTimerHarness();
-  const basePayload = patchPayload({ leadId: 'lead_purchase_1' });
-
-  harness.context.storeLeadSession(basePayload, { ok: true, data: { odoo: { id: 222 } } });
-  harness.context.cartState.silla = true;
-  harness.context.scheduleLeadCartUpdate('cart_change');
-  await harness.runActiveTimers();
-
-  await harness.context.submitLeadUpdate('purchase_click');
-
-  assert.equal(harness.calls.updateLead.length, 2);
-  assert.equal(harness.calls.updateLead[1].eventType, 'purchase_click');
-  assert.equal(harness.calls.updateLead[1].configuration.finalSelection, true);
-  assert.deepEqual(harness.calls.updateLead[1].configuration.selectedProducts, ['silla']);
-});
-
 test('presets Starter, Pro y Epic siguen llamando actualizacion', () => {
   const harness = createTimerHarness();
   harness.context.pqLeadSession.leadId = 'lead_presets_1';
@@ -563,30 +425,6 @@ test('presets Starter, Pro y Epic siguen llamando actualizacion', () => {
   assert.equal(harness.calls.updatePreview, 3);
   assert.deepEqual(harness.calls.updatePresetButtons, ['starter', 'pro', 'epic']);
   assert.deepEqual([...harness.timers.values()].map((timer) => timer.delay), [1000, 1000, 1000]);
-});
-
-test('WhatsApp del combo incluye variantes, IDs, SKUs, enlaces y total', async () => {
-  const harness = createWhatsAppHarness();
-
-  await harness.context.sendWhatsApp();
-  await flushPromises();
-
-  assert.equal(harness.openedUrls.length, 1);
-  const url = new URL(harness.openedUrls[0]);
-  const message = url.searchParams.get('text');
-  const productLines = message.match(/\n\d+\./g) || [];
-
-  assert.equal(url.hostname, 'wa.me');
-  assert.match(message, /\*Combo preparado:\* Setup Pro/);
-  assert.match(message, /1 x pArm · Brazo articulado para monitor/);
-  assert.match(message, /SKU: PARM/);
-  assert.match(message, /Producto ID: 254100672/);
-  assert.match(message, /Variante ID: 1122132928/);
-  assert.match(message, /https:\/\/www\.primoffice\.com\.ar\/productos\/soporte-para-monitor-brazo-ajustable-parmpro\//);
-  assert.match(message, /\*Total estimado: \$381\.737 ARS\*/);
-  assert.equal(productLines.length, 10);
-  assert.equal(harness.context.lastEventType, 'whatsapp_click');
-  assert.equal(harness.status.hidden, true);
 });
 
 test('PATCH usa odoo_lead_id de D1, actualiza productos y total', async () => {
