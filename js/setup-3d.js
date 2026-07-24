@@ -225,12 +225,70 @@
     g.userData.baseY=0.30; return g; }
 
   /* Notebook (contextual, generica) */
-  function bLaptop(){ var g=new THREE.Group(); var body=mat(COL.alu,{m:0.6,r:0.4});
-    var base=mesh(rbox(0.34,0.018,0.24,0.01),body); base.position.y=0.01; g.add(base);
-    var lid=new THREE.Group(); lid.add(mesh(rbox(0.34,0.22,0.012,0.008),body));
-    var disp=mesh(new THREE.PlaneGeometry(0.30,0.185),screenMat('current')); disp.name='screen-contextual'; disp.position.z=0.0075; lid.add(disp);
-    lid.position.set(0,0.12,-0.11); lid.rotation.x=rad(-15); g.add(lid);
-    g.userData.baseY=0; return g; }
+  function bLaptop(){
+    var g=new THREE.Group();
+    var body=mat(COL.alu,{m:0.62,r:0.36});
+    var edge=mat(0x778290,{m:0.58,r:0.44});
+    var keyM=mat(0x1d2228,{r:0.62,m:0.05});
+    var deckM=mat(0x323942,{r:0.58,m:0.12});
+    var glassM=mat(0x0a1118,{r:0.48,m:0.03});
+
+    var base=mesh(rbox(0.39,0.022,0.265,0.012),body);
+    base.position.y=0.011;
+    g.add(base);
+
+    var frontLip=mesh(rbox(0.37,0.004,0.010,0.004),edge);
+    frontLip.position.set(0,0.024,0.126);
+    frontLip.castShadow=false;
+    g.add(frontLip);
+
+    var deck=mesh(rbox(0.335,0.003,0.132,0.006),deckM);
+    deck.position.set(0,0.025,-0.012);
+    deck.castShadow=false;
+    g.add(deck);
+
+    var keyGeometry=new THREE.BoxGeometry(0.018,0.003,0.014);
+    for(var row=0;row<4;row++){
+      for(var col=0;col<12;col++){
+        var key=mesh(keyGeometry,keyM);
+        key.position.set(-0.126+col*0.023,0.029,-0.060+row*0.021);
+        key.castShadow=false;
+        g.add(key);
+      }
+    }
+    var space=mesh(rbox(0.110,0.003,0.014,0.003),keyM);
+    space.position.set(0,0.029,0.026);
+    space.castShadow=false;
+    g.add(space);
+
+    var trackpad=mesh(rbox(0.105,0.002,0.060,0.006),mat(0x66707c,{m:0.42,r:0.50}));
+    trackpad.position.set(0,0.027,0.080);
+    trackpad.castShadow=false;
+    g.add(trackpad);
+
+    var hinge=mesh(new THREE.CylinderGeometry(0.008,0.008,0.345,18),edge);
+    hinge.rotation.z=Math.PI/2;
+    hinge.position.set(0,0.032,-0.126);
+    g.add(hinge);
+
+    var lid=new THREE.Group();
+    var lidShell=mesh(rbox(0.39,0.252,0.014,0.010),body);
+    lid.add(lidShell);
+    var bezel=mesh(rbox(0.356,0.218,0.003,0.004),glassM);
+    bezel.position.z=0.008;
+    bezel.castShadow=false;
+    lid.add(bezel);
+    var disp=mesh(new THREE.PlaneGeometry(0.325,0.193),screenMat('current'));
+    disp.name='screen-contextual';
+    disp.position.z=0.0102;
+    lid.add(disp);
+    lid.position.set(0,0.146,-0.124);
+    lid.rotation.x=rad(-16);
+    g.add(lid);
+
+    g.userData.baseY=0;
+    return g;
+  }
 
   /* Base comun del monitor contextual. No representa un producto PrimOffice. */
   function bMonitorBase(){
@@ -611,6 +669,17 @@
     var baseB=mesh(rbox(0.252,0.011,0.026,0.009),black); baseB.position.set(0,0.006,-0.103); g.add(baseB);
 
     for(var sx=-1;sx<=1;sx+=2){
+      var sideCurve=new THREE.CatmullRomCurve3([
+        new THREE.Vector3(sx*0.112,0.014,0.104),
+        new THREE.Vector3(sx*0.112,0.012,-0.088),
+        new THREE.Vector3(sx*0.110,0.060,-0.116),
+        new THREE.Vector3(sx*0.106,0.138,-0.104),
+        new THREE.Vector3(sx*0.080,0.158,-0.068),
+        new THREE.Vector3(sx*0.073,0.133,0.108)
+      ],false,'catmullrom',0.18);
+      var sideHoop=mesh(new THREE.TubeGeometry(sideCurve,34,0.0095,10,false),black);
+      g.add(sideHoop);
+
       var rear=mesh(rbox(0.026,0.145,0.030,0.011),black);
       rear.position.set(sx*0.108,0.078,-0.088); g.add(rear);
 
@@ -639,6 +708,12 @@
       stop.position.set(sx*0.072,0.111,0.120);
       stop.rotation.x=rad(13);
       g.add(stop);
+
+      var stopPad=mesh(rbox(0.052,0.005,0.012,0.004),pad);
+      stopPad.position.set(sx*0.072,0.124,0.115);
+      stopPad.rotation.x=rad(13);
+      stopPad.castShadow=false;
+      g.add(stopPad);
 
       var stopFace=mesh(rbox(0.044,0.004,0.010,0.003),satin);
       stopFace.position.set(sx*0.072,0.120,0.116);
@@ -1320,7 +1395,7 @@
     'dsi-mousepad':      {x: 0.03, y: 0.00,  z: 0.12, rx:0, ry:0},
     'dsi-mouse':         {x: 0.30, y: 0.00,  z: 0.20, rx:0, ry:0},    
     'dsi-hub':           {x: 0.53, y: 0.00,  z:-0.035, rx:0, ry:0},
-    'dsi-organizer':     {x: 0.00, y:-0.207, z:-0.10,  rx:0, ry:0},
+    'dsi-organizer':     {x: 0.00, y:-0.207, z: 0.21,  rx:0, ry:0},
     'dsi-lightbar':      {x: 0.00, y: 0.50,  z:-0.12, rx:0, ry:0},
     'dsi-chair':         {x: 0.00, y: 0.00,  z: 0.95, rx:0, ry:0},
     'dsi-lumbar':        {x: 0.00, y: 0.76,  z: 0.155,rx:-7*Math.PI/180,ry:0},
@@ -1469,9 +1544,9 @@
     } else if(id==='dsi-mouse'){
       y = isVisible('dsi-mousepad') ? MAT_TOP : 0.0;
     } else if(id==='dsi-chair'){
-      x = comparisonMode==='current'?0.06:0;
-      z = comparisonMode==='current'?0.98:0.94;
-      ry = comparisonMode==='current'?rad(-2):0;
+      x = comparisonMode==='current'?0.06:-0.52;
+      z = comparisonMode==='current'?0.98:1.10;
+      ry = comparisonMode==='current'?rad(-2):rad(14);
     } else if(id==='dsi-lumbar'){
       var chair=visualChairType();
       y = chair===0?0.79:(chair===1?0.76:0.75);
@@ -1728,8 +1803,7 @@
       curtain.position.set(0.57+ci*0.070,-0.02,0.055+Math.sin(ci)*0.012); curtain.castShadow=false; roomWindow.add(curtain);
     }
     var windowLight=new THREE.PointLight(0xd9eff6,0.20,3.0,2); windowLight.position.set(0,0,0.42); windowLight.castShadow=false; roomWindow.add(windowLight);
-    roomWindow.rotation.y=Math.PI/2;
-    roomWindow.position.set(sideX+0.035,1.77,0.18); scene.add(roomWindow);
+    roomWindow.position.set(-1.18,1.77,backZ+0.030); scene.add(roomWindow);
 
     /* Elemento ambiental 1: planta de piso discreta, fuera del escritorio. */
     roomPlant=new THREE.Group(); roomPlant.name='s3d-room-plant';
@@ -2210,8 +2284,8 @@
     if(roomRightBaseboard) roomRightBaseboard.visible=showWall;
     if(roomCornerTrim) roomCornerTrim.visible=showWall;
     if(roomRightCornerTrim) roomRightCornerTrim.visible=showWall;
-    if(roomArt) roomArt.visible=showWall;
-    if(roomRightArt) roomRightArt.visible=showWall;
+    if(roomArt) roomArt.visible=false;
+    if(roomRightArt) roomRightArt.visible=false;
     if(roomWindow) roomWindow.visible=showWall;
   }
   function setView(v,animated){

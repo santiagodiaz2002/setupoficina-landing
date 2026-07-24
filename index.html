@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test ergonómico y configurador 3D para tu setup | PrimOffice</title>
-  <meta name="description" content="Mejorá tu espacio de trabajo con PrimOffice: hacé el test ergonómico gratuito, recibí una recomendación personalizada y visualizá tu setup en 3D." />
+  <title>Test ergonómico y visualizador de setup | PrimOffice</title>
+  <meta name="description" content="Hacé el test ergonómico gratuito, recibí una recomendación personalizada y explorá tu setup PrimOffice con fotografías reales de cada producto." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="author" content="PrimOffice" />
   <meta name="application-name" content="PrimOffice" />
@@ -21,24 +21,22 @@
   <meta property="og:locale" content="es_AR" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="PrimOffice" />
-  <meta property="og:title" content="Test ergonómico y configurador 3D para tu setup | PrimOffice" />
-  <meta property="og:description" content="Hacé el test ergonómico gratuito, recibí una recomendación personalizada y visualizá tu setup ideal en 3D con PrimOffice." />
+  <meta property="og:title" content="Test ergonómico y visualizador de setup | PrimOffice" />
+  <meta property="og:description" content="Recibí una recomendación personalizada y explorá con fotografías reales los productos para mejorar tu espacio de trabajo." />
   <meta property="og:url" content="https://setupoficina.com.ar/" />
   <meta property="og:image" content="https://setupoficina.com.ar/assets/images/brand/primoffice-og.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="PrimOffice: test ergonómico y configurador 3D para optimizar tu setup" />
+  <meta property="og:image:alt" content="PrimOffice: test ergonómico y visualizador de productos para optimizar tu setup" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Test ergonómico y configurador 3D para tu setup | PrimOffice" />
-  <meta name="twitter:description" content="Hacé el test ergonómico gratuito, recibí una recomendación personalizada y visualizá tu setup ideal en 3D con PrimOffice." />
+  <meta name="twitter:title" content="Test ergonómico y visualizador de setup | PrimOffice" />
+  <meta name="twitter:description" content="Recibí una recomendación personalizada y explorá con fotografías reales los productos para mejorar tu espacio de trabajo." />
   <meta name="twitter:image" content="https://setupoficina.com.ar/assets/images/brand/primoffice-og.jpg" />
-  <meta name="twitter:image:alt" content="PrimOffice: test ergonómico y configurador 3D para optimizar tu setup" />
+  <meta name="twitter:image:alt" content="PrimOffice: test ergonómico y visualizador de productos para optimizar tu setup" />
   <link rel="preload" as="image" href="./assets/images/comparacion/setup-antes.webp" type="image/webp" />
-  <link rel="preload" as="image" href="./assets/images/comparacion/setup-despues.webp" type="image/webp" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -191,71 +189,6 @@
     .desk-preview{background:linear-gradient(160deg,#0F172A,#162035);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);padding:1.5rem;position:sticky;top:88px;}
     .desk-preview__title{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.7);text-align:center;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.4rem;}
     .desk-preview__title svg{width:14px;height:14px;color:var(--accent);}
-    .desk-scene{width:100%;aspect-ratio:4/3;position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#1a2744 0%,#243050 60%,#2d3a5e 100%);}
-
-    /* Scene elements — positioned/layered */
-    .ds-floor{position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(180deg,#1e2d4a,#162035);}
-    .ds-wall{position:absolute;top:0;left:0;right:0;height:65%;background:linear-gradient(180deg,#0d1a30,#1a2744);}
-    /* desk */
-    .ds-desk-surface{position:absolute;left:5%;right:5%;bottom:28%;height:8%;background:linear-gradient(180deg,#c8a97a,#a8845a);border-radius:4px 4px 0 0;box-shadow:0 4px 12px rgba(0,0,0,.4);}
-    .ds-desk-legs{position:absolute;bottom:6%;left:9%;right:9%;height:22%;display:flex;justify-content:space-between;}
-    .ds-desk-leg{width:3%;background:#8b6a3e;border-radius:2px;}
-
-    /* desk items — each toggleable */
-    .ds-item{position:absolute;transition:opacity 350ms ease,transform 350ms ease;}
-    .ds-item.hidden-item{opacity:0;transform:scale(.85) translateY(8px);pointer-events:none;}
-
-    /* monitor */
-    .ds-monitor-arm{left:50%;bottom:36%;transform:translateX(-50%);width:3%;height:14%;background:#334155;border-radius:2px;}
-    .ds-monitor{left:50%;bottom:50%;transform:translateX(-50%);width:38%;height:20%;background:linear-gradient(180deg,#1e293b,#0f172a);border:3px solid #38BDF8;border-radius:6px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(56,189,248,.25);}
-    .ds-monitor-screen{width:85%;height:75%;background:linear-gradient(135deg,#0284c7 0%,#0ea5e9 50%,#38bdf8 100%);border-radius:3px;opacity:.9;}
-    .ds-monitor-stand{left:50%;bottom:36%;transform:translateX(-50%);width:8%;height:3%;background:#334155;border-radius:2px;}
-
-    /* laptop + stand */
-    .ds-laptop{left:50%;bottom:36%;transform:translateX(-50%);width:32%;height:12%;background:linear-gradient(180deg,#1e293b,#334155);border:2px solid #475569;border-radius:4px;display:flex;align-items:center;justify-content:center;}
-    .ds-laptop-screen{width:80%;height:70%;background:linear-gradient(135deg,#0369a1,#38bdf8);border-radius:2px;opacity:.85;}
-    .ds-stand{left:50%;bottom:36%;transform:translateX(-50%);width:28%;height:4%;background:#475569;border-radius:3px;}
-    .ds-stand-leg{position:absolute;left:50%;bottom:28%;transform:translateX(-50%);width:5%;height:8%;background:#475569;border-radius:2px;}
-
-    /* keyboard */
-    .ds-keyboard{left:50%;bottom:33%;transform:translateX(-50%);width:36%;height:5%;background:linear-gradient(180deg,#334155,#1e293b);border:1px solid #475569;border-radius:4px;display:flex;align-items:center;justify-content:center;}
-    .ds-keyboard-keys{width:88%;height:60%;background:repeating-linear-gradient(90deg,#475569 0,#475569 4%,transparent 4%,transparent 6%);border-radius:2px;opacity:.6;}
-
-    /* mouse */
-    .ds-mouse{right:18%;bottom:32%;width:5%;aspect-ratio:.6/1;background:linear-gradient(180deg,#334155,#1e293b);border:1px solid #475569;border-radius:50% 50% 40% 40%;}
-
-    /* mousepad */
-    .ds-mousepad{right:12%;bottom:32%;width:18%;height:7%;background:#1e293b;border:1px solid #0369a1;border-radius:4px;opacity:.8;}
-
-    /* hub */
-    .ds-hub{left:15%;bottom:36%;width:8%;height:3%;background:#334155;border:1px solid #475569;border-radius:4px;display:flex;align-items:center;justify-content:center;}
-    .ds-hub-dot{width:30%;aspect-ratio:1;background:#38bdf8;border-radius:50%;animation:pulse-hub 2s ease-in-out infinite;}
-    @keyframes pulse-hub{0%,100%{opacity:.6;}50%{opacity:1;}}
-
-    /* light bar */
-    .ds-lightbar{left:50%;transform:translateX(-50%);bottom:70%;width:40%;height:2%;background:linear-gradient(90deg,#fbbf24,#fef3c7,#fbbf24);border-radius:2px;box-shadow:0 2px 12px rgba(251,191,36,.5);}
-
-    /* organizer */
-    .ds-organizer{left:12%;bottom:36%;width:9%;height:10%;background:linear-gradient(180deg,#1e293b,#334155);border:1px solid #475569;border-radius:4px;}
-    .ds-organizer-pens{position:absolute;left:12%;bottom:46%;width:9%;height:5%;display:flex;gap:2%;align-items:flex-end;}
-    .ds-organizer-pen{width:15%;height:100%;border-radius:2px 2px 0 0;}
-
-    /* chair */
-    .ds-chair{left:50%;bottom:5%;transform:translateX(-50%);width:22%;height:18%;}
-    .ds-chair-back{position:absolute;top:0;left:15%;right:15%;height:55%;background:linear-gradient(180deg,#334155,#1e293b);border-radius:6px 6px 0 0;border:1px solid #475569;}
-    .ds-chair-seat{position:absolute;bottom:30%;left:5%;right:5%;height:22%;background:#334155;border-radius:4px;border:1px solid #475569;}
-    .ds-chair-leg{position:absolute;bottom:0;width:18%;height:32%;background:#1e293b;border-radius:2px;}
-    .ds-chair-leg--l{left:10%;}
-    .ds-chair-leg--r{right:10%;}
-
-    /* standing desk (raised legs) */
-    .ds-standing-legs{position:absolute;bottom:0%;left:9%;right:9%;height:28%;display:flex;justify-content:space-between;}
-    .ds-standing-leg{width:3%;background:linear-gradient(180deg,#8b6a3e,#6b5030);border-radius:2px;}
-    .ds-standing-badge{position:absolute;bottom:65%;right:6%;background:var(--success);color:white;font-size:6px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:.3px;}
-
-    /* ambient glow when items present */
-    .ds-ambient{position:absolute;inset:0;background:radial-gradient(ellipse 60% 30% at 50% 60%,rgba(56,189,248,.06),transparent);pointer-events:none;}
-
     /* item count badge */
     .desk-preview__count{text-align:center;margin-top:.75rem;font-size:.75rem;color:rgba(255,255,255,.4);}
     .desk-preview__count span{color:var(--accent);font-weight:700;}
@@ -422,26 +355,19 @@
   <link rel="stylesheet" href="./css/integracion-canonica.css" />
   <link rel="stylesheet" href="./css/pulido-visual.css" />
   <link rel="stylesheet" href="./css/comparacion-antes-despues.css" />
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
+  <link rel="stylesheet" href="./css/setup-visual-hybrid.css" />
 
   <style>
     /* Layout final del resultado:
-       bloque superior = configurador + radar; bloque inferior = carrito */
+       bloque superior = visualizador + radar; bloque inferior = carrito */
     #quiz-result .result-layout{
       display:grid;
-      grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);
+      grid-template-columns:minmax(0,1.62fr) minmax(320px,.98fr);
       grid-template-areas:
         "preview radar"
         "cart    cart";
       gap:1.35rem;
-      align-items:stretch;
+      align-items:start;
     }
     #quiz-result .desk-preview{
       grid-area:preview;
@@ -467,7 +393,7 @@
       margin:0;
       min-width:0;
       padding:1rem;
-      height:100%;
+      height:auto;
     }
     #quiz-result .radar-panel__head{
       gap:.65rem;
@@ -588,7 +514,7 @@
     }
   </style>
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.primoffice.com.ar/#organization","name":"PrimOffice","url":"https://www.primoffice.com.ar/","logo":{"@type":"ImageObject","url":"https://setupoficina.com.ar/assets/images/brand/logo-primoffice-horizontal.png","width":1000,"height":336},"description":"Soluciones para optimizar espacios de trabajo con ergonomía, conectividad, iluminación y orden."},{"@type":"WebSite","@id":"https://setupoficina.com.ar/#website","url":"https://setupoficina.com.ar/","name":"PrimOffice","publisher":{"@id":"https://www.primoffice.com.ar/#organization"},"inLanguage":"es-AR"},{"@type":"WebPage","@id":"https://setupoficina.com.ar/#webpage","url":"https://setupoficina.com.ar/","name":"Test ergonómico y configurador 3D para tu setup | PrimOffice","description":"Mejorá tu espacio de trabajo con PrimOffice: hacé el test ergonómico gratuito, recibí una recomendación personalizada y visualizá tu setup en 3D.","isPartOf":{"@id":"https://setupoficina.com.ar/#website"},"about":{"@id":"https://www.primoffice.com.ar/#organization"},"inLanguage":"es-AR","primaryImageOfPage":{"@type":"ImageObject","url":"https://setupoficina.com.ar/assets/images/brand/primoffice-og.jpg","width":1200,"height":630}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.primoffice.com.ar/#organization","name":"PrimOffice","url":"https://www.primoffice.com.ar/","logo":{"@type":"ImageObject","url":"https://setupoficina.com.ar/assets/images/brand/logo-primoffice-horizontal.png","width":1000,"height":336},"description":"Soluciones para optimizar espacios de trabajo con ergonomía, conectividad, iluminación y orden."},{"@type":"WebSite","@id":"https://setupoficina.com.ar/#website","url":"https://setupoficina.com.ar/","name":"PrimOffice","publisher":{"@id":"https://www.primoffice.com.ar/#organization"},"inLanguage":"es-AR"},{"@type":"WebPage","@id":"https://setupoficina.com.ar/#webpage","url":"https://setupoficina.com.ar/","name":"Test ergonómico y visualizador de setup | PrimOffice","description":"Hacé el test ergonómico gratuito, recibí una recomendación personalizada y explorá tu setup PrimOffice con fotografías reales de cada producto.","isPartOf":{"@id":"https://setupoficina.com.ar/#website"},"about":{"@id":"https://www.primoffice.com.ar/#organization"},"inLanguage":"es-AR","primaryImageOfPage":{"@type":"ImageObject","url":"https://setupoficina.com.ar/assets/images/brand/primoffice-og.jpg","width":1200,"height":630}}]}</script>
 
   <style>
     /* Identidad visual oficial PrimOffice */
@@ -729,7 +655,7 @@
           </div>
           <div class="pq-locked" aria-hidden="true">
             <div class="pq-locked__blur"></div>
-            <div class="pq-locked__lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Tu setup recomendado<br>en 3D</span></div>
+            <div class="pq-locked__lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Tu setup recomendado<br>con productos reales</span></div>
           </div>
         </div>
       </div>
@@ -794,89 +720,47 @@
       <div class="result-layout">
         <!-- LEFT: desk preview -->
         <div class="desk-preview">
-
-          <div class="desk-preview__title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0121 8.87V15.13a1 1 0 01-1.447.9L15 14M3 8h12v8H3V8z" stroke-linecap="round"/></svg>
-            Vista previa en tiempo real
-          </div>
-          <div class="s3d-comparison" role="group" aria-label="Comparar estados del setup">
-            <button type="button" class="s3d-comparison__btn is-active" data-setup-state="current" aria-pressed="true">Tu setup actual</button>
-            <button type="button" class="s3d-comparison__btn" data-setup-state="primoffice" aria-pressed="false">Con PrimOffice</button>
-          </div>
-          <div class="s3d-feedback" id="s3dFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
-          <div class="s3d-stage" id="s3dStage" hidden>
-            <div class="s3d-toolbar" id="s3dToolbar" role="toolbar" aria-label="Camara 3D">
-              <button type="button" class="s3d-cam is-active" data-view="perspectiva" aria-pressed="true" title="Perspectiva 3/4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg><span>3/4</span></button>
-              <button type="button" class="s3d-cam" data-view="frontal" aria-pressed="false" title="Vista frontal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg><span>Frontal</span></button>
-              <button type="button" class="s3d-cam" data-view="superior" aria-pressed="false" title="Vista superior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></svg><span>Superior</span></button>
-              <button type="button" class="s3d-cam" data-view="reset" aria-pressed="false" title="Reset camara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Reiniciar</span></button>
+          <header class="setup-visual-header">
+            <div class="setup-visual-header__copy">
+              <span class="setup-visual-header__eyebrow">Vista orientativa</span>
+              <h4 class="setup-visual-header__title">Visualizá tu setup</h4>
+              <p class="setup-visual-header__subtitle">Elegí un nivel o ajustá los productos desde una única configuración.</p>
             </div>
-            <div class="s3d-host" id="s3dHost"></div>
-            <div class="s3d-loader" id="s3dLoader"><span class="s3d-spin" aria-hidden="true"></span></div>
-            <p class="s3d-hint">Arrastrá para rotar &middot; rueda o pellizco para acercar</p>
-          </div>
-          <!-- SVG desk scene -->
-          <div class="desk-scene" id="desk-scene">
-            <div class="ds-wall"></div>
-            <div class="ds-ambient"></div>
-
-            <!-- light bar -->
-            <div class="ds-item ds-lightbar hidden-item" id="dsi-lightbar"></div>
-
-            <!-- monitor or laptop -->
-            <div class="ds-item ds-monitor-arm hidden-item" id="dsi-monitor-arm"></div>
-            <div class="ds-item ds-monitor hidden-item" id="dsi-monitor">
-              <div class="ds-monitor-screen"></div>
+            <div class="combo-preset" aria-label="Aplicar un setup preestablecido">
+              <div class="combo-preset__buttons" role="group" aria-label="Setups disponibles">
+                <button type="button" class="combo-preset__btn" data-combo-preset="starter" aria-pressed="false">Starter</button>
+                <button type="button" class="combo-preset__btn" data-combo-preset="pro" aria-pressed="false">Pro</button>
+                <button type="button" class="combo-preset__btn" data-combo-preset="epic" aria-pressed="false">Epic</button>
+              </div>
             </div>
-            <div class="ds-item ds-monitor-stand hidden-item" id="dsi-monitor-stand"></div>
+          </header>
 
-            <div class="ds-item ds-laptop hidden-item" id="dsi-laptop">
-              <div class="ds-laptop-screen"></div>
-            </div>
-            <div class="ds-item ds-stand hidden-item" id="dsi-stand"></div>
-            <div class="ds-item ds-stand-leg hidden-item" id="dsi-stand-leg"></div>
+          <div class="setup-visual" id="setupVisualHybrid">
+            <div class="setup-visual__feedback" id="setupVisualFeedback" role="status" aria-live="polite" aria-atomic="true"></div>
 
-            <!-- keyboard -->
-            <div class="ds-item ds-keyboard hidden-item" id="dsi-keyboard">
-              <div class="ds-keyboard-keys"></div>
-            </div>
+            <figure class="setup-scene" id="setupScene" data-mode="setup">
+              <div class="setup-scene__media">
+                <img class="setup-scene__image" id="setupSceneImage"
+                  src="./assets/images/scene/setup-pro-base.webp"
+                  width="1024" height="1024"
+                  alt="Ambiente PrimOffice con escritorio de madera, silla negra, monitor y notebook"
+                  fetchpriority="high" decoding="async">
+                <button type="button" class="setup-scene__before" id="setupBeforeToggle"
+                  data-scene-before aria-pressed="false">Ver antes</button>
+                <span class="setup-scene__fallback" id="setupSceneFallback" hidden>La referencia visual no está disponible.</span>
+              </div>
+              <figcaption class="setup-scene__caption">
+                <strong id="setupSceneLegend">Vista orientativa del ambiente PrimOffice</strong>
+                <span id="setupSceneContext">Los productos seleccionados se detallan debajo y en tu carrito.</span>
+              </figcaption>
+            </figure>
 
-            <!-- mouse + pad -->
-            <div class="ds-item ds-mousepad hidden-item" id="dsi-mousepad"></div>
-            <div class="ds-item ds-mouse hidden-item" id="dsi-mouse"></div>
-
-            <!-- hub -->
-            <div class="ds-item ds-hub hidden-item" id="dsi-hub"><div class="ds-hub-dot"></div></div>
-
-            <!-- organizer -->
-            <div class="ds-item ds-organizer hidden-item" id="dsi-organizer"></div>
-            <div class="ds-item ds-organizer-pens hidden-item" id="dsi-pens">
-              <div class="ds-organizer-pen" style="background:#38bdf8;height:90%"></div>
-              <div class="ds-organizer-pen" style="background:#f59e0b;height:70%"></div>
-              <div class="ds-organizer-pen" style="background:#10b981;height:80%"></div>
-            </div>
-
-            <!-- desk surface (always visible) -->
-            <div class="ds-desk-surface"></div>
-
-            <!-- standing desk badge -->
-            <div class="ds-item hidden-item" id="dsi-standing-badge" style="position:absolute;bottom:34%;right:5%;background:#10b981;color:white;font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;">STANDING</div>
-
-            <!-- normal desk legs -->
-            <div class="ds-desk-legs" id="ds-normal-legs">
-              <div class="ds-desk-leg"></div>
-              <div class="ds-desk-leg"></div>
-            </div>
-
-            <!-- chair -->
-            <div class="ds-item ds-chair hidden-item" id="dsi-chair">
-              <div class="ds-chair-back"></div>
-              <div class="ds-chair-seat"></div>
-              <div class="ds-chair-leg ds-chair-leg--l"></div>
-              <div class="ds-chair-leg ds-chair-leg--r"></div>
-            </div>
-
-            <div class="ds-floor"></div>
+            <section class="setup-product-bar" aria-labelledby="setupProductBarTitle">
+              <h5 class="sr-only" id="setupProductBarTitle">Productos del setup</h5>
+              <div class="setup-product-bar__rail" id="setupProductRail" role="list"
+                aria-label="Elegir un producto para ver su estado"></div>
+              <div class="setup-product-bar__panel" id="setupProductMiniPanel" aria-live="polite"></div>
+            </section>
           </div>
           <div class="desk-preview__count">
             <span id="preview-count">0</span> productos en tu setup
@@ -890,10 +774,10 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" stroke-linecap="round"/></svg>
               Tu carrito personalizado
             </div>
-            <span class="cart-header__note">Primero aparecen los productos que ya podés visualizar en 3D. Debajo están los productos adicionales incluidos en cada setup.</span>
+            <span class="cart-header__note">Todos los cambios se reflejan en el visualizador, el total y el diagnóstico comparativo.</span>
           </div>
           <div class="cart-product-section">
-            <div class="cart-extra-title cart-product-title">Productos del configurador 3D</div>
+            <div class="cart-extra-title cart-product-title">Productos principales del setup</div>
             <div class="cart-items" id="cart-items-list"></div>
           </div>
           <div class="cart-extra-section" id="cart-extras-section">
@@ -1058,7 +942,7 @@
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </button>
 
-<noscript class="noscript-notice"><p>Para completar el test y usar el configurador 3D, activá JavaScript. También podés consultar directamente por WhatsApp.</p></noscript>
+<noscript class="noscript-notice"><p>Para completar el test y usar el visualizador de setup, activá JavaScript. Las fotografías de referencia y el contacto directo por WhatsApp siguen disponibles en la página.</p></noscript>
 <script>
 (function(){
 'use strict';
@@ -1072,17 +956,17 @@ document.addEventListener('click',function(e){if(!navbar.contains(e.target))navb
 var P={
   /* Precios publicados por PrimOffice al 25/06/2026.
      Los productos sin stock se mantienen porque PrimOffice los comercializa. */
-  soporte_notebook:{name:'pNotebook · Soporte para notebook',cat:'Ergonomía',price:51191,icon:'laptop',dsEl:'dsi-stand,dsi-stand-leg,dsi-laptop'},
-  soporte_monitor:{name:'pArm · Brazo articulado para monitor',cat:'Ergonomía',price:68418,icon:'arm',dsEl:'dsi-monitor-arm,dsi-monitor'},
-  teclado_mec:{name:'pMechanic · Teclado mecánico RGB',cat:'Periférico',price:29399,icon:'kbd',dsEl:'dsi-keyboard'},
-  mouse_vertical:{name:'pMouseProV · Mouse vertical ergonómico',cat:'Periférico',price:39239,icon:'mouse',dsEl:'dsi-mouse'},
-  mousepad_xxl:{name:'pMat · Pad XL de escritorio',cat:'Accesorio',price:27549,icon:'pad',dsEl:'dsi-mousepad'},
-  hub_usb:{name:'pHub · Hub USB-C 7 en 1',cat:'Conectividad',price:26690,icon:'hub',dsEl:'dsi-hub'},
-  organizador_prem:{name:'pBox · Organizador de cables',cat:'Orden',price:42839,icon:'org',dsEl:'dsi-organizer',stock:false,badge:'Sin stock'},
-  luz_led:{name:'pGlow · Barra de luz para monitor',cat:'Iluminación',price:62999,icon:'light',dsEl:'dsi-lightbar,dsi-monitor',stock:false,badge:'Sin stock'},
-  reposamuñecas:{name:'pEase · Reposamuñecas ergonómico',cat:'Ergonomía',price:19949,icon:'wrist',dsEl:'dsi-wrist-rest'},
-  almohadilla:{name:'pLumbar · Soporte lumbar',cat:'Ergonomía',price:13464,icon:'back',dsEl:'dsi-lumbar',stock:false,badge:'Sin stock'},
-  standing_desk:{name:'pStanding · Escritorio eléctrico regulable',cat:'Mueble',price:443987,icon:'stand',dsEl:'dsi-standing-badge',stock:false,badge:'Sin stock'}
+  soporte_notebook:{name:'pNotebook · Soporte para notebook',cat:'Ergonomía',price:51191,icon:'laptop'},
+  soporte_monitor:{name:'pArm · Brazo articulado para monitor',cat:'Ergonomía',price:68418,icon:'arm'},
+  teclado_mec:{name:'pMechanic · Teclado mecánico RGB',cat:'Periférico',price:29399,icon:'kbd'},
+  mouse_vertical:{name:'pMouseProV · Mouse vertical ergonómico',cat:'Periférico',price:39239,icon:'mouse'},
+  mousepad_xxl:{name:'pMat · Pad XL de escritorio',cat:'Accesorio',price:27549,icon:'pad'},
+  hub_usb:{name:'pHub · Hub USB-C 7 en 1',cat:'Conectividad',price:26690,icon:'hub'},
+  organizador_prem:{name:'pBox · Organizador de cables',cat:'Orden',price:42839,icon:'org',stock:false,badge:'Sin stock'},
+  luz_led:{name:'pGlow · Barra de luz para monitor',cat:'Iluminación',price:62999,icon:'light',stock:false,badge:'Sin stock'},
+  'reposamu\u00f1ecas':{name:'pEase · Reposamuñecas ergonómico',cat:'Ergonomía',price:19949,icon:'wrist'},
+  almohadilla:{name:'pLumbar · Soporte lumbar',cat:'Ergonomía',price:13464,icon:'back',stock:false,badge:'Sin stock'},
+  standing_desk:{name:'pStanding · Escritorio eléctrico regulable',cat:'Mueble',price:443987,icon:'stand',stock:false,badge:'Sin stock'}
 };
 
 var ICON_BG={
@@ -1194,7 +1078,7 @@ renderQ(0);
 // ── RADAR DINÁMICO: ACTUAL VS CONFIGURACIÓN ACTIVA ─────────────────
 var RADAR_AXES=['Ergonomía','Comodidad','Postura','Orden','Foco','Energía'];
 var radarDisplay=null,radarTarget=null,radarAnim=0,radarResizeBound=false;
-var radarHighlightTimer=0,setupFeedbackTimer=0,pendingSetupChange=null;
+var radarHighlightTimer=0,setupFeedbackTimer=0;
 var RADAR_PRODUCT_IMPACTS={
   silla:[[0,16],[1,24],[2,20],[5,6]],
   almohadilla:[[1,10],[2,10]],
@@ -1207,14 +1091,14 @@ var RADAR_PRODUCT_IMPACTS={
   hub_usb:[[3,11],[4,6]],
   luz_led:[[4,10],[5,16]],
   standing_desk:[[0,9],[1,8],[5,13]],
-  reposamuñecas:[[1,7]],
+  'reposamu\u00f1ecas':[[1,7]],
   asesoria:[[0,5],[2,5],[3,5],[4,5],[5,5]]
 };
 var RADAR_PRODUCT_GROUPS={
   silla:['silla'],almohadilla:['almohadilla'],soporte_monitor:['soporte_monitor','soporte_dual'],soporte_notebook:['soporte_notebook'],
   mouse_vertical:['mouse_ergo','mouse_vertical','mouse_trackball'],teclado_mec:['teclado','teclado_mec'],mousepad_xxl:['mousepad_xxl'],
   organizador_prem:['organizador','organizador_prem'],hub_usb:['hub_usb','hub_usb_pro'],luz_led:['luz_led'],standing_desk:['standing_desk'],
-  reposamuñecas:['reposamuñecas'],asesoria:['asesoria']
+  'reposamu\u00f1ecas':['reposamu\u00f1ecas'],asesoria:['asesoria']
 };
 var RADAR_PRODUCT_CANONICAL={soporte_dual:'soporte_monitor',mouse_ergo:'mouse_vertical',mouse_trackball:'mouse_vertical',teclado:'teclado_mec',organizador:'organizador_prem',hub_usb_pro:'hub_usb'};
 
@@ -1278,7 +1162,7 @@ function radarMainAreas(ids,limit){
 }
 function setupProductLabel(id){var product=P[id];return product?product.name.split(' · ')[0]:id;}
 function showSetupFeedback(message,kind){
-  var el=document.getElementById('s3dFeedback');if(!el)return;
+  var el=document.getElementById('setupVisualFeedback');if(!el)return;
   if(setupFeedbackTimer)clearTimeout(setupFeedbackTimer);
   el.textContent=message;el.setAttribute('data-kind',kind||'info');el.classList.remove('is-visible');
   requestAnimationFrame(function(){el.classList.add('is-visible');});
@@ -1312,49 +1196,12 @@ function updateRadarChart(highlightAxes){
 // ── CART + PREVIEW STATE ──────────────────────────────────
 var cartState={}, extrasState={};
 
-// Map product id → desk scene element ids
-function getDsIds(id){
-  var p=P[id]; if(!p||!p.dsEl)return[];
-  return p.dsEl.split(',').filter(function(x){return x;});
-}
-
 function updatePreview(change){
-  change=change||pendingSetupChange;pendingSetupChange=null;
-  // Collect all active product ids from cart + extras
-  var active={};
-  Object.keys(cartState).forEach(function(id){if(cartState[id])active[id]=true;});
-  Object.keys(extrasState).forEach(function(id){if(extrasState[id])active[id]=true;});
-
-  // Collect which ds elements should be visible
-  var visible={};
-  Object.keys(active).forEach(function(id){
-    getDsIds(id).forEach(function(el){visible[el]=true;});
-  });
-
-  // Notebook y monitor son elementos contextuales: ayudan a visualizar
-  // los productos PrimOffice, pero no aparecen como productos del carrito.
-  if(active['soporte_notebook']) visible['dsi-laptop']=true;
-  if(active['soporte_monitor']||active['luz_led']) visible['dsi-monitor']=true;
-
-  // Mantener coherencia entre fallback 2D y escena 3D.
-  if(visible['dsi-monitor-arm']) visible['dsi-monitor-stand']=false;
-  if(!visible['dsi-monitor']) visible['dsi-lightbar']=false;
-
-  // Toggle elements
-  ['dsi-lightbar','dsi-monitor','dsi-monitor-stand','dsi-monitor-arm',
-   'dsi-laptop','dsi-stand','dsi-stand-leg','dsi-keyboard','dsi-mousepad',
-   'dsi-wrist-rest','dsi-mouse','dsi-hub','dsi-organizer','dsi-pens','dsi-chair','dsi-lumbar','dsi-standing-badge'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(!el)return;
-    if(visible[id]){el.classList.remove('hidden-item');}
-    else{el.classList.add('hidden-item');}
-  });
-
-  // Count
-  var cnt=FULL_CART_IDS.filter(function(id){return isProductSelected(id)&&getDsIds(id).length>0;}).length;
+  change=change||null;
+  var cnt=FULL_CART_IDS.filter(isProductSelected).length;
   document.getElementById('preview-count').textContent=cnt;
   var changedProductIds=change?(change.productIds||[change.productId].filter(Boolean)):[];
-  if(window.Setup3D){window.Setup3D.setVisible(visible,{standing:!!visible['dsi-standing-badge'],changedProductIds:changedProductIds,bulk:!!(change&&change.preset),preset:change&&change.preset||'',changeType:change&&change.selected===false?'remove':'add'});}
+  if(window.SetupVisualHybrid&&typeof window.SetupVisualHybrid.sync==='function')window.SetupVisualHybrid.sync({change:change||null});
   updateRadarChart(radarAxesForProducts(changedProductIds));
   if(change&&change.preset)showPresetFeedback(change.preset);
   else if(change&&change.productId)showProductFeedback(change.productId,!!change.selected);
@@ -1362,24 +1209,11 @@ function updatePreview(change){
 
 function setSetupComparisonMode(mode){
   if(mode!=='current'&&mode!=='primoffice')return;
-  document.querySelectorAll('[data-setup-state]').forEach(function(btn){
-    var active=btn.getAttribute('data-setup-state')===mode;
-    btn.classList.toggle('is-active',active);
-    btn.setAttribute('aria-pressed',active?'true':'false');
-  });
-  if(window.Setup3D&&typeof window.Setup3D.setMode==='function'){
-    window.Setup3D.setMode(mode);
-  }
+  if(window.SetupVisualHybrid&&typeof window.SetupVisualHybrid.setComparison==='function')window.SetupVisualHybrid.setComparison(mode);
   if(mode==='primoffice'&&Array.isArray(FULL_CART_IDS)){
     updateRadarChart(radarAxesForProducts(FULL_CART_IDS.filter(isProductSelected)));
   }
 }
-
-document.querySelectorAll('[data-setup-state]').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    setSetupComparisonMode(this.getAttribute('data-setup-state'));
-  });
-});
 
 function updateTotal(){
   var t=0;
@@ -1406,8 +1240,8 @@ function buildCart(ans){
 }
 
 /* Orden del checklist:
-   1) productos que hoy tienen representación en el configurador 3D;
-   2) productos reales de los setups que todavía no se visualizan. */
+   1) productos principales del setup;
+   2) productos adicionales que comparten el mismo estado y visualizador. */
 var CONFIGURATOR_PRODUCT_IDS=[
   'soporte_notebook','mouse_vertical','mousepad_xxl',
   'soporte_monitor','teclado_mec','hub_usb','organizador_prem','luz_led',
@@ -1415,7 +1249,7 @@ var CONFIGURATOR_PRODUCT_IDS=[
 ];
 
 var ADDITIONAL_PRODUCT_IDS=[
-  'reposamuñecas',
+  'reposamu\u00f1ecas',
   'almohadilla'
 ];
 
@@ -1448,6 +1282,7 @@ function isProductSelected(id){
 }
 
 function setCartRowState(id,on){
+  id=normalizeCartId(id);
   var additional=isAdditionalProduct(id);
   if(additional)extrasState[id]=!!on;
   else cartState[id]=!!on;
@@ -1463,11 +1298,49 @@ function setCartRowState(id,on){
   else row.classList.toggle('cart-item--disabled',!on);
 }
 
+function updateProductSelections(changes,options){
+  options=options||{};
+  var normalized=[];
+  (changes||[]).forEach(function(change){
+    var id=normalizeCartId(change&&change.id);
+    if(!P[id]||FULL_CART_IDS.indexOf(id)===-1)return;
+    normalized.push({id:id,on:!!change.on});
+  });
+  if(!normalized.length)return false;
+  var changed=[];
+  normalized.forEach(function(change){
+    setCartRowState(change.id,change.on);
+    if(changed.indexOf(change.id)===-1)changed.push(change.id);
+    if(change.on){
+      cartAlternativesOf(change.id).forEach(function(otherId){
+        otherId=normalizeCartId(otherId);
+        if(otherId!==change.id&&isProductSelected(otherId)){
+          setCartRowState(otherId,false);
+          if(changed.indexOf(otherId)===-1)changed.push(otherId);
+        }
+      });
+    }
+  });
+  updateTotal();
+  var primary=normalized[0];
+  var previewChange=options.preset?
+    {preset:options.preset,productIds:options.productIds||changed,source:options.source||'preset'}:
+    {productId:primary.id,productIds:changed,selected:primary.on,source:options.source||'cart'};
+  updatePreview(previewChange);
+  updatePresetButtons(options.preset||'');
+  if(options.scheduleLeadUpdate!==false)scheduleLeadCartUpdate('cart_change');
+  return true;
+}
+
+function updateProductSelection(rawId,on,options){
+  return updateProductSelections([{id:rawId,on:on}],options);
+}
+
 /* Presets formados exclusivamente por productos comercializados por PrimOffice. */
 var COMBO_PRESETS={
-  starter:['soporte_notebook','mouse_vertical','mousepad_xxl','reposamuñecas'],
-  pro:['soporte_notebook','soporte_monitor','teclado_mec','mouse_vertical','mousepad_xxl','hub_usb','organizador_prem','luz_led','reposamuñecas','almohadilla'],
-  epic:['standing_desk','soporte_notebook','soporte_monitor','teclado_mec','mouse_vertical','mousepad_xxl','hub_usb','organizador_prem','luz_led','reposamuñecas','almohadilla']
+  starter:['soporte_notebook','mouse_vertical','mousepad_xxl','reposamu\u00f1ecas'],
+  pro:['soporte_notebook','soporte_monitor','teclado_mec','mouse_vertical','mousepad_xxl','hub_usb','organizador_prem','luz_led','reposamu\u00f1ecas','almohadilla'],
+  epic:['standing_desk','soporte_notebook','soporte_monitor','teclado_mec','mouse_vertical','mousepad_xxl','hub_usb','organizador_prem','luz_led','reposamu\u00f1ecas','almohadilla']
 };
 
 /* Datos reales publicados por la tienda Tiendanube de PrimOffice el 21/07/2026.
@@ -1482,9 +1355,24 @@ var PRIMOFFICE_STORE_PRODUCTS={
   hub_usb:{url:'https://www.primoffice.com.ar/productos/adaptador-hub-usbc-multifuncional-phub/',productId:181273177,variantId:701301322,sku:'PHUB-7-1',variant:'Default',stock:294,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'181273177',quantity:'1',variant_id:'701301322'}},
   organizador_prem:{url:'https://www.primoffice.com.ar/productos/bandeja-organizadora-de-cables-para-escritorio-pbox/',productId:300254300,variantId:1338915376,sku:'PBOX',variant:'Default',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'300254300',quantity:'1',variant_id:'1338915376'}},
   luz_led:{url:'https://www.primoffice.com.ar/productos/lampara-para-monitor-barra-de-luz-led-pglow/',productId:299909412,variantId:1337977476,sku:'PGLOW',variant:'Default',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'299909412',quantity:'1',variant_id:'1337977476'}},
-  'reposamuñecas':{url:'https://www.primoffice.com.ar/productos/almohadilla-reposa-munecas-ergonomica-con-gel-antideslizante-pease/',productId:337015811,variantId:1498192158,sku:'PEASEB',variant:'Blanco',stock:1,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'337015811','variation[0]':'Blanco',quantity:'1',variant_id:'1498192158'}},
+  'reposamu\u00f1ecas':{url:'https://www.primoffice.com.ar/productos/almohadilla-reposa-munecas-ergonomica-con-gel-antideslizante-pease/',productId:337015811,variantId:1498192158,sku:'PEASEB',variant:'Blanco',stock:1,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'337015811','variation[0]':'Blanco',quantity:'1',variant_id:'1498192158'}},
   almohadilla:{url:'https://www.primoffice.com.ar/productos/respaldo-lumbar-para-silla-plumbar/',productId:93849738,variantId:356667602,sku:'PLUMBAR',variant:'Default',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'93849738',quantity:'1',variant_id:'356667602'}},
   standing_desk:{url:'https://www.primoffice.com.ar/productos/escritorio-altura-ajustable-pstanding/',productId:253530310,variantId:1436749537,sku:'PSTANDINGN-TIENDA',variant:'Negro / Sin tabla / Oak Natural (Roble Americano)',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'253530310','variation[0]':'Negro','variation[1]':'Sin tabla','variation[2]':'Oak Natural (Roble Americano)',quantity:'1',variant_id:'1436749537'}}
+};
+
+window.PrimOfficeHybridBridge={
+  getState:function(){
+    var selected={};
+    FULL_CART_IDS.forEach(function(id){selected[id]=isProductSelected(id);});
+    return{
+      products:P,
+      productIds:FULL_CART_IDS.slice(),
+      selected:selected
+    };
+  },
+  setProductSelection:function(id,on,options){
+    return updateProductSelection(id,on,options||{});
+  }
 };
 
 var PRIMOFFICE_COMBO_URLS={
@@ -1566,25 +1454,34 @@ function highlightCustomCart(){
   cartHighlightTimer=setTimeout(function(){cart.classList.remove('is-highlighted');},1200);
 }
 
-function applyComboPreset(name){
+function applyComboPreset(name,changedProductIds){
   var ids=COMBO_PRESETS[name];
   if(!ids)return;
-  FULL_CART_IDS.forEach(function(id){
-    setCartRowState(id,ids.indexOf(id)!==-1);
-  });
+  if(typeof updateProductSelections==='function'){
+    updateProductSelections(FULL_CART_IDS.map(function(id){
+      return{id:id,on:ids.indexOf(id)!==-1};
+    }),{
+      preset:name,
+      productIds:changedProductIds&&changedProductIds.length?changedProductIds:ids.slice(),
+      source:'preset'
+    });
+    return;
+  }
+  /* Compatibilidad defensiva con el arnés que valida esta función aislada. */
+  FULL_CART_IDS.forEach(function(id){setCartRowState(id,ids.indexOf(id)!==-1);});
   updateTotal();
   updatePreview();
   updatePresetButtons(name);
   scheduleLeadCartUpdate('cart_change');
 }
 
-function prepareComboPreset(name){
+function prepareComboPreset(name,options){
   var target=COMBO_PRESETS[name]||[];if(!target.length)return;
+  options=options||{};
   var changed=FULL_CART_IDS.filter(function(id){return isProductSelected(id)!==(target.indexOf(id)!==-1);});
   ensureComboResultVisible(name);
-  pendingSetupChange={preset:name,productIds:changed.length?changed:target.slice()};
-  applyComboPreset(name);
-  highlightCustomCart();
+  applyComboPreset(name,changed.length?changed:target.slice());
+  if(options.highlightCart!==false)highlightCustomCart();
 }
 
 function buyComboInPrimOffice(comboId){
@@ -1602,11 +1499,15 @@ function requestComboWhatsApp(name){
   window.sendWhatsApp();
 }
 
-document.querySelectorAll('[data-combo-action]').forEach(function(btn){
+document.querySelectorAll('[data-combo-preset]').forEach(function(btn){
   btn.addEventListener('click',function(){
     var name=this.getAttribute('data-combo-preset');
-    var action=this.getAttribute('data-combo-action');
-    if(action==='whatsapp')requestComboWhatsApp(name);
+    var action=this.getAttribute('data-combo-action')||'preview';
+    if(action==='preview'){
+      prepareComboPreset(name,{highlightCart:false});
+      setSetupComparisonMode('primoffice');
+    }
+    else if(action==='whatsapp')requestComboWhatsApp(name);
     else if(action==='purchase')buyComboInPrimOffice(name);
   });
 });
@@ -1655,11 +1556,7 @@ function renderCart(items,extras){
       '<div class="cart-item__price">'+(p.price>0?'$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'):'Gratis')+'</div>';
 
     row.querySelector('input').addEventListener('change',function(){
-      setCartRowState(id,this.checked);
-      updateTotal();
-      updatePreview({productId:id,selected:this.checked});
-      updatePresetButtons();
-      scheduleLeadCartUpdate('cart_change');
+      updateProductSelection(id,this.checked,{source:'cart_checkbox'});
     });
 
     listEl.appendChild(row);
@@ -1684,11 +1581,7 @@ function renderCart(items,extras){
       '<div class="cart-extra-item__price">$'+p.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+'</div>';
 
     row.querySelector('input').addEventListener('change',function(){
-      setCartRowState(id,this.checked);
-      updateTotal();
-      updatePreview({productId:id,selected:this.checked});
-      updatePresetButtons();
-      scheduleLeadCartUpdate('cart_change');
+      updateProductSelection(id,this.checked,{source:'cart_checkbox'});
     });
 
     extrasEl.appendChild(row);
@@ -1712,10 +1605,7 @@ function showResult(){
     document.getElementById('score-arc').style.strokeDashoffset=188.5-(r.score/18)*188.5;
   },350);
 
-  if(window.Setup3D&&typeof window.Setup3D.setDiagnosis==='function'){
-    window.Setup3D.setDiagnosis({answers:answers.slice()});
-  }
-  setSetupComparisonMode('current');
+  setSetupComparisonMode('primoffice');
   renderCart(r.items,r.extras);
   updateTotal();
   updatePreview();
@@ -1756,7 +1646,7 @@ function pqOnComplete(){
   var a1=document.getElementById('pqMetricAreas');if(a1)a1.textContent=areas||1;
   var a2=document.getElementById('pqMetricTier');if(a2)a2.textContent='Setup '+tier;
   var a3=document.getElementById('pqMetricCount');if(a3)a3.textContent=r.items.length;
-  var sub=document.getElementById('pqTeaserSub');if(sub)sub.innerHTML='Según tus respuestas, te recomendamos un <strong>Setup '+tier+'</strong>. Desbloquealo y ajustalo en 3D.';
+  var sub=document.getElementById('pqTeaserSub');if(sub)sub.innerHTML='Según tus respuestas, te recomendamos un <strong>Setup '+tier+'</strong>. Desbloquealo, explorá las fotografías reales y ajustá los productos.';
   pqHide(qContainer);pqShow(pqTeaser);pqScroll();
 }
 function pqCanal(){var c=document.querySelector('input[name=pqcanal]:checked');return c?c.value:'';}
@@ -1901,7 +1791,7 @@ function scheduleLeadCartUpdate(eventType){
 function pqPayload(){
   var r=buildCart(answers),tier=r.score<=8?'Starter':(r.score<=13?'Pro':'Epic'),c=pqCanal();
   var recommended=normalizeProductArray(r.items);
-  var recommended3D=recommended.filter(function(id){return !isAdditionalProduct(id);});
+  var recommendedPrimary=recommended.filter(function(id){return !isAdditionalProduct(id);});
   var recommendedAdditional=recommended.filter(function(id){return isAdditionalProduct(id);});
   var total=0;
   recommended.forEach(function(id){if(P[id])total+=Number(P[id].price||0);});
@@ -1911,7 +1801,7 @@ function pqPayload(){
     contact:{name:document.getElementById('pqNombre').value.trim(),preferredChannel:c||'email',
       email:c==='email'?document.getElementById('pqEmail').value.trim():'',whatsapp:c==='whatsapp'?document.getElementById('pqWa').value.trim():'',consent:!!document.getElementById('pqConsent').checked},
     diagnosis:{rawAnswers:answers.slice(),totalScore:r.score,recommendedTier:'Setup '+tier,recommendedPreset:tier.toLowerCase()},
-    configuration:{recommendedProducts:recommended.slice(),selectedProducts:recommended3D,selectedExtras:recommendedAdditional,estimatedTotal:total,currency:'ARS'}};
+    configuration:{recommendedProducts:recommended.slice(),selectedProducts:recommendedPrimary,selectedExtras:recommendedAdditional,estimatedTotal:total,currency:'ARS'}};
 }
 function pqSubmit(e){
   e.preventDefault();pqClearSubmitErr();if(!pqValidate())return;
@@ -2004,6 +1894,6 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
 <script defer src="./js/comparacion-antes-despues.js"></script>
 <script type="module" src="./js/config/app-config.js?v=d1-leads-2"></script>
 <script type="module" src="./js/services/leads-service.js?v=productos-separados-1"></script>
-<script type="module" src="./js/setup-3d.js"></script>
+<script type="module" src="./js/setup-visual-hybrid.js"></script>
 </body>
 </html>

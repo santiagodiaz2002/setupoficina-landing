@@ -12,7 +12,7 @@ Prioridades:
 2. captura de leads;
 3. persistencia en Cloudflare D1;
 4. sincronización con Odoo;
-5. configurador Three.js;
+5. visualizador híbrido 2D;
 6. responsive;
 7. performance;
 8. accesibilidad;
@@ -29,14 +29,17 @@ Archivos activos principales:
 * `css/integracion-canonica.css`
 * `css/pulido-visual.css`
 * `css/comparacion-antes-despues.css`
+* `css/setup-visual-hybrid.css`
 * `js/pulido-visual.js`
 * `js/comparacion-antes-despues.js`
 * `js/config/app-config.js`
 * `js/services/leads-service.js`
-* `js/setup-3d.js`
+* `js/setup-visual-hybrid.js`
 * `functions/api/leads.js`
 
 No asumir que otros archivos con nombres similares están activos. Verificar siempre las referencias reales desde `index.html`.
+
+`js/setup-3d.js` es un archivo legacy preservado como referencia histórica. No se carga en `index.html` ni forma parte del runtime activo.
 
 ## Flujo comercial
 
@@ -49,7 +52,7 @@ El flujo que debe preservarse es:
 5. resultado completo;
 6. carrito;
 7. radar;
-8. configurador 3D;
+8. visualizador híbrido 2D;
 9. persistencia del lead en D1;
 10. sincronización posterior con Odoo.
 
@@ -73,25 +76,35 @@ Las etiquetas conceptuales de Odoo deben mantenerse separadas:
 * resultado: `Setup Starter`, `Setup Pro` o `Setup Epic`;
 * canal: `WhatsApp` o `Email`.
 
-## Configurador 3D
+## Visualizador híbrido 2D
 
-El configurador activo está en `js/setup-3d.js` y utiliza Three.js.
+La experiencia visual activa está en `js/setup-visual-hybrid.js` y `css/setup-visual-hybrid.css`. Utiliza exclusivamente fotografías locales oficiales bajo `assets/images/`.
+
+La fuente de verdad comercial continúa en `index.html`:
+
+* catálogo, nombres y precios: `P`;
+* niveles: `COMBO_PRESETS`;
+* selección: `cartState` y `extrasState`;
+* IDs canónicos: `CONFIGURATOR_PRODUCT_IDS`, `ADDITIONAL_PRODUCT_IDS` y `FULL_CART_IDS`;
+* URLs y stock de tienda: `PRIMOFFICE_STORE_PRODUCTS`.
+
+El módulo visual sólo mantiene estado de presentación: preset presentado, producto enfocado y modo antes/setup. No debe crear un segundo carrito, duplicar presets ni redefinir productos o precios.
 
 No:
 
-* reescribirlo desde cero;
-* migrarlo a otra biblioteca;
-* reemplazar su arquitectura sin justificación;
-* eliminar cámara, zoom, rotación, reinicio o precarga por nivel;
-* romper la relación con test, carrito o resultado.
+* reactivar `js/setup-3d.js` sin una decisión explícita;
+* volver a cargar Three.js, canvas o WebGL para el visualizador;
+* presentar la comparación del ambiente como una fotografía exacta del preset;
+* depender de imágenes externas;
+* romper la relación con test, carrito, radar o resultado.
 
-Priorizar carga diferida, rendimiento móvil, limpieza de recursos WebGL y compatibilidad con el preview 2D.
+Priorizar fotografías reales, carga diferida, dimensiones reservadas, rendimiento móvil, accesibilidad y fallbacks seguros.
 
-## Invariante crítica: carrito, configurador 3D y Odoo
+## Invariante crítica: carrito, visualizador, radar y Odoo
 
 Después de la creación exitosa de un lead:
 
-1. cada cambio de producto o preset debe actualizar inmediatamente el carrito, el total, el radar y la escena 3D;
+1. cada cambio de producto o preset debe actualizar inmediatamente el carrito, el total, el radar, la escena, los hotspots y la barra compacta;
 2. después del debounce vigente de 1000 ms debe ejecutarse `PATCH /api/leads`;
 3. el PATCH debe actualizar el mismo registro de D1 y el mismo lead de Odoo;
 4. debe conservarse `odoo_lead_id`;

@@ -1,5 +1,5 @@
 {
-  "name": "PrimOffice — Test ergonómico y configurador 3D",
+  "name": "PrimOffice — Test ergonómico y visualizador de setup",
   "short_name": "PrimOffice",
   "lang": "es-AR",
   "start_url": "/",
@@ -20,5 +20,5 @@
     }
   ],
   "id": "/",
-  "description": "Test ergonómico gratuito, recomendación personalizada y visualización 3D para optimizar espacios de trabajo."
+  "description": "Test ergonómico gratuito, recomendación personalizada y explorador fotográfico de productos para optimizar espacios de trabajo."
 }
