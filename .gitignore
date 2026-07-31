@@ -29,3 +29,9 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Exportaciones temporales y resultados de validación
+/assets/setup-layers/import/*.png
+/artifacts/
+
+/tests/visual-output/

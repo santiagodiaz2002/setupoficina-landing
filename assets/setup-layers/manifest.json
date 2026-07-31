@@ -1,0 +1,322 @@
+{
+  "canvas": {
+    "width": 1254,
+    "height": 1254
+  },
+  "cleared_regions": {
+    "map": {
+      "canva": {
+        "x": 975.1095,
+        "y": 26.4053,
+        "width": 255,
+        "height": 334
+      },
+      "pixel_bounds": [
+        975,
+        26,
+        1231,
+        361
+      ]
+    },
+    "compass": {
+      "canva": {
+        "x": 916.1095,
+        "y": 221.4053,
+        "width": 79,
+        "height": 80
+      },
+      "pixel_bounds": [
+        916,
+        221,
+        996,
+        302
+      ]
+    }
+  },
+  "source_files": [
+    {
+      "file": "00_BASE_ESTATICA.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "84914d0618b2c30c9a37840abbaccac5e3036d18b7411680c96ee96016af86a0"
+    },
+    {
+      "file": "01_PARM.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "44c1e1c596497ce4b5cc3ed0dc532871b23cc2c6c40efbf0ea78c17940615467"
+    },
+    {
+      "file": "02_PNOTEBOOK.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "46c30cfee6f0377e9450aac676b0f21ea5f354149416b6e08c0b98de71c72ae3"
+    },
+    {
+      "file": "03_PMECHANIC.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "13123e9a0b2ac28e8a6051b36391a30a0778550794c3a1debe6ce1e6b580d80b"
+    },
+    {
+      "file": "04_PGLOW.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "e6e11785785e437b5dde668e91bd2f9aa4bca9cf8b0f17db21c01271c698c8b4"
+    },
+    {
+      "file": "05_PMAT.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "7c0f3a5795d399f401b04a4ae7e00a13e6fe7bcfe7661db83d12ef0a41cccf75"
+    },
+    {
+      "file": "06_PHUB.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "2cb1a561c17dba927f5dd7d56a44994c9158941fd94e932b613e8f0e0dd8c098"
+    },
+    {
+      "file": "07_PBOX.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "34a8d5c36d9a8274c1172aab810d9e5fbe7ffad6090427a0c324a174ad71250e"
+    },
+    {
+      "file": "08_PMOUSEPROV.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "b62881a13b0c314d32f9b2b6f359d6562f8b4c2038c4c2bca6bd186247249edc"
+    },
+    {
+      "file": "09_STANDING_DESK.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "2b942a86d027cae42dcf57426795338e8c043cf9f257bb140260537bbbefa9db"
+    },
+    {
+      "file": "09B_STANDARD_DESK.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "92e0d7d57832e204a4b8d3de0c871c19d6a8186ba6eff67e4900eaa4f1839de7"
+    },
+    {
+      "file": "10_SETUP_STARTER.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "dfd25c63a5f089ef5466a5f3bf9bd7d0d56b6bd872dab40cf5c838ddf46e4dce"
+    },
+    {
+      "file": "11_SETUP_PRO.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "f7239bfd3bee811af7d065599efcf360c568b6a8b1995235f5db416342de64e5"
+    },
+    {
+      "file": "12_SETUP_EPIC.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "5c68d1f3f3da62bfe408394ca48b58e5230bf3c7c3e28536016df107a207f5e2"
+    }
+  ],
+  "runtime_files": [
+    {
+      "file": "00_BASE_ESTATICA.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "84914d0618b2c30c9a37840abbaccac5e3036d18b7411680c96ee96016af86a0"
+    },
+    {
+      "file": "01_PARM.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "ef36f3d0321fa7c516cc77676915dc6c819b236be1baa901d5ed415923f5bdd3"
+    },
+    {
+      "file": "02_PNOTEBOOK.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "96caf6e822f64a748aaccada22f9cfa7d7ef3a4c6c5e9bafe8b3f96b4dc6c611"
+    },
+    {
+      "file": "03_PMECHANIC.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "7c1099dbe6cebc7a67e0e805b049858c66855e9a36098adca17310b072c0e461"
+    },
+    {
+      "file": "04_PGLOW.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "969f86f497addce5ceeb04211ed2ba36340faef8bd4429a8b16c8f5e93e2d9ac"
+    },
+    {
+      "file": "05_PMAT.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "5d511a0a197e1e9951df84d7185cab19a2c3e07fbc54ae98e51d9442ad00ed81"
+    },
+    {
+      "file": "06_PHUB.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "2ff4c6b9b240a2cdee6dc3d04f311ba154545e0d8b18c780ff857efabe61b1c9"
+    },
+    {
+      "file": "07_PBOX.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "12012622c5d1521d5882a2dc712c62b3a8596a75010af489d254a207817b6152"
+    },
+    {
+      "file": "08_PMOUSEPROV.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "905024f8cf2fe8d3862a9594733dda8b3f91b3331e139951a1a64275f8605ba2"
+    },
+    {
+      "file": "09_STANDING_DESK.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "ab99e5a85bf574ecb09bfa91826dcb5ca125f72977be7f54b37d2743b5f310f1"
+    },
+    {
+      "file": "09B_STANDARD_DESK.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha": true,
+      "sha256": "e0ed922df579b247af740bcaad3336895d6d44bf741374d3b4a589926b7b2ad5"
+    }
+  ],
+  "reference_files": [
+    {
+      "file": "10_SETUP_STARTER.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "dfd25c63a5f089ef5466a5f3bf9bd7d0d56b6bd872dab40cf5c838ddf46e4dce"
+    },
+    {
+      "file": "11_SETUP_PRO.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "f7239bfd3bee811af7d065599efcf360c568b6a8b1995235f5db416342de64e5"
+    },
+    {
+      "file": "12_SETUP_EPIC.png",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "5c68d1f3f3da62bfe408394ca48b58e5230bf3c7c3e28536016df107a207f5e2"
+    }
+  ]
+}
