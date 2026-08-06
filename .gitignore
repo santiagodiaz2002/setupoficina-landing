@@ -19,6 +19,9 @@ node_modules/
 coverage/
 dist/
 build/
+!tiendanube-script/build/
+tiendanube-script/build/*
+!tiendanube-script/build/backend-url.mjs
 
 # Logs y archivos del sistema/editor
 *.log
@@ -33,5 +36,7 @@ Thumbs.db
 # Exportaciones temporales y resultados de validación
 /assets/setup-layers/import/*.png
 /artifacts/
+/db/generated/
+/_worker.bundle
 
 /tests/visual-output/

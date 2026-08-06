@@ -1,0 +1,20 @@
+{
+  "name": "setupoficina-tiendanube-cart-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@tiendanube/nube-sdk-jsx": "^0.21.0",
+    "@tiendanube/nube-sdk-types": "^0.90.0",
+    "@tiendanube/nube-sdk-ui": "^0.22.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  }
+}

@@ -805,11 +805,15 @@
               <div class="cart-total__value"><span class="cart-total__currency">$</span><span id="cart-total-value">0</span> <span style="font-size:.75rem;font-weight:400;color:var(--text-muted)">ARS</span></div>
             </div>
             <div class="cart-actions">
+              <button type="button" class="btn-cart" id="tiendanube-cart-transfer-button" data-tiendanube-transfer data-tiendanube-only hidden>
+                Comprar en Tiendanube
+              </button>
               <button class="btn-cart btn-cart--whatsapp" onclick="sendWhatsApp()">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 Pedir por WhatsApp
               </button>
             </div>
+            <p id="tiendanube-transfer-status" role="status" aria-live="polite" hidden></p>
           </div>
         </div>
 
@@ -857,7 +861,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pMat · Pad XL de escritorio</li>
         </ul>
         <div class="combo-card__actions">
-          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="starter" data-combo-action="purchase">Quiero este combo</button>
+          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="starter" data-combo-action="purchase" data-tiendanube-transfer>Quiero este combo</button>
           <button type="button" class="combo-btn combo-btn--whatsapp" data-combo-preset="starter" data-combo-action="whatsapp">Pedir por WhatsApp</button>
         </div>
       </div>
@@ -877,7 +881,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pGlow · Barra de luz para monitor</li>
         </ul>
         <div class="combo-card__actions">
-          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="pro" data-combo-action="purchase">Quiero este combo</button>
+          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="pro" data-combo-action="purchase" data-tiendanube-transfer>Quiero este combo</button>
           <button type="button" class="combo-btn combo-btn--whatsapp" data-combo-preset="pro" data-combo-action="whatsapp">Pedir por WhatsApp</button>
         </div>
       </div>
@@ -897,7 +901,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round"/></svg>pStanding · Escritorio eléctrico regulable</li>
         </ul>
         <div class="combo-card__actions">
-          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="epic" data-combo-action="purchase">Quiero este combo</button>
+          <button type="button" class="combo-btn combo-btn--primary" data-combo-preset="epic" data-combo-action="purchase" data-tiendanube-transfer>Quiero este combo</button>
           <button type="button" class="combo-btn combo-btn--whatsapp" data-combo-preset="epic" data-combo-action="whatsapp">Pedir por WhatsApp</button>
         </div>
       </div>
@@ -1353,23 +1357,6 @@ var COMBO_PRESETS={
   epic:['standing_desk','soporte_notebook','soporte_monitor','teclado_mec','mouse_vertical','mousepad_xxl','hub_usb','organizador_prem','luz_led']
 };
 
-/* Datos reales publicados por la tienda Tiendanube de PrimOffice el 21/07/2026.
-   Se conservan como mapeo tecnico; la landing deriva la compra de combos a
-   paginas puente same-site dentro de PrimOffice y no hace POST cross-site. */
-var PRIMOFFICE_STORE_PRODUCTS={
-  soporte_notebook:{url:'https://www.primoffice.com.ar/productos/soporte-notebook-ergonomico-pnotebook/',productId:122080675,variantId:554959249,sku:'PNOTEBOOKGE',variant:'Gris Espacial',stock:18,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'122080675','variation[0]':'Gris Espacial',quantity:'1',variant_id:'554959249'}},
-  mouse_vertical:{url:'https://www.primoffice.com.ar/productos/mouse-vertical-ergonomico-inalambrico-recargable-pmouseprov-lg4ff/',productId:338590249,variantId:1504839464,sku:'PMOUSEPROV',variant:'Default',stock:130,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'338590249',quantity:'1',variant_id:'1504839464'}},
-  mousepad_xxl:{url:'https://www.primoffice.com.ar/productos/pad-xl-cuero-ecologico-pmat/',productId:107462883,variantId:411998913,sku:'PMATN',variant:'Negro',stock:39,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'107462883','variation[0]':'Negro',quantity:'1',variant_id:'411998913'}},
-  soporte_monitor:{url:'https://www.primoffice.com.ar/productos/soporte-para-monitor-brazo-ajustable-parmpro/',productId:254100672,variantId:1122132928,sku:'PARM',variant:'Default',stock:23,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'254100672',quantity:'1',variant_id:'1122132928'}},
-  teclado_mec:{url:'https://www.primoffice.com.ar/productos/teclado-mecanico-compacto-rgb-pmechanic/',productId:288170247,variantId:1289758116,sku:'PMECHANIC',variant:'Default',stock:38,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'288170247',quantity:'1',variant_id:'1289758116'}},
-  hub_usb:{url:'https://www.primoffice.com.ar/productos/adaptador-hub-usbc-multifuncional-phub/',productId:181273177,variantId:701301322,sku:'PHUB-7-1',variant:'Default',stock:294,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'181273177',quantity:'1',variant_id:'701301322'}},
-  organizador_prem:{url:'https://www.primoffice.com.ar/productos/bandeja-organizadora-de-cables-para-escritorio-pbox/',productId:300254300,variantId:1338915376,sku:'PBOX',variant:'Default',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'300254300',quantity:'1',variant_id:'1338915376'}},
-  luz_led:{url:'https://www.primoffice.com.ar/productos/lampara-para-monitor-barra-de-luz-led-pglow/',productId:299909412,variantId:1337977476,sku:'PGLOW',variant:'Default',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'299909412',quantity:'1',variant_id:'1337977476'}},
-  'reposamu\u00f1ecas':{url:'https://www.primoffice.com.ar/productos/almohadilla-reposa-munecas-ergonomica-con-gel-antideslizante-pease/',productId:337015811,variantId:1498192158,sku:'PEASEB',variant:'Blanco',stock:1,available:true,cartAction:'/comprar/',postFields:{add_to_cart:'337015811','variation[0]':'Blanco',quantity:'1',variant_id:'1498192158'}},
-  almohadilla:{url:'https://www.primoffice.com.ar/productos/respaldo-lumbar-para-silla-plumbar/',productId:93849738,variantId:356667602,sku:'PLUMBAR',variant:'Default',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'93849738',quantity:'1',variant_id:'356667602'}},
-  standing_desk:{url:'https://www.primoffice.com.ar/productos/escritorio-altura-ajustable-pstanding/',productId:253530310,variantId:1436749537,sku:'PSTANDINGN-TIENDA',variant:'Negro / Sin tabla / Oak Natural (Roble Americano)',stock:0,available:false,cartAction:'/comprar/',postFields:{add_to_cart:'253530310','variation[0]':'Negro','variation[1]':'Sin tabla','variation[2]':'Oak Natural (Roble Americano)',quantity:'1',variant_id:'1436749537'}}
-};
-
 window.PrimOfficeHybridBridge={
   getState:function(){
     var selected={};
@@ -1389,12 +1376,6 @@ window.PrimOfficeHybridBridge={
   setProductSelection:function(id,on,options){
     return updateProductSelection(id,on,options||{});
   }
-};
-
-var PRIMOFFICE_COMBO_URLS={
-  starter:'https://www.primoffice.com.ar/combo-starter/',
-  pro:'https://www.primoffice.com.ar/combo-pro/',
-  epic:'https://www.primoffice.com.ar/combo-epic/'
 };
 
 function presetMatches(name){
@@ -1500,15 +1481,43 @@ function prepareComboPreset(name,options){
   if(options.highlightCart!==false)highlightCustomCart();
 }
 
+function selectedTiendanubeTransferItems(){
+  var cart=getCurrentCartConfiguration();
+  return cart.selectedProducts.concat(cart.selectedExtras).map(function(internalId){
+    return{internalId:internalId,quantity:1};
+  });
+}
+
+function startTiendanubeCartTransfer(){
+  if(!(window.PrimOfficeTiendanube&&window.PrimOfficeTiendanube.transferSelection))return Promise.resolve({ok:false,skipped:true,reason:'service_unavailable'});
+  clearTimeout(pqLeadSession.cartUpdateTimer);
+  submitLeadUpdate('purchase_click');
+  return window.PrimOfficeTiendanube.transferSelection(selectedTiendanubeTransferItems()).catch(function(){return{ok:false};});
+}
+
+var PRIMOFFICE_COMBO_URLS={
+  starter:'https://www.primoffice.com.ar/combo-starter/',
+  pro:'https://www.primoffice.com.ar/combo-pro/',
+  epic:'https://www.primoffice.com.ar/combo-epic/'
+};
+
+function tiendanubeCartBridgeEnabled(){
+  return Boolean(window.PrimOfficeConfig&&window.PrimOfficeConfig.TIENDANUBE_ENABLED===true);
+}
+
 function buyComboInPrimOffice(comboId){
   var url=PRIMOFFICE_COMBO_URLS[comboId];
   if(!url)return;
   prepareComboPreset(comboId);
+  if(tiendanubeCartBridgeEnabled())return startTiendanubeCartTransfer();
   window.open(url,'_blank','noopener');
   clearTimeout(pqLeadSession.cartUpdateTimer);
   submitLeadUpdate('purchase_click');
 }
 window.buyComboInPrimOffice=buyComboInPrimOffice;
+
+var tiendanubeCartButton=document.getElementById('tiendanube-cart-transfer-button');
+if(tiendanubeCartButton)tiendanubeCartButton.addEventListener('click',startTiendanubeCartTransfer);
 
 function requestComboWhatsApp(name){
   prepareComboPreset(name);
@@ -1910,6 +1919,7 @@ if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-moti
 <script defer src="./js/comparacion-antes-despues.js"></script>
 <script type="module" src="./js/config/app-config.js?v=d1-leads-2"></script>
 <script type="module" src="./js/services/leads-service.js?v=productos-separados-1"></script>
+<script type="module" src="./js/services/tiendanube-cart-transfer.js?v=cart-bridge-1"></script>
 <script type="module" src="./js/setup-visual-hybrid.js?v=layout-by-desk-2"></script>
 </body>
 </html>

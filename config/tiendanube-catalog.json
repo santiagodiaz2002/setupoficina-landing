@@ -1,0 +1,57 @@
+[
+  {
+    "internal_id": "soporte_notebook",
+    "sku": "PNOTEBOOKGE",
+    "name": "pNotebook · Soporte para notebook"
+  },
+  {
+    "internal_id": "mouse_vertical",
+    "sku": "PMOUSEPROV",
+    "name": "pMouseProV · Mouse vertical ergonómico"
+  },
+  {
+    "internal_id": "mousepad_xxl",
+    "sku": "PMATN",
+    "name": "pMat · Pad XL de escritorio"
+  },
+  {
+    "internal_id": "soporte_monitor",
+    "sku": "PARM",
+    "name": "pArm · Soporte para monitor"
+  },
+  {
+    "internal_id": "teclado_mec",
+    "sku": "PMECHANIC",
+    "name": "pMechanic · Teclado mecánico"
+  },
+  {
+    "internal_id": "hub_usb",
+    "sku": "PHUB-7-1",
+    "name": "pHub · Hub USB"
+  },
+  {
+    "internal_id": "organizador_prem",
+    "sku": "PBOX",
+    "name": "pBox · Organizador de cables"
+  },
+  {
+    "internal_id": "luz_led",
+    "sku": "PGLOW",
+    "name": "pGlow · Barra de luz para monitor"
+  },
+  {
+    "internal_id": "reposamuñecas",
+    "sku": "PEASEB",
+    "name": "pEase · Reposamuñecas"
+  },
+  {
+    "internal_id": "almohadilla",
+    "sku": "PLUMBAR",
+    "name": "pLumbar · Almohadilla lumbar"
+  },
+  {
+    "internal_id": "standing_desk",
+    "sku": "PSTANDINGN-TIENDA",
+    "name": "pStanding · Escritorio eléctrico regulable"
+  }
+]

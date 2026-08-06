@@ -22,6 +22,17 @@ export const APP_CONFIG = {
   /* Clave usada solo cuando se prueba en modo demo. */
   LEADS_STORAGE_KEY: 'primoffice_leads_demo',
 
+  /* Puente al carrito nativo. Se habilita explicitamente luego de configurar
+     D1, los secretos y el script NubeSDK. */
+  TIENDANUBE_ENABLED: false,
+  TIENDANUBE_CART_TRANSFER_URL: '/api/tiendanube/cart-transfer',
+  TIENDANUBE_TRANSFER_TIMEOUT_MS: 10000,
+  TIENDANUBE_STOREFRONT_ORIGINS: [
+    'https://primoffice2.mitiendanube.com',
+    'https://primoffice.com.ar',
+    'https://www.primoffice.com.ar'
+  ],
+
   /* Datos útiles para saber de dónde vino el lead. */
   LEAD_ORIGIN: 'landing-primoffice',
   LANDING_SOURCE: 'Landing PrimOffice · Test ergonómico',

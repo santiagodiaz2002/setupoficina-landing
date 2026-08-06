@@ -37,5 +37,11 @@ http://localhost:8000/?calibrate=1
 node --test tests/*.test.mjs
 ```
 
+La base del puente al carrito nativo de Tiendanube y sus pasos operativos estan
+documentados en [`docs/tiendanube-cart-bridge.md`](docs/tiendanube-cart-bridge.md).
+El mismo documento describe el alta OAuth Authorization Code, el cifrado del
+token en D1, los callbacks de produccion y Preview y el endpoint de estado
+sanitizado.
+
 Las posiciones no dependen del preset. Toda selección con escritorio estándar usa
 el mismo layout; toda selección con standing desk usa el layout alto calibrado.
