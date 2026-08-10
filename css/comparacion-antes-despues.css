@@ -1,15 +1,30 @@
+/* GUÍA EDUCATIVA: estilos encapsulados del comparador; la variable de posición y los atributos de borde los actualiza su script clásico. */
 /* Comparador animado PrimOffice — scoped .ba-* */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-compare{--ba-position:88%;position:relative;isolation:isolate;overflow:hidden;background:#0F172A;touch-action:pan-y;cursor:ew-resize;user-select:none;-webkit-user-select:none;}
+/* Define una señal de foco perceptible para navegación por teclado y otras tecnologías de entrada. */
 .ba-compare:focus-visible{outline:3px solid #38BDF8;outline-offset:4px;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-img--antes,.ba-img--despues{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none;-webkit-user-drag:none;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-img--despues{z-index:1;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-img--antes{z-index:2;clip-path:inset(0 calc(100% - var(--ba-position)) 0 0);will-change:clip-path;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-divider{position:absolute;z-index:4;top:0;bottom:0;left:var(--ba-position);width:3px;background:rgba(255,255,255,.95);transform:translateX(-50%);box-shadow:0 0 0 1px rgba(15,23,42,.15),0 0 22px rgba(56,189,248,.58);will-change:left;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-handle{position:absolute;top:50%;left:50%;display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;transform:translate(-50%,-50%);background:#fff;color:#0369A1;box-shadow:0 10px 26px rgba(0,0,0,.28);}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-handle svg{width:17px;height:17px;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-label{position:absolute;z-index:5;top:1rem;padding:.36rem .66rem;border-radius:999px;background:rgba(15,23,42,.76);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);color:#fff;font-size:.68rem;font-weight:700;letter-spacing:.7px;text-transform:uppercase;transition:opacity 180ms ease;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-label--antes{left:1rem;}.ba-label--despues{right:1rem;}
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .ba-compare[data-position-low="true"] .ba-label--antes,.ba-compare[data-position-high="true"] .ba-label--despues{opacity:.28;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-hint{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.75rem;color:rgba(255,255,255,.64);font-size:.72rem;}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .ba-hint svg{width:16px;height:16px;}
+/* Abre la variante de accesibilidad que reduce o elimina movimiento cuando el usuario así lo solicita. */
 @media(prefers-reduced-motion:reduce){.ba-img--antes,.ba-divider{transition:none!important;}}
