@@ -170,19 +170,6 @@
     .result-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:1.5rem;align-items:start;}
     @media(max-width:900px){.result-layout{grid-template-columns:1fr;}}
 
-    /* Score header */
-    .result-header{background:linear-gradient(135deg,#0F172A,#1E293B);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);padding:2rem;text-align:center;position:relative;overflow:hidden;margin-bottom:1.5rem;}
-    .result-header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(56,189,248,.15) 0%,transparent 65%);}
-    .result-header__label{font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;position:relative;}
-    .result-header__title{font-family:'Poppins',sans-serif;font-size:1.5rem;font-weight:700;color:var(--white);margin-bottom:.5rem;position:relative;}
-    .result-header__sub{color:rgba(255,255,255,.65);font-size:.9rem;max-width:420px;margin:0 auto;position:relative;}
-    .score-ring{width:72px;height:72px;margin:0 auto 1rem;position:relative;}
-    .score-ring svg{width:72px;height:72px;transform:rotate(-90deg);}
-    .score-ring__track{fill:none;stroke:rgba(255,255,255,.1);stroke-width:6;}
-    .score-ring__fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 800ms cubic-bezier(.4,0,.2,1);}
-    .score-ring__label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:700;color:var(--white);}
-    .score-ring__sub{font-size:.45rem;font-weight:500;color:rgba(255,255,255,.5);text-transform:uppercase;}
-
     /* ── DESK PREVIEW ── */
     .desk-preview{background:linear-gradient(160deg,#0F172A,#162035);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);padding:1.5rem;position:sticky;top:88px;}
     .desk-preview__title{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.7);text-align:center;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.4rem;}
@@ -698,17 +685,7 @@
 
     <!-- Result -->
     <div id="quiz-result" class="hidden">
-      <div class="result-header">
-        <div class="score-ring" aria-hidden="true">
-          <svg viewBox="0 0 72 72"><circle class="score-ring__track" cx="36" cy="36" r="30"/><circle class="score-ring__fill" cx="36" cy="36" r="30" id="score-arc" stroke-dasharray="188.5" stroke-dashoffset="188.5"/></svg>
-          <div class="score-ring__label"><span id="score-display">0</span><span class="score-ring__sub">/ 18</span></div>
-        </div>
-        <div class="result-header__label" id="result-tier">Setup Pro</div>
-        <h3 class="result-header__title" id="result-title">Tu combo personalizado está listo</h3>
-        <p class="result-header__sub" id="result-description">Excluimos lo que ya tenés. Tocá para agregar o quitar antes de hacer el pedido.</p>
-      </div>
-
-
+      <span id="result-tier" hidden>Setup Pro</span>
       <div class="result-layout">
         <!-- Cart -->
         <div class="cart-wrapper" id="customCart">
@@ -1358,8 +1335,6 @@ function ensureComboResultVisible(name){
     if(teaser)teaser.setAttribute('hidden','');
     if(lead)lead.setAttribute('hidden','');
     document.getElementById('result-tier').textContent='Setup '+tier;
-    document.getElementById('result-title').textContent='Tu combo '+tier+' está listo';
-    document.getElementById('result-description').textContent='Revisá los productos seleccionados y ajustá el carrito antes de avanzar.';
     qr.classList.remove('hidden');
     qr.style.opacity='1';
   }
@@ -1548,12 +1523,6 @@ function showResult(){
   else{tier='Setup Epic recomendado';title='Tu setup necesita atención urgente';desc='Estás acumulando desgaste físico todos los días. Este es el combo que te cambia la vida laboral.';}
 
   document.getElementById('result-tier').textContent=tier;
-  document.getElementById('result-title').textContent=title;
-  document.getElementById('result-description').textContent=desc;
-  document.getElementById('score-display').textContent=r.score;
-  setTimeout(function(){
-    document.getElementById('score-arc').style.strokeDashoffset=188.5-(r.score/18)*188.5;
-  },350);
 
   setSetupComparisonMode('primoffice');
   renderCart(r.items,r.extras);
