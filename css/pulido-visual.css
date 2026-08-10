@@ -1,3 +1,5 @@
+/* GUÍA EDUCATIVA: estilos del fondo atmosférico y del sistema de aparición que crea pulido-visual.js. */
+/* Las reglas transparentan secciones para dejar visible el canvas decorativo sin alterar la lógica comercial. */
 /* =====================================================================
    PrimOffice · Fondo atmosférico continuo (premium, tipo Spline)
    ---------------------------------------------------------------------
@@ -11,40 +13,63 @@
    El <canvas> lo inyecta js/pulido-visual.js.
    ===================================================================== */
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 html{background:radial-gradient(120% 95% at 50% -12%, #163463 0%, #0d1f3f 42%, #081229 72%, #060d1d 100%) fixed, #0a1224}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 body{background:transparent!important}
 
 /* ---------- ATMÓSFERA GLOBAL (capa fija única) ---------- */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 #pv-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background:
+    /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
     radial-gradient(120% 95% at 50% -12%, #163463 0%, #0d1f3f 42%, #081229 72%, #060d1d 100%);
 }
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 #pv-canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
 
 /* ---------- SECCIONES OSCURAS: dejar ver la atmósfera ---------- */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .hero,.quiz-section,.cta-section,footer{background:transparent!important}
 /* El viejo fondo decorativo del hero lo reemplaza la atmósfera global */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .hero__grid,.hero__glow{display:none!important}
 
 /* ---------- SECCIONES CLARAS: vidrio legible que se funde en la atmósfera ---------- */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .section--alt,.combos-section,#beneficios{
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background:linear-gradient(180deg,
+    /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
     rgba(247,250,253,.66) 0%,
+    /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
     rgba(247,250,253,.94) 13%,
+    /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
     rgba(247,250,253,.94) 87%,
+    /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
     rgba(247,250,253,.66) 100%)!important;
 }
 
 /* ---------- SCROLL REVEAL (único sistema, repetible) ---------- */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .pv-rv{opacity:0;transform:translateY(22px);
+  /* Suaviza el cambio de estado o enlaza la secuencia animada correspondiente. */
   transition:opacity .62s cubic-bezier(.16,1,.3,1),transform .62s cubic-bezier(.16,1,.3,1);
+  /* Configura la propiedad will-change como parte de la presentación del selector actual. */
   will-change:opacity,transform}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .pv-rv.pv-rv--left{transform:translateX(-26px)}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .pv-rv.pv-rv--right{transform:translateX(26px)}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .pv-rv.pv-rv--scale{transform:scale(.96)}
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .pv-rv.pv-in{opacity:1;transform:none}
 
 /* ---------- PREFERS-REDUCED-MOTION ---------- */
+/* Abre la variante de accesibilidad que reduce o elimina movimiento cuando el usuario así lo solicita. */
 @media (prefers-reduced-motion: reduce){
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .pv-rv{opacity:1!important;transform:none!important;transition:none!important}
 }

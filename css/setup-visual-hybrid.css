@@ -1,709 +1,1209 @@
+/* GUÍA EDUCATIVA: presentación del compositor por capas, rail de productos, feedback, presets y panel temporal de calibración. */
+/* Los estados incluidos, enfocados y de comparación proceden de setup-visual-hybrid.js y del puente comercial de index.html. */
 /* Visualizador 2D fotográfico con fondo y capas estructurales de lienzo completo. */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 #quiz-result .desk-preview {
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   max-width: 100%;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: 1rem;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual-header {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: flex;
+  /* Configura la propiedad align-items como parte de la presentación del selector actual. */
   align-items: flex-end;
+  /* Configura la propiedad justify-content como parte de la presentación del selector actual. */
   justify-content: space-between;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: 1rem;
+  /* Configura la propiedad margin-bottom como parte de la presentación del selector actual. */
   margin-bottom: .85rem;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual-header__copy {
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual-header__eyebrow {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
+  /* Configura la propiedad margin-bottom como parte de la presentación del selector actual. */
   margin-bottom: .18rem;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: var(--accent);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font: 700 .64rem/1.35 'Poppins', sans-serif;
+  /* Configura la propiedad letter-spacing como parte de la presentación del selector actual. */
   letter-spacing: 1.1px;
+  /* Configura la propiedad text-transform como parte de la presentación del selector actual. */
   text-transform: uppercase;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual-header__title {
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: 0;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font: 700 1.08rem/1.25 'Poppins', sans-serif;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual-header__subtitle {
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   max-width: 470px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: .28rem 0 0;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .57);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .7rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.45;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 #quiz-result .combo-preset {
+  /* Configura la propiedad flex como parte de la presentación del selector actual. */
   flex: 0 0 auto;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: 0;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: 0;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 0;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: transparent;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 #quiz-result .combo-preset__buttons {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
   grid-template-columns: repeat(3, minmax(72px, 1fr));
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .36rem;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 #quiz-result .combo-preset__btn {
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   min-height: 44px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .48rem .64rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(255, 255, 255, .15);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 9px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .72);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(255, 255, 255, .045);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .7rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
+  /* Suaviza el cambio de estado o enlaza la secuencia animada correspondiente. */
   transition: transform 160ms ease, border-color 180ms ease, color 180ms ease,
+    /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
     background 180ms ease, box-shadow 180ms ease;
 }
 
+/* Define la respuesta visual al puntero sin alterar el estado comercial del componente. */
 #quiz-result .combo-preset__btn:hover {
+  /* Aplica la transformación visual usada para posición, escala o animación. */
   transform: translateY(-1px);
+  /* Configura la propiedad border-color como parte de la presentación del selector actual. */
   border-color: rgba(56, 189, 248, .58);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 #quiz-result .combo-preset__btn.is-active {
+  /* Configura la propiedad border-color como parte de la presentación del selector actual. */
   border-color: #38bdf8;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: linear-gradient(135deg, rgba(3, 105, 161, .92), rgba(14, 165, 233, .78));
+  /* Configura la propiedad box-shadow como parte de la presentación del selector actual. */
   box-shadow: 0 5px 16px rgba(3, 105, 161, .26);
 }
 
+/* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
 #quiz-result .combo-preset__btn:focus-visible,
+/* Define una señal de foco perceptible para navegación por teclado y otras tecnologías de entrada. */
 .setup-visual button:focus-visible {
+  /* Configura la propiedad outline como parte de la presentación del selector actual. */
   outline: 3px solid #7dd3fc;
+  /* Configura la propiedad outline-offset como parte de la presentación del selector actual. */
   outline-offset: 3px;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual {
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   max-width: 100%;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual .sr-only {
+  /* Define cómo se posiciona la caja respecto de su contenedor o del viewport. */
   position: absolute;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 1px;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   height: 1px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: 0;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: -1px;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura la propiedad clip como parte de la presentación del selector actual. */
   clip: rect(0, 0, 0, 0);
+  /* Configura la propiedad white-space como parte de la presentación del selector actual. */
   white-space: nowrap;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 0;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-visual__feedback {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: none;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: 0 0 .55rem;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .5rem .68rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(56, 189, 248, .4);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 9px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(240, 249, 255, .96);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(3, 18, 32, .88);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .68rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.4;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual__feedback.is-visible {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual__feedback[data-kind="remove"] {
+  /* Configura la propiedad border-color como parte de la presentación del selector actual. */
   border-color: rgba(148, 163, 184, .48);
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual__feedback[data-kind="preset"] {
+  /* Configura la propiedad border-color como parte de la presentación del selector actual. */
   border-color: rgba(52, 211, 153, .48);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene {
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 100%;
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: 0;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(255, 255, 255, .13);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 16px 16px 0 0;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: #edf0ef;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__media {
+  /* Define cómo se posiciona la caja respecto de su contenedor o del viewport. */
   position: relative;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 100%;
+  /* Configura la propiedad aspect-ratio como parte de la presentación del selector actual. */
   aspect-ratio: 1 / 1;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: #edf0ef;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__image {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 100%;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   height: 100%;
+  /* Configura la propiedad object-fit como parte de la presentación del selector actual. */
   object-fit: contain;
+  /* Configura la propiedad object-position como parte de la presentación del selector actual. */
   object-position: center;
+  /* Configura la propiedad user-select como parte de la presentación del selector actual. */
   user-select: none;
 }
 
+/* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
 .setup-scene__layer,
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__before-image {
+  /* Define cómo se posiciona la caja respecto de su contenedor o del viewport. */
   position: absolute;
+  /* Ordena esta capa respecto de las demás superficies superpuestas. */
   z-index: 1;
+  /* Configura la propiedad inset como parte de la presentación del selector actual. */
   inset: 0;
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 100%;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   height: 100%;
+  /* Configura la propiedad object-fit como parte de la presentación del selector actual. */
   object-fit: contain;
+  /* Configura la propiedad object-position como parte de la presentación del selector actual. */
   object-position: center;
+  /* Configura la propiedad pointer-events como parte de la presentación del selector actual. */
   pointer-events: none;
+  /* Configura la propiedad user-select como parte de la presentación del selector actual. */
   user-select: none;
 }
 
+/* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
 .setup-scene__layer[hidden],
+/* Define el estado oculto controlado desde HTML o JavaScript para retirar el elemento del flujo visual. */
 .setup-scene__before-image[hidden] {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: none;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__before-image { z-index: 20; }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__before {
+  /* Define cómo se posiciona la caja respecto de su contenedor o del viewport. */
   position: absolute;
+  /* Ordena esta capa respecto de las demás superficies superpuestas. */
   z-index: 2;
+  /* Establece este fotograma de la animación y los valores que se interpolarán hasta el siguiente. */
   top: .72rem;
+  /* Configura la propiedad right como parte de la presentación del selector actual. */
   right: .72rem;
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 92px;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   min-height: 44px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .45rem .7rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(255, 255, 255, .5);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 999px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(3, 14, 27, .64);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .67rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
+  /* Configura la propiedad box-shadow como parte de la presentación del selector actual. */
   box-shadow: 0 5px 18px rgba(0, 0, 0, .18);
+  /* Configura la propiedad backdrop-filter como parte de la presentación del selector actual. */
   backdrop-filter: blur(8px);
+  /* Suaviza el cambio de estado o enlaza la secuencia animada correspondiente. */
   transition: background 160ms ease, border-color 160ms ease;
 }
 
+/* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
 .setup-scene__before:hover,
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-scene__before[aria-pressed="true"] {
+  /* Configura la propiedad border-color como parte de la presentación del selector actual. */
   border-color: rgba(125, 211, 252, .86);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(3, 105, 161, .86);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__caption {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: flex;
+  /* Configura la propiedad align-items como parte de la presentación del selector actual. */
   align-items: center;
+  /* Configura la propiedad justify-content como parte de la presentación del selector actual. */
   justify-content: space-between;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .8rem;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   min-height: 48px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .58rem .78rem;
+  /* Configura la propiedad border-top como parte de la presentación del selector actual. */
   border-top: 1px solid rgba(255, 255, 255, .1);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: #0b1728;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__caption strong {
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .69rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.35;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__caption span {
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .66);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .61rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.35;
+  /* Configura la propiedad text-align como parte de la presentación del selector actual. */
   text-align: right;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__fallback {
+  /* Define cómo se posiciona la caja respecto de su contenedor o del viewport. */
   position: absolute;
+  /* Ordena esta capa respecto de las demás superficies superpuestas. */
   z-index: 3;
+  /* Configura la propiedad inset como parte de la presentación del selector actual. */
   inset: 0;
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Configura la propiedad place-items como parte de la presentación del selector actual. */
   place-items: center;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: 1rem;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .82);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: linear-gradient(145deg, #162239, #0b1424);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .75rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
+  /* Configura la propiedad text-align como parte de la presentación del selector actual. */
   text-align: center;
 }
 
+/* Define el estado oculto controlado desde HTML o JavaScript para retirar el elemento del flujo visual. */
 .setup-scene__fallback[hidden] {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: none;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar {
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   max-width: 100%;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(255, 255, 255, .12);
+  /* Configura la propiedad border-top como parte de la presentación del selector actual. */
   border-top: 0;
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 0 0 14px 14px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(3, 12, 24, .88);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__rail {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: flex;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .22rem;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 100%;
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   max-width: 100%;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .4rem;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow-x: auto;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow-y: hidden;
+  /* Configura la propiedad overscroll-behavior-inline como parte de la presentación del selector actual. */
   overscroll-behavior-inline: contain;
+  /* Configura la propiedad scrollbar-width como parte de la presentación del selector actual. */
   scrollbar-width: thin;
+  /* Configura la propiedad scrollbar-color como parte de la presentación del selector actual. */
   scrollbar-color: rgba(125, 211, 252, .42) transparent;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__item {
+  /* Configura la propiedad flex como parte de la presentación del selector actual. */
   flex: 0 0 72px;
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-chip {
+  /* Define cómo se posiciona la caja respecto de su contenedor o del viewport. */
   position: relative;
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Configura la propiedad grid-template-rows como parte de la presentación del selector actual. */
   grid-template-rows: 22px auto;
+  /* Configura la propiedad place-items como parte de la presentación del selector actual. */
   place-items: center;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .18rem;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 100%;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   min-height: 60px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .38rem .25rem .32rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid transparent;
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 9px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .62);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: transparent;
+  /* Establece este fotograma de la animación y los valores que se interpolarán hasta el siguiente. */
   touch-action: manipulation;
+  /* Suaviza el cambio de estado o enlaza la secuencia animada correspondiente. */
   transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
 }
 
+/* Define la respuesta visual al puntero sin alterar el estado comercial del componente. */
 .setup-product-chip:hover {
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(255, 255, 255, .055);
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-product-chip.is-focused {
+  /* Configura la propiedad border-color como parte de la presentación del selector actual. */
   border-color: rgba(125, 211, 252, .76);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(14, 165, 233, .14);
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-product-chip.is-included {
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(240, 249, 255, .95);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(56, 189, 248, .08);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-chip__icon {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Configura la propiedad place-items como parte de la presentación del selector actual. */
   place-items: center;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 22px;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   height: 22px;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-chip__icon svg {
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 21px;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   height: 21px;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-chip__name {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 100%;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .56rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.2;
+  /* Configura la propiedad text-align como parte de la presentación del selector actual. */
   text-align: center;
+  /* Configura la propiedad text-overflow como parte de la presentación del selector actual. */
   text-overflow: ellipsis;
+  /* Configura la propiedad white-space como parte de la presentación del selector actual. */
   white-space: nowrap;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-chip__mark {
+  /* Define cómo se posiciona la caja respecto de su contenedor o del viewport. */
   position: absolute;
+  /* Establece este fotograma de la animación y los valores que se interpolarán hasta el siguiente. */
   top: 4px;
+  /* Configura la propiedad right como parte de la presentación del selector actual. */
   right: 5px;
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Configura la propiedad place-items como parte de la presentación del selector actual. */
   place-items: center;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   width: 14px;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   height: 14px;
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 50%;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #052e16;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: #86efac;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .56rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 900;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-product-chip:not(.is-included) .setup-product-chip__mark {
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(241, 245, 249, .8);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(15, 23, 42, .88);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__panel {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
   grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  /* Configura la propiedad align-items como parte de la presentación del selector actual. */
   align-items: center;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .7rem;
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   min-height: 46px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .38rem .68rem;
+  /* Configura la propiedad border-top como parte de la presentación del selector actual. */
   border-top: 1px solid rgba(255, 255, 255, .09);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(255, 255, 255, .025);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__panel:empty {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: none;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__selection {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: flex;
+  /* Configura la propiedad align-items como parte de la presentación del selector actual. */
   align-items: center;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .5rem;
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__selection strong {
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .94);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .67rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.3;
+  /* Configura la propiedad text-overflow como parte de la presentación del selector actual. */
   text-overflow: ellipsis;
+  /* Configura la propiedad white-space como parte de la presentación del selector actual. */
   white-space: nowrap;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__state {
+  /* Configura la propiedad flex como parte de la presentación del selector actual. */
   flex: 0 0 auto;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .56);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .61rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-product-bar__hint {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .5);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .58rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.3;
+  /* Configura la propiedad text-align como parte de la presentación del selector actual. */
   text-align: right;
+  /* Configura la propiedad text-overflow como parte de la presentación del selector actual. */
   text-overflow: ellipsis;
+  /* Configura la propiedad white-space como parte de la presentación del selector actual. */
   white-space: nowrap;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .desk-preview__count {
+  /* Configura la propiedad margin-top como parte de la presentación del selector actual. */
   margin-top: .65rem;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .radar-summary__item.is-changed {
+  /* Suaviza el cambio de estado o enlaza la secuencia animada correspondiente. */
   animation: setupRadarPulse .8s ease;
 }
 
+/* Define la secuencia temporal que consumirá la propiedad de animación del componente relacionado. */
 @keyframes setupRadarPulse {
+  /* Establece este fotograma de la animación y los valores que se interpolarán hasta el siguiente. */
   0%,
+  /* Establece este fotograma de la animación y los valores que se interpolarán hasta el siguiente. */
   100% {
+    /* Configura la propiedad border-color como parte de la presentación del selector actual. */
     border-color: rgba(255, 255, 255, .08);
+    /* Aplica la transformación visual usada para posición, escala o animación. */
     transform: translateX(0);
   }
+  /* Establece este fotograma de la animación y los valores que se interpolarán hasta el siguiente. */
   35% {
+    /* Configura la propiedad border-color como parte de la presentación del selector actual. */
     border-color: rgba(56, 189, 248, .66);
+    /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
     background: rgba(56, 189, 248, .12);
+    /* Aplica la transformación visual usada para posición, escala o animación. */
     transform: translateX(3px);
   }
 }
 
+/* Abre una variante responsive; las reglas internas sustituyen el diseño sólo cuando se cumple esta consulta. */
 @media (max-width: 1180px) {
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-visual-header {
+    /* Configura la propiedad align-items como parte de la presentación del selector actual. */
     align-items: flex-start;
+    /* Configura la propiedad flex-direction como parte de la presentación del selector actual. */
     flex-direction: column;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   #quiz-result .combo-preset {
+    /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
     width: 100%;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   #quiz-result .combo-preset__buttons {
+    /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
+/* Abre una variante responsive; las reglas internas sustituyen el diseño sólo cuando se cumple esta consulta. */
 @media (max-width: 900px) {
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-visual-header {
+    /* Configura la propiedad align-items como parte de la presentación del selector actual. */
     align-items: flex-end;
+    /* Configura la propiedad flex-direction como parte de la presentación del selector actual. */
     flex-direction: row;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   #quiz-result .combo-preset {
+    /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
     width: auto;
   }
 }
 
+/* Abre una variante responsive; las reglas internas sustituyen el diseño sólo cuando se cumple esta consulta. */
 @media (max-width: 640px) {
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   #quiz-result .desk-preview {
+    /* Define el espacio interno, externo o entre elementos del layout. */
     padding: .75rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-visual-header {
+    /* Configura la propiedad align-items como parte de la presentación del selector actual. */
     align-items: stretch;
+    /* Configura la propiedad flex-direction como parte de la presentación del selector actual. */
     flex-direction: column;
+    /* Define el espacio interno, externo o entre elementos del layout. */
     gap: .72rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   #quiz-result .combo-preset {
+    /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
     width: 100%;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-scene {
+    /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
     border-radius: 13px 13px 0 0;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-scene__media {
+    /* Configura la propiedad aspect-ratio como parte de la presentación del selector actual. */
     aspect-ratio: 1 / 1;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-scene__caption {
+    /* Configura la propiedad align-items como parte de la presentación del selector actual. */
     align-items: flex-start;
+    /* Configura la propiedad flex-direction como parte de la presentación del selector actual. */
     flex-direction: column;
+    /* Define el espacio interno, externo o entre elementos del layout. */
     gap: .12rem;
+    /* Define el espacio interno, externo o entre elementos del layout. */
     padding: .55rem .65rem;
   }
 
+  /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
   .setup-scene__caption strong,
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-scene__caption span {
+    /* Elige el modelo de caja que organiza los hijos del componente. */
     display: block;
+    /* Configura la propiedad text-align como parte de la presentación del selector actual. */
     text-align: left;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-scene__caption strong {
+    /* Configura tipografía y ritmo de lectura para este contenido. */
     font-size: .64rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-scene__caption span {
+    /* Configura tipografía y ritmo de lectura para este contenido. */
     font-size: .56rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-product-bar__item {
+    /* Configura la propiedad flex-basis como parte de la presentación del selector actual. */
     flex-basis: 66px;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-product-bar__panel {
+    /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
     grid-template-columns: minmax(0, 1fr);
+    /* Define el espacio interno, externo o entre elementos del layout. */
     gap: .15rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-product-bar__selection {
+    /* Define el espacio interno, externo o entre elementos del layout. */
     gap: .35rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-product-bar__selection strong {
+    /* Configura tipografía y ritmo de lectura para este contenido. */
     font-size: .63rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-product-bar__state {
+    /* Configura tipografía y ritmo de lectura para este contenido. */
     font-size: .57rem;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-product-bar__hint {
+    /* Configura la propiedad text-align como parte de la presentación del selector actual. */
     text-align: left;
   }
 }
 
+/* Abre la variante de accesibilidad que reduce o elimina movimiento cuando el usuario así lo solicita. */
 @media (prefers-reduced-motion: reduce) {
+  /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
   #quiz-result .combo-preset__btn,
+  /* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
   .setup-scene__before,
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-product-chip {
+    /* Suaviza el cambio de estado o enlaza la secuencia animada correspondiente. */
     transition: none;
   }
 
+  /* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
   .radar-summary__item.is-changed {
+    /* Suaviza el cambio de estado o enlaza la secuencia animada correspondiente. */
     animation: none;
+    /* Configura la propiedad border-color como parte de la presentación del selector actual. */
     border-color: rgba(56, 189, 248, .55);
   }
 }
 
 /* Controles y errores siempre por encima de la composición. */
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__before { z-index: 25; }
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-scene__fallback { z-index: 30; }
 
 /* Modo temporal de calibración: sólo se activa mediante ?calibrate=1. */
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual.is-calibrating .setup-scene__media {
+  /* Configura la propiedad cursor como parte de la presentación del selector actual. */
   cursor: crosshair;
+  /* Establece este fotograma de la animación y los valores que se interpolarán hasta el siguiente. */
   touch-action: none;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual.is-calibrating.has-calibration-selection .setup-scene__media {
+  /* Configura la propiedad cursor como parte de la presentación del selector actual. */
   cursor: grab;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual.is-calibrating .setup-scene__media.is-calibration-dragging {
+  /* Configura la propiedad cursor como parte de la presentación del selector actual. */
   cursor: grabbing;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual.is-calibrating .setup-scene__layer.is-calibration-selected {
+  /* Configura la propiedad filter como parte de la presentación del selector actual. */
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, .98)) drop-shadow(0 0 9px rgba(56, 189, 248, .98));
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-visual.is-calibrating .setup-product-chip.is-calibration-unavailable {
+  /* Configura la propiedad cursor como parte de la presentación del selector actual. */
   cursor: not-allowed;
+  /* Configura la propiedad opacity como parte de la presentación del selector actual. */
   opacity: .38;
 }
 
+/* Define la respuesta visual al puntero sin alterar el estado comercial del componente. */
 .setup-visual.is-calibrating .setup-product-chip:disabled:hover {
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .62);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: transparent;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .72rem;
+  /* Configura la propiedad margin-top como parte de la presentación del selector actual. */
   margin-top: .75rem;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .8rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(56, 189, 248, .5);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 14px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #f8fafc;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(3, 12, 24, .96);
+  /* Configura la propiedad box-shadow como parte de la presentación del selector actual. */
   box-shadow: 0 12px 30px rgba(0, 0, 0, .22);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__header {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: flex;
+  /* Configura la propiedad align-items como parte de la presentación del selector actual. */
   align-items: flex-start;
+  /* Configura la propiedad justify-content como parte de la presentación del selector actual. */
   justify-content: space-between;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .8rem;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__eyebrow {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
+  /* Configura la propiedad margin-bottom como parte de la presentación del selector actual. */
   margin-bottom: .12rem;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #7dd3fc;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .58rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 800;
+  /* Configura la propiedad letter-spacing como parte de la presentación del selector actual. */
   letter-spacing: .08em;
+  /* Configura la propiedad text-transform como parte de la presentación del selector actual. */
   text-transform: uppercase;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel h5 {
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: 0;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .86rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.25;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__canvas {
+  /* Configura la propiedad flex como parte de la presentación del selector actual. */
   flex: 0 0 auto;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .3rem .48rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(125, 211, 252, .32);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 999px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(224, 242, 254, .9);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(14, 165, 233, .1);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .58rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__readout {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
   grid-template-columns: minmax(0, 1fr) minmax(72px, auto) minmax(72px, auto);
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .45rem;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__readout > div {
+  /* Configura la propiedad min-width como parte de la presentación del selector actual. */
   min-width: 0;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .52rem .58rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(255, 255, 255, .1);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 9px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(255, 255, 255, .035);
 }
 
+/* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
 .setup-calibration-panel__readout span,
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__readout strong {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: block;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__readout span {
+  /* Configura la propiedad margin-bottom como parte de la presentación del selector actual. */
   margin-bottom: .12rem;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .5);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .55rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
+  /* Configura la propiedad text-transform como parte de la presentación del selector actual. */
   text-transform: uppercase;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__readout strong {
+  /* Controla cómo se recorta o desplaza el contenido que supera la caja. */
   overflow: hidden;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fff;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font: 700 .72rem/1.3 ui-monospace, SFMono-Regular, Consolas, monospace;
+  /* Configura la propiedad text-overflow como parte de la presentación del selector actual. */
   text-overflow: ellipsis;
+  /* Configura la propiedad white-space como parte de la presentación del selector actual. */
   white-space: nowrap;
 }
 
+/* Continúa la declaración anterior con valores adicionales necesarios para completar el efecto visual. */
 .setup-calibration-panel__help,
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__status {
+  /* Define el espacio interno, externo o entre elementos del layout. */
   margin: 0;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: rgba(255, 255, 255, .62);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .61rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   line-height: 1.45;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__actions {
+  /* Elige el modelo de caja que organiza los hijos del componente. */
   display: grid;
+  /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Define el espacio interno, externo o entre elementos del layout. */
   gap: .38rem;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__actions button {
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   min-height: 42px;
+  /* Define el espacio interno, externo o entre elementos del layout. */
   padding: .45rem .52rem;
+  /* Configura la propiedad border como parte de la presentación del selector actual. */
   border: 1px solid rgba(125, 211, 252, .34);
+  /* Configura la propiedad border-radius como parte de la presentación del selector actual. */
   border-radius: 9px;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #e0f2fe;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(14, 165, 233, .1);
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-size: .61rem;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 750;
 }
 
+/* Define la respuesta visual al puntero sin alterar el estado comercial del componente. */
 .setup-calibration-panel__actions button:hover:not(:disabled) {
+  /* Configura la propiedad border-color como parte de la presentación del selector actual. */
   border-color: rgba(125, 211, 252, .8);
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   background: rgba(14, 165, 233, .2);
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__actions button:disabled {
+  /* Configura la propiedad cursor como parte de la presentación del selector actual. */
   cursor: not-allowed;
+  /* Configura la propiedad opacity como parte de la presentación del selector actual. */
   opacity: .38;
 }
 
+/* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
 .setup-calibration-panel__status {
+  /* Acota una dimensión para preservar proporción y legibilidad en distintos tamaños. */
   min-height: 1.1rem;
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #bae6fd;
+  /* Configura tipografía y ritmo de lectura para este contenido. */
   font-weight: 700;
 }
 
+/* Estiliza un estado dinámico que los scripts o atributos accesibles activan y desactivan. */
 .setup-calibration-panel__status[data-kind="error"] {
+  /* Configura el color o fondo que comunica la jerarquía visual de este estado. */
   color: #fecaca;
 }
 
+/* Abre una variante responsive; las reglas internas sustituyen el diseño sólo cuando se cumple esta consulta. */
 @media (max-width: 640px) {
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-calibration-panel__header {
+    /* Configura la propiedad align-items como parte de la presentación del selector actual. */
     align-items: stretch;
+    /* Configura la propiedad flex-direction como parte de la presentación del selector actual. */
     flex-direction: column;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-calibration-panel__canvas {
+    /* Configura la propiedad align-self como parte de la presentación del selector actual. */
     align-self: flex-start;
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-calibration-panel__readout {
+    /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
     grid-template-columns: minmax(0, 1fr) repeat(2, minmax(58px, .35fr));
   }
 
+  /* Define la apariencia del selector mostrado; las declaraciones del bloque se aplican a ese componente y su contexto. */
   .setup-calibration-panel__actions {
+    /* Describe la estructura de columnas o áreas que distribuye los bloques del componente. */
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
