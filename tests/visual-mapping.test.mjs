@@ -31,16 +31,22 @@ async function hash(pathname) {
   return createHash('sha256').update(buffer).digest('hex');
 }
 
-test('el runtime activo usa exclusivamente el compositor PNG por capas', async () => {
+test('el configurador 2D queda aislado del runtime visible sin borrar sus fuentes', async () => {
   const html = await readFile(path.join(root, 'index.html'), 'utf8');
   const js = await readFile(path.join(root, 'js/setup-visual-hybrid.js'), 'utf8');
-  const activeSource = `${html}\n${js}`;
 
-  assert.match(html, /assets\/setup-layers\/runtime\/00_BASE_ESTATICA\.png/);
   assert.match(js, /deriveVisibleSetupLayers/);
-  assert.doesNotMatch(activeSource, /assets\/images\/scene\/mapped\//);
-  assert.doesNotMatch(activeSource, /scene-epic-reference/);
+  assert.doesNotMatch(html, /setupVisualHybrid|setup-visual-hybrid|assets\/setup-layers\/runtime\//);
+  assert.doesNotMatch(html, /Vista fotográfica interactiva|Visualizá tu setup|data-scene-before/);
   assert.doesNotMatch(html, /js\/setup-3d\.js/);
+});
+
+test('el CTA de Tiendanube usa el celeste real del logo sin alterar WhatsApp', async () => {
+  const html = await readFile(path.join(root, 'index.html'), 'utf8');
+
+  assert.match(html, /#tiendanube-cart-transfer-button\{background:#12ADE0;color:var\(--dark\)/);
+  assert.match(html, /#tiendanube-cart-transfer-button:(?:hover|focus-visible|active|disabled)/);
+  assert.match(html, /\.btn-cart--whatsapp\{background:#25D366;\}/);
 });
 
 test('el mapeo comercial usa los IDs reales y una sola capa por producto', async () => {
