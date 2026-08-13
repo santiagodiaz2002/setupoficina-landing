@@ -355,7 +355,13 @@ async function exchangeAuthorizationCode(env, code, deps) {
 // Completa esta etapa concreta de cálculo, validación o construcción del resultado.
   ) {
 // Interrumpe la operación con un error deliberado que el borde HTTP puede serializar.
-    throw new HttpError(502, 'oauth_response_invalid', 'Respuesta OAuth invalida.');
+    console.error(JSON.stringify({
+      event: 'tiendanube_oauth_response_invalid',
+      reason: 'metadata',
+      status: response.status,
+      contentType,
+      declaredLength
+    }));    throw new HttpError(502, 'oauth_response_invalid', 'Respuesta OAuth invalida.');
 // Cierra el bloque o la estructura y delimita el alcance iniciado antes.
   }
 // Reserva estado mutable porque el valor se ajustará durante la validación o el recorrido.
@@ -367,7 +373,16 @@ async function exchangeAuthorizationCode(env, code, deps) {
 // Completa esta etapa concreta de cálculo, validación o construcción del resultado.
     payload = JSON.parse(raw);
 // Captura el fallo para traducirlo sin filtrar secretos ni detalles del proveedor.
-  } catch (_) { throw new HttpError(502, 'oauth_response_invalid', 'Respuesta OAuth invalida.'); }
+  } catch (_) {
+    console.error(JSON.stringify({
+      event: 'tiendanube_oauth_response_invalid',
+      reason: 'body',
+      status: response.status,
+      contentType,
+      declaredLength
+    }));
+    throw new HttpError(502, 'oauth_response_invalid', 'Respuesta OAuth invalida.');
+  }
 // Calcula y conserva un dato inmutable dentro de este alcance.
   const accessToken = String(payload && payload.access_token || '');
 // Calcula y conserva un dato inmutable dentro de este alcance.
@@ -375,7 +390,15 @@ async function exchangeAuthorizationCode(env, code, deps) {
 // Evalúa una precondición y evita que el flujo continúe con estado inválido o no autorizado.
   if (!accessToken || accessToken.length > 4096 || !/^\d+$/.test(storeId)) {
 // Interrumpe la operación con un error deliberado que el borde HTTP puede serializar.
-    throw new HttpError(502, 'oauth_response_invalid', 'Respuesta OAuth invalida.');
+    console.error(JSON.stringify({
+      event: 'tiendanube_oauth_response_invalid',
+      reason: 'fields',
+      status: response.status,
+      hasAccessToken: Boolean(accessToken),
+      accessTokenLength: accessToken.length,
+      hasStoreId: Boolean(storeId),
+      storeIdNumeric: /^\d+$/.test(storeId)
+    }));    throw new HttpError(502, 'oauth_response_invalid', 'Respuesta OAuth invalida.');
 // Cierra el bloque o la estructura y delimita el alcance iniciado antes.
   }
 // Calcula y conserva un dato inmutable dentro de este alcance.
