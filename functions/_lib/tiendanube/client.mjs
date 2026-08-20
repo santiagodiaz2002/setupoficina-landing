@@ -72,13 +72,10 @@ export async function readBoundedResponseText(response, maxBytes) {
 }
 
 async function boundedJson(response, maxBytes) {
-  const contentType = String(response.headers.get('Content-Type') || '').toLowerCase();
-  if (!/^application\/(?:[a-z0-9.+-]+\+)?json(?:\s*;|$)/i.test(contentType)) {
-    throw new TiendanubeApiError(response.status, 'invalid_content_type', 'Tiendanube devolvio un tipo de contenido invalido.', false);
-  }
   if (contentLength(response) > maxBytes) {
     throw new TiendanubeApiError(response.status, 'response_too_large', 'Tiendanube devolvio una respuesta demasiado grande.', false);
   }
+
   let raw;
   try {
     raw = await readBoundedResponseText(response, maxBytes);
@@ -86,15 +83,24 @@ async function boundedJson(response, maxBytes) {
     if (error && error.name === 'AbortError') throw error;
     throw new TiendanubeApiError(response.status, 'response_too_large', 'Tiendanube devolvio una respuesta demasiado grande.', false);
   }
+
   try {
     return JSON.parse(raw);
   } catch (_) {
-    throw new TiendanubeApiError(response.status, 'invalid_json', 'Tiendanube devolvio JSON invalido.', false);
+    const contentType = String(response.headers.get('Content-Type') || '').toLowerCase();
+    throw new TiendanubeApiError(
+      response.status,
+      'invalid_json',
+      `Tiendanube devolvio una respuesta no JSON (${contentType || 'sin content-type'}).`,
+      false
+    );
   }
 }
 
 function classifyError(status) {
+  if (status === 400) return ['bad_request', 'Tiendanube rechazo la solicitud.', false];
   if (status === 401) return ['unauthorized', 'Tiendanube rechazo el token.', false];
+  if (status === 402) return ['payment_required', 'La tienda no tiene acceso activo a la API.', false];
   if (status === 403) return ['forbidden', 'Tiendanube rechazo los permisos.', false];
   if (status === 404) return ['not_found', 'El recurso no existe en Tiendanube.', false];
   if (status === 409) return ['conflict', 'Tiendanube informo un conflicto.', false];
@@ -102,6 +108,26 @@ function classifyError(status) {
   if (status === 429) return ['rate_limited', 'Tiendanube aplico rate limiting.', true];
   if (status >= 500) return ['upstream_error', 'Tiendanube no esta disponible.', true];
   return ['http_error', `Tiendanube respondio HTTP ${status}.`, false];
+}
+
+function officialApiBases(primary) {
+  const clean = String(primary || '').replace(/\/+$/, '');
+  const bases = [clean];
+
+  try {
+    const url = new URL(clean);
+    if (url.hostname === 'api.tiendanube.com') {
+      const fallback = new URL(clean);
+      fallback.hostname = 'api.nuvemshop.com.br';
+      bases.push(fallback.toString().replace(/\/+$/, ''));
+    } else if (url.hostname === 'api.nuvemshop.com.br') {
+      const fallback = new URL(clean);
+      fallback.hostname = 'api.tiendanube.com';
+      bases.push(fallback.toString().replace(/\/+$/, ''));
+    }
+  } catch (_) {}
+
+  return [...new Set(bases.filter(Boolean))];
 }
 
 export class TiendanubeClient {
@@ -112,7 +138,7 @@ export class TiendanubeClient {
     if (!/^\d+$/.test(this.storeId) || !this.accessToken || !this.userAgent.trim()) {
       throw new TiendanubeApiError(0, 'client_configuration_invalid', 'Cliente Tiendanube no configurado.', false);
     }
-    this.apiBase = String(options.apiBase || `https://api.tiendanube.com/${TIENDANUBE_API_VERSION}`).replace(/\/+$/, '');
+    this.apiBases = officialApiBases(options.apiBase || `https://api.tiendanube.com/${TIENDANUBE_API_VERSION}`);
     this.timeoutMs = positiveInteger(options.timeoutMs, 5000);
     this.maxRetries = Math.min(3, nonNegativeInteger(options.maxRetries, 2));
     this.maxResponseBytes = positiveInteger(options.maxResponseBytes, DEFAULT_MAX_RESPONSE_BYTES);
@@ -123,72 +149,91 @@ export class TiendanubeClient {
   async request(path, options = {}) {
     const method = String(options.method || 'GET').toUpperCase();
     const safeRead = method === 'GET' || method === 'HEAD';
-    const maxAttempts = safeRead ? this.maxRetries + 1 : 1;
-    const url = `${this.apiBase}/${encodeURIComponent(this.storeId)}${path}`;
     const extraHeaders = { ...(options.headers || {}) };
     delete extraHeaders.Authorization;
     delete extraHeaders.authorization;
     delete extraHeaders['User-Agent'];
     delete extraHeaders['user-agent'];
 
-    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), this.timeoutMs);
-      try {
-        const response = await this.fetchImpl(url, {
-          method,
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${this.accessToken}`,
-            'User-Agent': this.userAgent,
-            ...extraHeaders
-          },
-          body: options.body,
-          signal: controller.signal
-        });
+    let lastNetworkError = null;
 
-        if (response.ok) {
-          if (response.status === 204) return null;
-          return await boundedJson(response, positiveInteger(options.maxResponseBytes, this.maxResponseBytes));
-        }
+    for (let baseIndex = 0; baseIndex < this.apiBases.length; baseIndex += 1) {
+      const apiBase = this.apiBases[baseIndex];
+      const url = `${apiBase}/${encodeURIComponent(this.storeId)}${path}`;
+      const maxAttempts = safeRead ? this.maxRetries + 1 : 1;
 
-        const [code, message, retryable] = classifyError(response.status);
-        if (safeRead && retryable && attempt + 1 < maxAttempts) {
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+
+        try {
+          const response = await this.fetchImpl(url, {
+            method,
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${this.accessToken}`,
+              'User-Agent': this.userAgent,
+              ...extraHeaders
+            },
+            body: options.body,
+            signal: controller.signal
+          });
+
+          if (response.ok) {
+            if (response.status === 204) return null;
+            return await boundedJson(response, positiveInteger(options.maxResponseBytes, this.maxResponseBytes));
+          }
+
+          const [code, message, retryable] = classifyError(response.status);
+          if (safeRead && retryable && attempt + 1 < maxAttempts) {
+            await this.sleepImpl(retryDelay(response, attempt));
+            continue;
+          }
+
+          throw new TiendanubeApiError(response.status, code, message, retryable);
+        } catch (error) {
+          if (error instanceof TiendanubeApiError) throw error;
+
+          const timedOut = error && error.name === 'AbortError';
+          lastNetworkError = { error, timedOut, method, url };
+
+          // Un fallo de red puede ser especifico del hostname. Antes de repetir el mismo host,
+          // probamos el hostname oficial alternativo documentado por Tiendanube/Nuvemshop.
+          if (baseIndex + 1 < this.apiBases.length) break;
+
+          if (safeRead && attempt + 1 < maxAttempts) {
+            await this.sleepImpl(Math.min(1000, 150 * (2 ** attempt)));
+            continue;
+          }
+        } finally {
           clearTimeout(timer);
-          await this.sleepImpl(retryDelay(response, attempt));
-          continue;
         }
-        throw new TiendanubeApiError(response.status, code, message, retryable);
-      } catch (error) {
-  if (error instanceof TiendanubeApiError) throw error;
+      }
+    }
 
-  const timedOut = error && error.name === 'AbortError';
+    if (lastNetworkError) {
+      const { error, timedOut, method, url } = lastNetworkError;
+      console.error(JSON.stringify({
+        event: 'tiendanube_api_fetch_exception',
+        method,
+        host: new URL(url).hostname,
+        attemptedHosts: this.apiBases.map((base) => new URL(base).hostname),
+        name: String(error?.name || ''),
+        message: String(error?.message || '').slice(0, 300),
+        causeName: String(error?.cause?.name || ''),
+        causeCode: String(error?.cause?.code || ''),
+        causeMessage: String(error?.cause?.message || '').slice(0, 300),
+        timedOut
+      }));
 
-  if (safeRead && attempt + 1 < maxAttempts) {
-    clearTimeout(timer);
-    await this.sleepImpl(Math.min(1000, 150 * (2 ** attempt)));
-    continue;
-  }
+      throw new TiendanubeApiError(
+        0,
+        timedOut ? 'timeout' : 'network_error',
+        timedOut ? 'Timeout de Tiendanube.' : 'Error de red con Tiendanube.',
+        true
+      );
+    }
 
-  console.error(JSON.stringify({
-    event: 'tiendanube_api_fetch_exception',
-    method,
-    host: new URL(url).hostname,
-    name: String(error?.name || ''),
-    message: String(error?.message || '').slice(0, 300),
-    causeName: String(error?.cause?.name || ''),
-    causeCode: String(error?.cause?.code || ''),
-    causeMessage: String(error?.cause?.message || '').slice(0, 300),
-    timedOut
-  }));
-
-  throw new TiendanubeApiError(
-    0,
-    timedOut ? 'timeout' : 'network_error',
-    timedOut ? 'Timeout de Tiendanube.' : 'Error de red con Tiendanube.',
-    true
-  );
-}
     throw new TiendanubeApiError(0, 'unexpected_error', 'Fallo inesperado de Tiendanube.', false);
   }
 
