@@ -347,23 +347,6 @@ async function exchangeAuthorizationCode(env, code, deps) {
 // Calcula y conserva un dato inmutable dentro de este alcance.
   const declaredLength = Number(response.headers.get('Content-Length') || 0);
 // Evalúa una precondición y evita que el flujo continúe con estado inválido o no autorizado.
-  if (
-// Completa esta etapa concreta de cálculo, validación o construcción del resultado.
-    !/^application\/(?:[a-z0-9.+-]+\+)?json(?:\s*;|$)/i.test(contentType) ||
-// Continúa una expresión agrupada para hacer explícitas sus condiciones o argumentos.
-    (Number.isFinite(declaredLength) && declaredLength > OAUTH_RESPONSE_MAX_BYTES)
-// Completa esta etapa concreta de cálculo, validación o construcción del resultado.
-  ) {
-// Interrumpe la operación con un error deliberado que el borde HTTP puede serializar.
-    console.error(JSON.stringify({
-      event: 'tiendanube_oauth_response_invalid',
-      reason: 'metadata',
-      status: response.status,
-      contentType,
-      declaredLength
-    }));    throw new HttpError(502, 'oauth_response_invalid', 'Respuesta OAuth invalida.');
-// Cierra el bloque o la estructura y delimita el alcance iniciado antes.
-  }
 // Reserva estado mutable porque el valor se ajustará durante la validación o el recorrido.
   let payload;
 // Aísla una operación que puede fallar por datos externos, red o persistencia.
