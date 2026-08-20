@@ -160,19 +160,35 @@ export class TiendanubeClient {
         }
         throw new TiendanubeApiError(response.status, code, message, retryable);
       } catch (error) {
-        if (error instanceof TiendanubeApiError) throw error;
-        const timedOut = error && error.name === 'AbortError';
-        if (safeRead && attempt + 1 < maxAttempts) {
-          clearTimeout(timer);
-          await this.sleepImpl(Math.min(1000, 150 * (2 ** attempt)));
-          continue;
-        }
-        throw new TiendanubeApiError(0, timedOut ? 'timeout' : 'network_error', timedOut ? 'Timeout de Tiendanube.' : 'Error de red con Tiendanube.', true);
-      } finally {
-        clearTimeout(timer);
-      }
-    }
+  if (error instanceof TiendanubeApiError) throw error;
 
+  const timedOut = error && error.name === 'AbortError';
+
+  if (safeRead && attempt + 1 < maxAttempts) {
+    clearTimeout(timer);
+    await this.sleepImpl(Math.min(1000, 150 * (2 ** attempt)));
+    continue;
+  }
+
+  console.error(JSON.stringify({
+    event: 'tiendanube_api_fetch_exception',
+    method,
+    host: new URL(url).hostname,
+    name: String(error?.name || ''),
+    message: String(error?.message || '').slice(0, 300),
+    causeName: String(error?.cause?.name || ''),
+    causeCode: String(error?.cause?.code || ''),
+    causeMessage: String(error?.cause?.message || '').slice(0, 300),
+    timedOut
+  }));
+
+  throw new TiendanubeApiError(
+    0,
+    timedOut ? 'timeout' : 'network_error',
+    timedOut ? 'Timeout de Tiendanube.' : 'Error de red con Tiendanube.',
+    true
+  );
+}
     throw new TiendanubeApiError(0, 'unexpected_error', 'Fallo inesperado de Tiendanube.', false);
   }
 
