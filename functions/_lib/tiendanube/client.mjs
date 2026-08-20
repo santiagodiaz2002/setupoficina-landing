@@ -167,7 +167,8 @@ export class TiendanubeClient {
         const timer = setTimeout(() => controller.abort(), this.timeoutMs);
 
         try {
-          const response = await this.fetchImpl(url, {
+          const fetchImpl = this.fetchImpl;
+          const response = await fetchImpl(url, {
             method,
             headers: {
               Accept: 'application/json',
