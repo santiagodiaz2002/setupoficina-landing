@@ -2655,4 +2655,4 @@ function stepSmoothZoom(){
   window.Setup3D={ setVisible:setVisible, setDiagnosis:setDiagnosis, setMode:setMode, setView:setView, refreshFromDOM:refreshFromDOM, isReady:function(){return ready;}, reset:resetPositions, setFree:setFree };
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
-})(); /* setup-3d ready */
+})();

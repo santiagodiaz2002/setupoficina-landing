@@ -174,7 +174,6 @@
     .desk-preview{background:linear-gradient(160deg,#0F172A,#162035);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);padding:1.5rem;position:sticky;top:88px;}
     .desk-preview__title{font-family:'Poppins',sans-serif;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.7);text-align:center;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.4rem;}
     .desk-preview__title svg{width:14px;height:14px;color:var(--accent);}
-    /* item count badge */
     .desk-preview__count{text-align:center;margin-top:.75rem;font-size:.75rem;color:rgba(255,255,255,.4);}
     .desk-preview__count span{color:var(--accent);font-weight:700;}
 
@@ -597,7 +596,6 @@
       <p class="section__sub">Seleccioná una opción y avanzamos solos. Podés volver cuando quieras.</p>
     </header>
 
-    <!-- Questions -->
     <div id="quiz-container">
       <div class="quiz-step-label" aria-live="polite">Pregunta <span id="step-current">1</span> de 6</div>
       <div class="quiz-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar-wrap">
@@ -683,11 +681,9 @@
       </div>
     </div>
 
-    <!-- Result -->
     <div id="quiz-result" class="hidden">
       <span id="result-tier" hidden>Setup Pro</span>
       <div class="result-layout">
-        <!-- Cart -->
         <div class="cart-wrapper" id="customCart">
           <div class="cart-header">
             <div class="cart-header__title">
@@ -965,7 +961,6 @@ function renderQ(s){
       btn.innerHTML='<span class="quiz-option__letter">'+l+'</span>'+q.opts[i].l;
       btn.addEventListener('click',function(){
         if(advancing)return;
-        // Mark selected
         answers[s]=i;
         qOpts.querySelectorAll('.quiz-option').forEach(function(b,j){
           b.classList.toggle('selected',j===i);
@@ -973,7 +968,6 @@ function renderQ(s){
         });
         hint.textContent='Avanzando…';
         advancing=true;
-        // Auto-advance after 420ms
         setTimeout(function(){
           if(s<questions.length-1){step++;renderQ(step);}
           else{pqOnComplete();}
@@ -1529,10 +1523,8 @@ function showResult(){
   updateTotal();
   updatePreview();
 
-  // Progress bar full
   pBar.style.width='100%'; pWrap.setAttribute('aria-valuenow',100);
 
-  // Transition
   var qc=document.getElementById('quiz-container');
   qc.style.transition='opacity 250ms,transform 250ms';
   qc.style.opacity='0'; qc.style.transform='translateY(16px)';

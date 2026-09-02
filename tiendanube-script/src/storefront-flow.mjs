@@ -1,5 +1,5 @@
 export const RESULT_STORAGE_KEY = 'setupoficina_cart_transfer_result';
-export const RESULT_ROUTE = '/cart?setupoficina_result=1';
+export const RESULT_ROUTE = '/?setupoficina_result=1';
 export const RESULT_TTL_SECONDS = 600;
 
 const OUT_OF_STOCK_REASONS = new Set(['insufficient_stock', 'out_of_stock']);
@@ -112,7 +112,7 @@ export async function displayStoredResult(browser, renderResult) {
 export function isResultLocation(location) {
   if (!location || location.queries?.setupoficina_result !== '1') return false;
   try {
-    return new URL(String(location.url)).pathname.replace(/\/+$/, '') === '/cart';
+    return new URL(String(location.url)).pathname.replace(/\/+$/, '') === '';
   } catch (_) {
     return false;
   }

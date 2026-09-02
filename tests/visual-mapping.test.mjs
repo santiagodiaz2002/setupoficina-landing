@@ -447,8 +447,8 @@ test('los listeners de arrastre sólo se registran dentro del controlador tempor
 test('cambiar el preset en calibración sólo cambia la vista temporal', async () => {
   const html = await readFile(path.join(root, 'index.html'), 'utf8');
   const hybridJs = await readFile(path.join(root, 'js/setup-visual-hybrid.js'), 'utf8');
-  const bridgeMatch = html.match(/getPresetSelection:function\(name\)\{([\s\S]*?)\n  \},\n  setProductSelection/);
-  const handlerMatch = hybridJs.match(/function handleCalibrationPresetClick\(event\) \{([\s\S]*?)\n  \}\n\n  function sync/);
+  const bridgeMatch = html.match(/getPresetSelection:function\(name\)\{([\s\S]*?)\r?\n  \},\r?\n  setProductSelection/);
+  const handlerMatch = hybridJs.match(/function handleCalibrationPresetClick\(event\) \{([\s\S]*?)\r?\n  \}\r?\n\r?\n  function sync/);
 
   assert.ok(bridgeMatch, 'el puente debe exponer una lectura de preset sin mutaciones');
   assert.doesNotMatch(bridgeMatch[1], /cartState\s*=|extrasState\s*=|updateProductSelection|submitLead|PATCH/i);

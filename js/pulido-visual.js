@@ -130,7 +130,6 @@
 p.x += (p.baseVx + flowX) * dt * DPR;
 p.y += (p.baseVy + flowY) * dt * DPR;
         p.tw += p.tws * dt * 0.0015;
-        // wrap
         if (p.x < -30) p.x = W + 30; else if (p.x > W + 30) p.x = -30;
         if (p.y < -30) p.y = H + 30; else if (p.y > H + 30) p.y = -30;
         var twinkle = 0.7 + 0.3 * Math.sin(p.tw);

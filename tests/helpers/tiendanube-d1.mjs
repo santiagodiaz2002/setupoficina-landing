@@ -135,6 +135,13 @@ class MemoryStatement {
   }
 
   async run() {
+    // El doble de D1 modela datos, no el parser DDL de SQLite.
+    // El runtime productivo inicializa el schema con CREATE IF NOT EXISTS;
+    // en memoria esas tablas ya estan representadas por los Maps del constructor.
+    if (this.sql.startsWith('CREATE TABLE IF NOT EXISTS ') || this.sql.startsWith('CREATE INDEX IF NOT EXISTS ')) {
+      return { meta: { changes: 0 } };
+    }
+
     if (this.sql.startsWith('DELETE FROM tiendanube_oauth_states WHERE expires_at <= ?')) {
       const [now] = this.args;
       let changes = 0;
