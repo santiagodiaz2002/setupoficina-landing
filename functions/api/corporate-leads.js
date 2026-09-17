@@ -70,6 +70,6 @@ export async function onRequest({ request, env }) {
     } catch {
       // No registrar payload, credenciales ni respuestas de Odoo en los logs públicos.
       console.error('corporate_lead_registration_failed');
-      return reply({ ok: false, error: 'No pudimos registrar la consulta. Podés continuar por WhatsApp.' }, 503);
+      return reply({ ok: false, error: 'No pudimos confirmar el registro de la consulta. Podés volver a intentar.' }, 503);
     }
 }

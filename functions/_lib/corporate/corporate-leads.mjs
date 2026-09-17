@@ -1,4 +1,5 @@
 import { getOdooSession, odooExecuteKw } from './odoo.mjs';
+import { CORPORATE_RECORD_START, CORPORATE_RECORD_END, createCorporateRecord } from './corporate-record.mjs';
 
 export const CORPORATE_TAG = 'Empresas - Landing';
 const PROJECTS = new Set([
@@ -6,7 +7,12 @@ const PROJECTS = new Set([
   'Productos con branding', 'Acciones corporativas', 'Proyecto especial',
   'Visita al showroom', 'Todavía no lo tengo definido'
 ]);
-const LIMITS = { nombre: 120, empresa: 180, contacto: 180, tipo: 80, cantidad: 12, fecha: 10, detalle: 4000 };
+const LIMITS = {
+  nombre: 120, empresa: 180, email: 180, phone: 40, tipo: 80, cantidad: 12, fecha: 10, detalle: 4000,
+  gclid: 512, gbraid: 512, wbraid: 512,
+  utm_source: 512, utm_medium: 512, utm_campaign: 512, utm_term: 512, utm_content: 512,
+  landing_url: 2048, referrer: 2048
+};
 const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
 })[char]);
@@ -21,12 +27,12 @@ export function validateCorporatePayload(payload, today = new Date()) {
     }
     data[key] = value.trim();
   }
-  if (!data.nombre || !data.empresa || !data.contacto || !data.fecha) return { error: 'Completá nombre, empresa, contacto y fecha objetivo.' };
+  if (!data.nombre || !data.empresa || !data.email || !data.phone || !data.cantidad || !data.fecha) return { error: 'Completá nombre, empresa, email, WhatsApp, cantidad y fecha objetivo.' };
   if (!PROJECTS.has(data.tipo)) return { error: 'Elegí un tipo de proyecto válido.' };
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contacto);
-  const digits = data.contacto.replace(/\D/g, '');
-  const isPhone = /^\+?[\d\s().-]+$/.test(data.contacto) && digits.length >= 8 && digits.length <= 15;
-  if (!isEmail && !isPhone) return { error: 'Ingresá un email o WhatsApp válido.' };
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
+  const digits = data.phone.replace(/\D/g, '');
+  const isPhone = /^\+?[\d\s().-]+$/.test(data.phone) && digits.length >= 8 && digits.length <= 15;
+  if (!isEmail || !isPhone) return { error: 'Ingresá un email y un WhatsApp válidos.' };
   if (data.cantidad && (!/^\d+$/.test(data.cantidad) || !Number.isSafeInteger(Number(data.cantidad)) || Number(data.cantidad) < 1)) {
     return { error: 'La cantidad debe ser un número entero mayor que cero.' };
   }
@@ -35,7 +41,14 @@ export function validateCorporatePayload(payload, today = new Date()) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(data.fecha) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== data.fecha || data.fecha < argentinaToday) {
     return { error: 'Ingresá una fecha objetivo válida, desde hoy en adelante.' };
   }
-  return { data: { ...data, email: isEmail ? data.contacto : '', phone: isPhone ? data.contacto : '' } };
+  for (const key of ['landing_url', 'referrer']) {
+    if (!data[key]) continue;
+    try {
+      const url = new URL(data[key]);
+      if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) throw new Error('url');
+    } catch { return { error: `El campo ${key} es inválido.` }; }
+  }
+  return { data };
 }
 
 async function resolveCorporateTag(session) {
@@ -65,9 +78,10 @@ export async function createCorporateLead(payload, env) {
     if (fields?.[name]?.type !== type) throw new Error('Unsupported CRM schema');
   }
   const tagId = await resolveCorporateTag(session);
-  const labels = { nombre: 'Contacto', empresa: 'Empresa', contacto: 'Email o WhatsApp', tipo: 'Tipo de proyecto', cantidad: 'Cantidad aproximada', fecha: 'Fecha objetivo', detalle: 'Detalle' };
+  const labels = { nombre: 'Contacto', empresa: 'Empresa', email: 'Email corporativo', phone: 'WhatsApp', tipo: 'Tipo de proyecto', cantidad: 'Cantidad aproximada', fecha: 'Fecha objetivo', detalle: 'Detalle' };
   const description = '<div><p><strong>Consulta corporativa — PrimOffice Empresas</strong></p>' +
-    Object.entries(labels).map(([key, label]) => `<p><strong>${label}:</strong> ${escapeHtml(data[key] || 'Sin especificar').replace(/\r?\n/g, '<br>')}</p>`).join('') + '</div>';
+    Object.entries(labels).map(([key, label]) => `<p><strong>${label}:</strong> ${escapeHtml(data[key] || 'Sin especificar').replace(/\r?\n/g, '<br>')}</p>`).join('') + '</div>' +
+    `<pre>${CORPORATE_RECORD_START}\n${escapeHtml(createCorporateRecord(data))}\n${CORPORATE_RECORD_END}</pre>`;
   const values = {
     name: `${data.empresa} — ${data.tipo}`,
     contact_name: data.nombre,
