@@ -14,6 +14,19 @@ de leads.
 - `functions/api/leads.js`: endpoint de leads y sincronización CRM.
 - `assets/setup-layers/runtime/`: PNG que utiliza el navegador.
 
+## Leads corporativos y atribución Ads
+
+`functions/api/corporate-leads.js` conserva email y teléfono separados y guarda
+la metadata corporativa/Ads en el campo existente `crm.lead.description`, después
+del texto comercial, dentro del bloque `PRIMOFFICE CORPORATE DATA v1`.
+NO requiere migración Odoo, custom fields ni administración del VPS. El bloque
+incluye click IDs, UTMs, landing/referrer iniciales, `status: "new"` y
+`estimated_value`, `quoted_value`, `final_sale_value` como `null`.
+Una segunda etapa podrá recuperar estos datos y migrarlos a campos propios;
+no se implementa importación offline. Ver [contrato y recuperación](docs/CORPORATE_LEADS.md).
+
+RIESGO PREEXISTENTE: odoo.setupoficina.com.ar actualmente solo expone HTTP públicamente; su remediación de infraestructura queda fuera de esta entrega.
+
 `js/setup-3d.js` se conserva como archivo legacy, pero no se carga en el runtime
 actual.
 
