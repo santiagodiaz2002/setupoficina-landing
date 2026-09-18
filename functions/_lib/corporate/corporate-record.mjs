@@ -8,7 +8,9 @@ export function serializeCorporateRecord(record) {
   if (record.schema_version !== 1 || !CORPORATE_STATUSES.includes(record.status)) {
     throw new Error('Invalid corporate record');
   }
-  for (const key of ['estimated_value', 'quoted_value', 'final_sale_value']) {
+  const valueKeys = ['estimated_value', 'quoted_value', 'won_value' in record ? 'won_value' : 'final_sale_value'];
+  if ('won_value' in record && 'final_sale_value' in record) valueKeys.push('final_sale_value');
+  for (const key of valueKeys) {
     if (record[key] !== null && (typeof record[key] !== 'number' || !Number.isFinite(record[key]) || record[key] < 0)) {
       throw new Error('Invalid corporate value');
     }
@@ -19,15 +21,16 @@ export function serializeCorporateRecord(record) {
   return JSON.stringify(ordered, null, 2).replaceAll('---', '\\u002d\\u002d\\u002d');
 }
 
-export function createCorporateRecord(data, now = new Date()) {
+export function createCorporateRecord(data) {
   return serializeCorporateRecord({
     ...data,
     schema_version: 1,
-    captured_at: now.toISOString(),
+    lead_id: null,
+    created_at: null,
     status: 'new',
     estimated_value: null,
     quoted_value: null,
-    final_sale_value: null,
+    won_value: null,
     currency: 'ARS'
   });
 }
@@ -54,5 +57,7 @@ export function parseCorporateRecord(description) {
   if (end === -1) throw new Error('Incomplete corporate record');
   const record = JSON.parse(text.slice(jsonStart, end).trim());
   serializeCorporateRecord(record); // Validate version, lifecycle and nullable values.
+  // Keep historical fields readable without treating capture time as creation time.
+  if (!('won_value' in record)) record.won_value = record.final_sale_value;
   return record;
 }

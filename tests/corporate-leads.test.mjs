@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { corporateOdoo } from './helpers/corporate-odoo.mjs';
 import assert from 'node:assert/strict';
 import { onRequest } from '../functions/api/corporate-leads.js';
 const worker = { fetch: (request, env) => onRequest({request, env}) };
@@ -7,7 +8,7 @@ import { CORPORATE_RECORD_START, CORPORATE_RECORD_END, CORPORATE_STATUSES, creat
 
 const valid = { nombre: 'Contacto de prueba', empresa: '[PRUEBA] PrimOffice Empresas', email: 'prueba@example.com', phone: '+54 9 11 1234-5678', tipo: 'Kits de bienvenida', cantidad: '80', fecha: '2099-12-10', detalle: 'Prueba controlada <script>alert(1)</script>\nSegunda línea' };
 const env = { ODOO_ENABLED: 'true', ODOO_URL: 'https://odoo.example.test', ODOO_DB: 'test-db', ODOO_USERNAME: 'test-user', ODOO_API_KEY: 'test-only-key' };
-const schema = { name: { type: 'char' }, contact_name: { type: 'char' }, partner_name: { type: 'char' }, email_from: { type: 'char' }, phone: { type: 'char' }, description: { type: 'html' }, tag_ids: { type: 'many2many' }, type: { type: 'selection' } };
+const schema = { create_date: { type: 'datetime' }, name: { type: 'char' }, contact_name: { type: 'char' }, partner_name: { type: 'char' }, email_from: { type: 'char' }, phone: { type: 'char' }, description: { type: 'html' }, tag_ids: { type: 'many2many' }, type: { type: 'selection' } };
 const escape = (x) => String(x).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 function value(x) {
   if (Array.isArray(x)) return `<value><array><data>${x.map(value).join('')}</data></array></value>`;
@@ -18,13 +19,24 @@ function value(x) {
 }
 function rpcMock(t, responses) {
   const calls = [];
+  let lead;
   t.mock.method(globalThis, 'fetch', async (url, options) => {
     assert.doesNotMatch(options.body, /ir\.model|x_corporate_data/, 'Sin acceso al esquema administrativo ni campo personalizado');
     calls.push({ url, body: options.body });
+    if (options.body.includes('<string>crm.lead</string>') && options.body.includes('<string>read</string>')) {
+      return new Response(`<methodResponse><params><param>${value([lead])}</param></params></methodResponse>`);
+    }
+    if (options.body.includes('<string>crm.lead</string>') && options.body.includes('<string>write</string>')) {
+      lead.description = storedText(options.body);
+      return new Response(`<methodResponse><params><param>${value(true)}</param></params></methodResponse>`);
+    }
     assert.ok(responses.length, 'Llamada RPC inesperada');
     const next = responses.shift();
     const result = await (typeof next === 'function' ? next() : next);
     if (result instanceof Error) throw result;
+    if (options.body.includes('<string>crm.lead</string>') && options.body.includes('<string>create</string>') && result > 0) {
+      lead = { id: result, create_date: '2026-09-18 13:25:42', description: storedText(options.body) };
+    }
     return new Response(`<?xml version="1.0"?><methodResponse><params><param>${value(result)}</param></params></methodResponse>`);
   });
   return calls;
@@ -47,7 +59,7 @@ test('validación: requeridos, email/teléfono, fecha real, cantidad y límites'
 test('crea oportunidad corporativa con etiqueta exclusiva y HTML escapado', async (t) => {
   const calls = rpcMock(t, [7, schema, [], 19, 123]);
   assert.deepEqual(await createCorporateLead(valid, env), { id: 123 });
-  assert.equal(calls.length, 5);
+  assert.equal(calls.length, 8);
   assert.match(calls[0].url, /\/xmlrpc\/2\/common$/);
   assert.match(calls[1].body, /fields_get/);
   assert.match(calls[2].body, /Empresas - Landing/);
@@ -68,7 +80,7 @@ test('sin partner_name en modelo: empresa preservada en título y descripción; 
   const { partner_name, ...withoutCompany } = schema;
   const calls = rpcMock(t, [7, withoutCompany, [19], 124]);
   await createCorporateLead(valid, env);
-  const lead = calls.at(-1).body;
+  const lead = calls.findLast(c => c.body.includes('<string>create</string>')).body;
   assert.doesNotMatch(lead, /<name>partner_name<\/name>/);
   assert.match(lead, /<name>email_from<\/name>/);
   assert.match(lead, /<name>phone<\/name>/);
@@ -95,32 +107,35 @@ function storedText(body, field = 'description') {
   return decode(match[1]);
 }
 
-test('persistencia Odoo: payload completo, atribución, timestamp del servidor, new y valores null', async (t) => {
+test('persistencia Odoo: payload completo, atribución, fecha real de Odoo, new y valores null', async (t) => {
   const attribution = Object.fromEntries(['gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].map(key => [key, `${key}-original`]));
   Object.assign(attribution, { landing_url: 'https://empresas.primoffice.com.ar/?gclid=original', referrer: 'https://www.google.com/' });
   const calls = rpcMock(t, [7, schema, [19], 321]);
-  const before = Date.now();
   const response = await worker.fetch(request({ ...valid, ...attribution, status: 'won', captured_at: 'fake', estimated_value: 5000, quoted_value: 4000, final_sale_value: 100000, ODOO_API_KEY: 'must-not-be-stored' }), env);
   assert.equal(response.status, 201);
   assert.deepEqual(await response.json(), { ok: true, id: 321 });
-  // The same successful create contains native fields, human text and Ads JSON.
-  const description = storedText(calls.at(-1).body);
+  // Metadata is completed before confirming the response.
+  const description = storedText(calls.findLast(c => c.body.includes('<string>write</string>')).body);
   const stored = parseCorporateRecord(description);
   assert.ok(description.indexOf('Consulta corporativa') < description.indexOf(CORPORATE_RECORD_START));
   assert.match(description, /<strong>Empresa:<\/strong> \[PRUEBA\] PrimOffice Empresas/);
   assert.match(description, /Prueba controlada &lt;script&gt;alert\(1\)&lt;\/script&gt;<br>Segunda línea/);
   assert.doesNotMatch(description, /must-not-be-stored|<script>/);
   for (const [key, val] of Object.entries({ ...valid, ...attribution })) assert.equal(stored[key], val);
-  assert.ok(Date.parse(stored.captured_at) >= before && Date.parse(stored.captured_at) <= Date.now());
+  assert.equal(stored.created_at, '2026-09-18T13:25:42.000Z');
+  assert.equal(stored.lead_id, 321);
+  assert.match(stored.submission_id, /^[0-9a-f-]{36}$/);
+  assert.equal('captured_at' in stored, false);
+  assert.equal('final_sale_value' in stored, false);
   assert.equal(stored.status, 'new');
-  for (const key of ['estimated_value', 'quoted_value', 'final_sale_value']) assert.equal(stored[key], null);
+  for (const key of ['estimated_value', 'quoted_value', 'won_value']) assert.equal(stored[key], null);
   for (const status of CORPORATE_STATUSES) {
-    const evolved = JSON.parse(serializeCorporateRecord({ ...stored, status, estimated_value: 5000, quoted_value: 4000, final_sale_value: 0 }));
+    const evolved = JSON.parse(serializeCorporateRecord({ ...stored, status, estimated_value: 5000, quoted_value: 4000, won_value: 0 }));
     assert.equal(evolved.status, status);
-    assert.equal(evolved.final_sale_value, 0);
+    assert.equal(evolved.won_value, 0);
   }
   assert.throws(() => serializeCorporateRecord({ ...stored, status: 'unknown' }));
-  assert.throws(() => serializeCorporateRecord({ ...stored, final_sale_value: -1 }));
+  assert.throws(() => serializeCorporateRecord({ ...stored, won_value: -1 }));
 });
 
 test('endpoint nunca confirma si Odoo devuelve ID inválido o create falla', async (t) => {
@@ -136,10 +151,11 @@ test('endpoint nunca confirma si Odoo devuelve ID inválido o create falla', asy
 test('sin custom field ni migración: crea una vez usando únicamente crm.lead y crm.tag', async (t) => {
   const calls = rpcMock(t, [7, schema, [19], 99]);
   assert.deepEqual(await createCorporateLead(valid, env), { id: 99 });
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 7);
   assert.equal(calls.filter(c => c.body.includes('<string>create</string>')).length, 1);
-  assert.ok(calls.every(c => !c.body.includes('<string>write</string>') && !c.body.includes('<string>unlink</string>')));
-  assert.equal(parseCorporateRecord(storedText(calls.at(-1).body)).status, 'new');
+  assert.equal(calls.filter(c => c.body.includes('<string>write</string>')).length, 1);
+  assert.ok(calls.every(c => !c.body.includes('<string>unlink</string>')));
+  assert.equal(parseCorporateRecord(storedText(calls.findLast(c => c.body.includes('<string>write</string>')).body)).status, 'new');
 });
 
 test('bloque recuperable con entidades, Unicode, saltos, tags y delimitadores ingresados por el cliente', async (t) => {
@@ -147,7 +163,7 @@ test('bloque recuperable con entidades, Unicode, saltos, tags y delimitadores in
   const data = { ...valid, detalle: tricky, gclid: tricky, gbraid: 'B+/%&=---', wbraid: 'W-ñ_123' };
   const calls = rpcMock(t, [7, schema, [19], 100]);
   await createCorporateLead(data, env);
-  const description = storedText(calls.at(-1).body);
+  const description = storedText(calls.findLast(c => c.body.includes('<string>write</string>')).body);
   const stored = parseCorporateRecord(description);
   for (const key of ['detalle', 'gclid', 'gbraid', 'wbraid']) assert.equal(stored[key], data[key]);
   // A sanitizer can normalize quote entities and wrappers without losing JSON.
@@ -159,13 +175,13 @@ test('bloque recuperable con entidades, Unicode, saltos, tags y delimitadores in
 
 test('serialización determinista, recuperable y validación de importes futuros', () => {
   const data = validateCorporatePayload(valid).data;
-  const now = new Date('2026-09-17T12:00:00.000Z');
-  const forward = createCorporateRecord(data, now);
-  const reversed = createCorporateRecord(Object.fromEntries(Object.entries(data).reverse()), now);
+  const forward = createCorporateRecord(data);
+  const reversed = createCorporateRecord(Object.fromEntries(Object.entries(data).reverse()));
   assert.equal(forward, reversed);
   const record = JSON.parse(forward);
-  assert.equal(record.captured_at, now.toISOString());
-  for (const key of ['estimated_value', 'quoted_value', 'final_sale_value']) {
+  assert.equal(record.created_at, null, 'no inventa fecha antes de leer Odoo');
+  assert.equal(record.lead_id, null);
+  for (const key of ['estimated_value', 'quoted_value', 'won_value']) {
     for (const invalid of [-1, NaN, Infinity, '100', undefined]) assert.throws(() => serializeCorporateRecord({ ...record, [key]: invalid }));
   }
 });
@@ -228,4 +244,84 @@ test('fallo Odoo o falta de secretos: 503 sin filtración y sin falso éxito', a
   assert.doesNotMatch(await response.text(), /secret information|test-only-key/);
   assert.equal(calls.length, 1);
   assert.equal((await worker.fetch(request(), {})).status, 503);
+});
+
+const submission = '09f48484-38e4-4d32-8d28-44c9316371cb';
+
+for (const failure of ['loseCreateResponse', 'failWrite', 'loseWriteResponse']) {
+  test(`${failure}: retry recupera el mismo lead y completa metadata sin otro create`, async t => {
+    const odoo = corporateOdoo({ [failure]: true });
+    t.mock.method(globalThis, 'fetch', odoo.fetch);
+    t.mock.method(console, 'error', () => {});
+    const payload = { ...valid, submission_id: submission };
+    const first = await worker.fetch(request(payload), env);
+    assert.equal(first.status, 503);
+    assert.equal(odoo.records.length, 1);
+    const human = odoo.records[0].description.split(CORPORATE_RECORD_START)[0];
+    // A manual CRM edit and archived record must survive the repair.
+    odoo.records[0].description = '<p>Nota comercial intacta</p>' + odoo.records[0].description;
+    odoo.records[0].active = false;
+    const retry = await worker.fetch(request(payload), env);
+    assert.equal(retry.status, 201);
+    assert.deepEqual(await retry.json(), { ok: true, id: 1 });
+    assert.equal(odoo.records.length, 1);
+    assert.equal(odoo.calls.filter(c => c.model === 'crm.lead' && c.method === 'create').length, 1);
+    assert.equal(odoo.records[0].description.split(CORPORATE_RECORD_START)[0], '<p>Nota comercial intacta</p>' + human);
+    const record = parseCorporateRecord(odoo.records[0].description);
+    assert.equal(record.submission_id, submission);
+    assert.equal(record.lead_id, 1);
+    assert.equal(record.created_at, '2026-09-18T13:25:42.000Z');
+    assert.equal(record.status, 'new');
+    for (const key of ['estimated_value', 'quoted_value', 'won_value']) assert.equal(record[key], null);
+    const writes = odoo.calls.filter(c => c.method === 'write').length;
+    assert.deepEqual(await createCorporateLead(payload, env), { id: 1 });
+    assert.equal(odoo.calls.filter(c => c.method === 'write').length, writes, 'metadata completa no se reescribe');
+    assert.equal(odoo.records.length, 1);
+  });
+}
+
+test('idempotencia exige coincidencia exacta del bloque y etiqueta; no deduplica contactos', async t => {
+  const odoo = corporateOdoo();
+  t.mock.method(globalThis, 'fetch', odoo.fetch);
+  const first = await createCorporateLead({ ...valid, submission_id: submission }, env);
+  const secondId = '09f48484-38e4-4d32-8d28-44c9316371cc';
+  // Text supplied by the customer can contain the other UUID, but is not its key.
+  odoo.records[0].description = `<p>${secondId}</p>` + odoo.records[0].description;
+  const second = await createCorporateLead({ ...valid, submission_id: secondId }, env);
+  assert.notEqual(first.id, second.id);
+  assert.equal(odoo.records.length, 2, 'mismo email/teléfono/empresa y otro envío sí crea');
+  odoo.records[0].tag_ids = [999];
+  const third = await createCorporateLead({ ...valid, submission_id: submission }, env);
+  assert.equal(third.id, 3, 'un lead de otro flujo no satisface la búsqueda corporativa');
+});
+
+test('create_date ausente no inventa metadata ni confirma; retry repara el existente', async t => {
+  const odoo = corporateOdoo({ createDate: false });
+  t.mock.method(globalThis, 'fetch', odoo.fetch);
+  t.mock.method(console, 'error', () => {});
+  const payload = { ...valid, submission_id: submission };
+  assert.equal((await worker.fetch(request(payload), env)).status, 503);
+  assert.equal(odoo.records.length, 1);
+  assert.equal(parseCorporateRecord(odoo.records[0].description).created_at, null);
+  odoo.records[0].create_date = '2026-09-18 13:25:42';
+  assert.deepEqual(await createCorporateLead(payload, env), { id: 1 });
+  assert.equal(odoo.records.length, 1);
+});
+
+test('parser histórico conserva captured_at y final_sale_value; expone won_value sin perder cero', () => {
+  for (const amount of [null, 0, 4500]) {
+    const record = { schema_version: 1, status: 'won', captured_at: '2026-09-17T12:00:00.000Z', estimated_value: null, quoted_value: null, final_sale_value: amount };
+    const parsed = parseCorporateRecord(`<pre>${CORPORATE_RECORD_START}\n${serializeCorporateRecord(record)}\n${CORPORATE_RECORD_END}</pre>`);
+    assert.equal(parsed.captured_at, record.captured_at);
+    assert.equal(parsed.final_sale_value, amount);
+    assert.equal(parsed.won_value, amount);
+    assert.equal('created_at' in parsed, false, 'captura histórica no se inventa como fecha de creación');
+  }
+});
+
+test('submission_id valida UUID y rechaza tipos, comodines y longitud excesiva antes de Odoo', () => {
+  for (const id of ['%', '_', 'x'.repeat(37), 123, {}, '00000000-0000-0000-0000-000000000000']) {
+    assert.ok(validateCorporatePayload({ ...valid, submission_id: id }).error);
+  }
+  assert.equal(validateCorporatePayload({ ...valid, submission_id: submission.toUpperCase() }).data.submission_id, submission);
 });
