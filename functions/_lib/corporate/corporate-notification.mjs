@@ -75,7 +75,8 @@ async function send(apiKey, body, key) {
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST', redirect: 'error', signal: controller.signal,
+      // workerd supports manual/follow only; reject 3xx below without forwarding credentials.
+      method: 'POST', redirect: 'manual', signal: controller.signal,
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'Idempotency-Key': key },
       body: JSON.stringify({ ...body, to: [RECIPIENT] })
     });

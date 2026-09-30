@@ -66,7 +66,7 @@ test('lead confirmado notifica: destinatario fijo, asunto, Reply-To, todos los d
   assert.equal(body.reply_to, payload.email);
   assert.equal(key, `corporate-lead/${submission}`);
   assert.equal(init.headers.Authorization, `Bearer ${env.RESEND_API_KEY}`);
-  assert.equal(init.redirect, 'error');
+  assert.equal(init.redirect, 'manual');
   assert.ok(init.signal instanceof AbortSignal);
   for (const field of ['nombre', 'empresa', 'email', 'phone', 'tipo', 'cantidad', 'fecha', 'detalle']) assert.ok(body.text.includes(payload[field]), field);
   assert.match(body.text, /ID del lead: 1/);
