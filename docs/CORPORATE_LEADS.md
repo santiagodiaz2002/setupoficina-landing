@@ -70,3 +70,168 @@ Validación de este contrato: `node --test tests/corporate-leads.test.mjs tests/
 - La herramienta y el token temporales de QA se retiran al cerrar la validación; no son parte del endpoint definitivo.
 
 Pruebas: `node --test tests/corporate-leads.test.mjs tests/leads-defensive.test.mjs` (18 aprobadas). La suite general presenta tres fallos anteriores en `tiendanube-client.test.mjs` y `tiendanube-nubesdk.test.mjs`, reproducidos en un checkout limpio del commit base. Esos archivos y sus flujos no se modifican en esta integración.
+
+## Notificación por email — implementación preparada el 25/09/2026
+
+### Base y publicación reales, verificadas en solo lectura
+
+El formulario de `primoffice-empresas/site/assets/js/main.js` llama a este endpoint.
+`setupoficina-corporate-leads` es un worktree del repositorio GitHub
+`santiagodiaz2002/setupoficina-landing`; su branch `codex/corporate-leads` en
+`7ce37b01a11eba83dc1498cb21251b2399218eaf` no contiene la corrección posterior de
+idempotencia. `git ls-remote` confirmó `main` en
+`55fdd5a64e8b4f3a8b93bfa06054d0e4a27450ca`.
+
+La API de Cloudflare y `wrangler pages deployment list` confirmaron ese mismo SHA
+en el deployment de producción `452c5fc4-1af8-481d-8ad9-662adb4a883a`, exitoso el
+18/09/2026. Proyecto Pages: `setupoficina-landing`, cuenta PrimOffice
+`a29f0f240aa395b57629ff6d17aff7d4`, dominios `setupoficina.com.ar` y
+`www.setupoficina.com.ar`. Integración GitHub activa, producción desde `main`,
+trigger `github:push`, build `exit 0`, raíz del repositorio y salida `.`;
+compatibility date `2026-06-12`, sin flags. No hay configuración Wrangler versionada.
+
+El cambio se preparó en el worktree aislado
+`C:\Users\Santi\Documents\GitHub\setupoficina-corporate-email`, branch
+`codex/corporate-email-notification`, desde ese SHA. No requiere usar ni limpiar
+el checkout local `setupoficina-landing`, ni mover el preflight no rastreado del
+worktree original. El frontend Empresas no requiere cambios ni publicación.
+
+### Funcionamiento y fallos
+
+Tras `createCorporateLead` (creación/recuperación y metadata verificada), el endpoint
+registra `notifyCorporateLead` con `context.waitUntil`. Mantiene el `201 {ok:true,id}`
+inmediato del lead, sin esperar Resend ni modificar Analytics, WhatsApp o UX.
+Los harnesses sin contexto Pages esperan la tarea para permitir pruebas deterministas.
+La tarea tiene el presupuesto de 25 segundos del cliente Odoo existente, con hasta
+8 segundos para Resend dentro de ese presupuesto. No agrega dependencias npm,
+D1, colas, cron, endpoints ni cambios de esquema Odoo.
+
+La notificación lee el registro confirmado de Odoo, no los campos arbitrarios del
+request. Envía mediante `POST https://api.resend.com/emails` a
+`info@primoffice.com.ar`, constante privada del backend. Asunto:
+`Nueva consulta corporativa — {empresa}`; Reply-To: email del contacto.
+Incluye contacto, empresa, email, teléfono, proyecto, cantidad, fecha objetivo,
+detalle e ID real. Tiene texto plano y HTML escapado; el asunto elimina CR/LF.
+
+Se agrega `notification` al bloque JSON existente en `crm.lead.description`,
+conservando los campos comerciales, atribución y notas humanas. Antes del primer
+envío se persiste y relee `status: pending`, `first_attempt_at`, una copia del
+mensaje y la clave `corporate-lead/{submission_id}`. La misma clave se envía como
+`Idempotency-Key`. Un retry usa exactamente el mensaje guardado, incluso si el
+navegador cambia datos o luego se cambia el remitente configurado.
+
+Sólo HTTP exitoso con JSON e ID UUID de Resend sin error permite guardar y verificar
+`status: sent`, `provider_id` y `accepted_at`. Esto confirma aceptación por Resend,
+no entrega al buzón. Los retries de un registro `sent` no llaman a Resend, aun días
+después. Consultas distintas con distintos UUID siguen generando distintos leads
+y correos aunque coincidan empresa/email/teléfono.
+
+Resend retiene la idempotencia durante 24 horas. Si un envío queda incierto (timeout,
+respuesta inválida, error de proveedor o fallo al guardar la aceptación), puede
+reintentarse con el mismo UUID dentro de las primeras 23 horas. Después se registra
+`corporate_notification_requires_review` y no se reenvía automáticamente: consultar
+Resend y el buzón antes de cualquier recuperación manual. No borrar el estado ni
+cambiar el UUID para forzar el retry. La marca `sent` persistida evita depender
+de la ventana de Resend en el caso normal.
+
+Un fallo del correo nunca revierte el lead ni convierte su confirmación en 503.
+Se registran códigos fijos con `lead_id`, sin payload, secretos, excepciones ni
+respuestas del proveedor: `corporate_notification_configuration_missing`,
+`configuration_invalid`, `provider_failed`, `provider_invalid_response`,
+`storage_failed`, `state_not_saved`, `state_invalid`, `lead_unconfirmed` o
+`requires_review` (todos con prefijo `corporate_notification_`). El éxito emite
+`corporate_notification_sent`. Configuración ausente impide iniciar el envío y
+queda explícita en logs; un 201 por sí solo no acredita correo habilitado.
+
+No existe procesamiento periódico de pendientes ni retry automático. Ante un
+error, revisar los logs del deployment Pages y el lead indicado; corregir la causa
+y repetir la consulta con su mismo UUID dentro de la ventana segura. Fuera de ella,
+reconciliar manualmente el resultado en Resend antes de reenviar. Se conserva la
+limitación previa: Odoo busca y crea en operaciones separadas, sin exclusión
+transaccional entre dos requests independientes de un UUID aún inexistente. El
+frontend serializa los submits; este cambio no modifica esa arquitectura.
+
+### Configuración externa requerida antes de publicar
+
+La inspección de producción encontró los bindings Odoo existentes (incluido el
+secreto cifrado `ODOO_API_KEY`; no se leyó su valor) y ninguna configuración Resend.
+Faltan `RESEND_API_KEY` y `CORPORATE_NOTIFICATION_FROM`. No se verificó una cuenta
+Resend, un dominio de envío ni entrega real. No publicar este cambio como correo
+habilitado hasta completar lo siguiente:
+
+1. En [Resend](https://resend.com/domains), abrir **Domains > Add domain** y agregar
+   el dominio o subdominio propio elegido para enviar. Si ya está verificado en la
+   cuenta, reutilizarlo. El remitente debe pertenecer al dominio verificado.
+2. Copiar exactamente los registros de verificación que muestre Resend (nombre,
+   tipo y valor) al DNS autoritativo del dominio elegido. Para `primoffice.com.ar`,
+   `nslookup -type=NS primoffice.com.ar` confirmó delegación a AWS Route 53
+   (`ns-1311.awsdns-35.org`, `ns-214.awsdns-26.com`, `ns-659.awsdns-18.net`,
+   `ns-1629.awsdns-11.co.uk`). En la cuenta que administra esa zona, abrir
+   **AWS Route 53 > Hosted zones > primoffice.com.ar > Create record**. Si la zona
+   es administrada por un proveedor, entregarle los registros exactos que muestra
+   Resend; esta inspección no identifica al titular de la cuenta AWS. No cargarlos
+   en una zona Cloudflare no autoritativa. No hay valores universales para inventar.
+   Usar sólo los registros de envío indicados, sin reemplazar los
+   MX de recepción del correo comercial. Volver a Resend y esperar **Verified**.
+3. En **Resend > API Keys > Create API Key**, crear una clave **Sending access**
+   restringida al dominio elegido. Copiarla para guardarla directamente en Cloudflare.
+4. En [Cloudflare Pages: setupoficina-landing](https://dash.cloudflare.com/a29f0f240aa395b57629ff6d17aff7d4/pages/view/setupoficina-landing),
+   abrir **Settings > Variables and Secrets**, seleccionar **Production** y agregar:
+   - `RESEND_API_KEY`: clave de Resend, tipo **Secret / Encrypt**.
+   - `CORPORATE_NOTIFICATION_FROM`: mailbox real del dominio verificado, opcionalmente
+     con formato `PrimOffice <mailbox>`. No usar la dirección del visitante.
+   Guardar ambos antes del deployment. No modificar los bindings Odoo existentes ni
+   agregar estas variables a Empresas. `.env.example` sólo documenta nombres vacíos.
+
+### Validación local y publicación posterior
+
+Desde el worktree aislado:
+
+```powershell
+git diff --check
+node --check functions/api/corporate-leads.js
+node --check functions/_lib/corporate/corporate-notification.mjs
+node --check tests/corporate-notification.test.mjs
+node --test tests/corporate-notification.test.mjs tests/corporate-leads.test.mjs tests/leads-defensive.test.mjs
+node ..\primoffice-empresas\node_modules\wrangler\bin\wrangler.js pages functions build functions --outdir .wrangler/notification-build --compatibility-date 2026-06-12
+```
+
+En Empresas, sin modificar archivos:
+
+```powershell
+$env:CORPORATE_BACKEND_DIR='C:\Users\Santi\Documents\GitHub\setupoficina-corporate-email'
+npm test
+```
+
+Las pruebas de correo usan transporte Odoo/Resend simulado y bloquean red ajena.
+El test integrado existente del frontend usa su configuración Odoo de prueba sin
+Resend; comprueba que esa ausencia se registra y conserva el contrato anterior.
+Resultado local: 55/55 tests del backend (24 nuevos y 31 existentes), 12/12 del
+frontend sin skips, sintaxis y compilación Pages correctas. No se ejecutó publicación.
+
+Cuando se autorice publicar, revisar los cinco archivos del cambio y confirmar que
+la configuración está lista. Crear el commit de la branch aislada, subirla y hacer
+la revisión/merge a `main` en GitHub. Pages tiene previews activados para todas las
+branches: subir la branch puede generar un preview, y el merge a `main` dispara
+producción automáticamente. Repetir las validaciones anteriores sobre el commit a
+publicar y comprobar que Pages terminó exitosamente con ese SHA. No ejecutar deploy
+desde el checkout local con cambios ajenos ni publicar la branch antigua
+`codex/corporate-leads`. No se necesita desplegar el frontend.
+
+Prueba controlada posterior al deploy: usar una empresa identificable `[PRUEBA EMAIL]`,
+un contacto propio, datos válidos y fecha futura. Enviar desde Empresas y conservar
+el JSON/`submission_id` del request en DevTools. Verificar `201 {ok:true,id}`, mensaje
+de éxito y un solo lead con etiqueta `Empresas - Landing`. Esperar la tarea de correo
+y verificar un único mensaje en `info@primoffice.com.ar`, asunto, ocho datos, ID y
+Reply-To correctos. Repetir exactamente el request capturado (sin generar otro UUID):
+debe devolver el mismo ID y conservar un solo lead y un solo email. Confirmar
+`notification.status=sent`, ID del proveedor, un único `generate_lead` del submit
+original y WhatsApp disponible sólo por clic explícito. La repetición HTTP manual
+no debe generar un nuevo evento del navegador. No se hizo esta prueba real aquí.
+
+Referencias: [Resend Send Email](https://resend.com/docs/api-reference/emails/send-email),
+[idempotencia](https://resend.com/docs/dashboard/emails/idempotency-keys),
+[dominios](https://resend.com/docs/dashboard/domains/introduction),
+[API keys](https://resend.com/docs/dashboard/api-keys/introduction),
+[secretos Pages](https://developers.cloudflare.com/pages/functions/bindings/#secrets),
+[waitUntil](https://developers.cloudflare.com/workers/runtime-apis/context/#waituntil).

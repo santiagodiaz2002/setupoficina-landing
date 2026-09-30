@@ -1,4 +1,5 @@
 import { createCorporateLead } from '../_lib/corporate/corporate-leads.mjs';
+import { notifyCorporateLead } from '../_lib/corporate/corporate-notification.mjs';
 
 const ALLOWED_ORIGINS = new Set([
   'https://empresas.primoffice.com.ar',
@@ -44,7 +45,8 @@ async function readPayload(request) {
   return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
 }
 
-export async function onRequest({ request, env }) {
+export async function onRequest(context) {
+    const { request, env } = context;
     const origin = request.headers.get('Origin');
     if (origin && !ALLOWED_ORIGINS.has(origin)) return json({ ok: false, error: 'Origen no permitido.' }, 403);
     const cors = { Vary: 'Origin' };
@@ -66,6 +68,10 @@ export async function onRequest({ request, env }) {
     try {
       const result = await createCorporateLead(payload, env);
       if (result.error) return reply({ ok: false, error: result.error }, 400);
+      // Notification failures must not turn a confirmed registration into a failure.
+      const notification = notifyCorporateLead(result.id, env);
+      if (typeof context.waitUntil === 'function') context.waitUntil(notification);
+      else await notification; // Local harnesses without a Pages execution context.
       return reply({ ok: true, id: result.id }, 201);
     } catch {
       // No registrar payload, credenciales ni respuestas de Odoo en los logs públicos.
