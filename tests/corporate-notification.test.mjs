@@ -187,6 +187,9 @@ for (const status of [401, 429, 503]) {
     assert.deepEqual(await (await s.submit()).json(), { ok: true, id: 1 });
     assert.equal(parseCorporateRecord(s.odoo.records[0].description).notification.status, 'pending');
     assert.ok(s.logs.some(([code]) => code === 'corporate_notification_provider_failed'));
+    assert.deepEqual(s.logs.at(-1), ['corporate_notification_provider_failed', { lead_id: 1, failure: 'http', http_status: status }]);
+    assert.ok(!JSON.stringify(s.logs).includes(env.RESEND_API_KEY));
+    assert.ok(!JSON.stringify(s.logs).includes('private'));
     s.provider = null;
     assert.equal((await s.submit({ ...payload, empresa: 'Changed in browser', email: 'different@example.com' }, { ...env, CORPORATE_NOTIFICATION_FROM: 'New <new@example.com>' })).status, 201);
     assert.equal(s.odoo.records.length, 1);
@@ -238,6 +241,74 @@ test('timeout aborta el fetch y conserva lead confirmado', async t => {
   assert.equal((await s.submit()).status, 201);
   assert.equal(s.emails[0].init.signal.aborted, true);
   assert.equal(s.logs.at(-1)[0], 'corporate_notification_provider_failed');
+  assert.deepEqual(s.logs.at(-1)[1], { lead_id: 1, failure: 'timeout' });
+});
+
+for (const remaining of [500, 0, -1]) {
+  test(`Odoo termina con ${remaining} ms: Resend recibe 8000 ms propios; retry conserva un lead y un correo`, async t => {
+    const s = fixture(t);
+    await createCorporateLead(payload, env);
+    let now = Date.now(), advanced = false, scheduledMs;
+    t.mock.method(Date, 'now', () => now);
+    const originalSetTimeout = globalThis.setTimeout;
+    t.mock.method(globalThis, 'setTimeout', (callback, delay, ...args) => {
+      scheduledMs = delay;
+      return originalSetTimeout(callback, delay, ...args);
+    });
+    const originalOdooFetch = s.odoo.fetch;
+    t.mock.method(s.odoo, 'fetch', async (url, init) => {
+      const response = await originalOdooFetch(url, init);
+      // The confirming read began within the Odoo budget and completes at its boundary.
+      if (!advanced && init.body.includes('<string>read</string>') &&
+          parseCorporateRecord(s.odoo.records[0]?.description)?.notification?.status === 'pending') {
+        now += 25000 - remaining;
+        advanced = true;
+      }
+      return response;
+    });
+    const providerBudgets = [];
+    s.provider = (_, accept) => { providerBudgets.push(scheduledMs); return accept(); };
+    assert.equal(await notifyCorporateLead(1, env), remaining > 0 ? 'sent' : 'storage_failed');
+    assert.equal(advanced, true, 'attempt was persisted and its confirming read completed');
+    assert.equal(s.emails.length, 1, 'expired Odoo deadline does not skip the provider');
+    assert.equal(s.accepted.size, 1);
+    assert.deepEqual(providerBudgets, [8000]);
+    assert.equal(s.emails[0].key, `corporate-lead/${submission}`);
+    if (remaining <= 0) {
+      assert.equal(parseCorporateRecord(s.odoo.records[0].description).notification.status, 'pending', 'Odoo retains its own deadline');
+    }
+    assert.deepEqual(await (await s.submit()).json(), { ok: true, id: 1 });
+    assert.equal(parseCorporateRecord(s.odoo.records[0].description).notification.status, 'sent');
+    for (const email of s.emails) {
+      assert.equal(email.key, s.emails[0].key);
+      assert.equal(email.init.body, s.emails[0].init.body);
+    }
+    assert.ok(providerBudgets.every(ms => ms === 8000));
+    const callsAfterSent = s.emails.length;
+    assert.deepEqual(await (await s.submit()).json(), { ok: true, id: 1 });
+    assert.equal(s.emails.length, callsAfterSent, 'confirmed notification does not call Resend again');
+    assert.equal(s.accepted.size, 1);
+    assert.equal(s.odoo.records.length, 1);
+    assert.equal(s.odoo.calls.filter(call => call.method === 'create').length, 1);
+  });
+}
+
+test('fallo de transporte se distingue de HTTP/timeout sin imprimir excepción ni secretos', async t => {
+  const s = fixture(t);
+  s.provider = () => { throw new Error(`Authorization: Bearer ${env.RESEND_API_KEY} ${env.ODOO_API_KEY}`); };
+  const response = await s.submit();
+  assert.equal(response.status, 201);
+  assert.deepEqual(await response.json(), { ok: true, id: 1 });
+  assert.deepEqual(s.logs, [['corporate_notification_provider_failed', { lead_id: 1, failure: 'transport' }]]);
+  assert.equal(s.accepted.size, 0);
+  assert.equal(parseCorporateRecord(s.odoo.records[0].description).notification.status, 'pending');
+  s.provider = null;
+  await s.submit();
+  assert.equal(s.emails[0].key, `corporate-lead/${submission}`);
+  assert.equal(s.emails[1].key, s.emails[0].key);
+  assert.equal(s.emails[1].init.body, s.emails[0].init.body);
+  assert.equal(s.odoo.records.length, 1);
+  assert.equal(s.accepted.size, 1);
 });
 
 test('falta/configuración inválida explícita: no toca Resend ni convierte lead válido en error', async t => {

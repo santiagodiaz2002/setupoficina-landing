@@ -11,9 +11,14 @@ const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
 })[char]);
 
 class NotificationError extends Error {
-  constructor(code) { super(code); this.code = code; }
+  constructor(code, failure, httpStatus) {
+    super(code);
+    this.code = code;
+    this.failure = failure;
+    this.httpStatus = httpStatus;
+  }
 }
-const fail = code => { throw new NotificationError(code); };
+const fail = (code, failure, httpStatus) => { throw new NotificationError(code, failure, httpStatus); };
 
 function configuration(env) {
   const apiKey = typeof env.RESEND_API_KEY === 'string' ? env.RESEND_API_KEY.trim() : '';
@@ -64,11 +69,10 @@ async function saveNotification(session, id, submissionId, notification) {
   return notification;
 }
 
-async function send(apiKey, body, key, deadline) {
-  const remaining = deadline - Date.now();
-  if (remaining <= 0) fail('provider_failed');
+async function send(apiKey, body, key) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), Math.min(8000, remaining));
+  // Resend gets its own bounded request budget, independent of elapsed Odoo work.
+  const timeout = setTimeout(() => controller.abort(), 8000);
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST', redirect: 'error', signal: controller.signal,
@@ -76,8 +80,8 @@ async function send(apiKey, body, key, deadline) {
       body: JSON.stringify({ ...body, to: [RECIPIENT] })
     });
     if (!response.ok) {
-      await response.body?.cancel();
-      fail('provider_failed');
+      try { await response.body?.cancel(); } catch { /* Keep the HTTP diagnostic; never read the body. */ }
+      fail('provider_failed', 'http', response.status);
     }
     const reader = response.body?.getReader();
     if (!reader) fail('provider_invalid_response');
@@ -100,7 +104,7 @@ async function send(apiKey, body, key, deadline) {
   } catch (error) {
     if (error instanceof NotificationError) throw error;
     // Never retain provider response bodies, URLs, credentials or exception messages.
-    fail('provider_failed');
+    fail('provider_failed', controller.signal.aborted ? 'timeout' : 'transport');
   } finally { clearTimeout(timeout); }
 }
 
@@ -123,7 +127,7 @@ export async function notifyCorporateLead(id, env) {
     if (notification.status !== 'pending' || !notification.message) fail('state_invalid');
     const age = Date.now() - Date.parse(notification.first_attempt_at);
     if (!Number.isFinite(age) || age < 0 || age >= SAFE_RETRY_MS) fail('requires_review');
-    const providerId = await send(apiKey, notification.message, key, session.deadline);
+    const providerId = await send(apiKey, notification.message, key);
     await saveNotification(session, id, record.submission_id, {
       ...notification, status: 'sent', provider_id: providerId, accepted_at: new Date().toISOString()
     });
@@ -131,7 +135,10 @@ export async function notifyCorporateLead(id, env) {
     return 'sent';
   } catch (error) {
     const code = error instanceof NotificationError ? error.code : 'storage_failed';
-    console.error(`corporate_notification_${code}`, { lead_id: id });
+    const diagnostic = { lead_id: id };
+    if (error instanceof NotificationError && error.failure) diagnostic.failure = error.failure;
+    if (error instanceof NotificationError && Number.isInteger(error.httpStatus)) diagnostic.http_status = error.httpStatus;
+    console.error(`corporate_notification_${code}`, diagnostic);
     return code;
   }
 }
